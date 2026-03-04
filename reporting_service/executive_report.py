@@ -76,6 +76,7 @@ REPORT_TEMPLATE = """<!DOCTYPE html>
       .cover { background: #1a1f35; -webkit-print-color-adjust: exact; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
@@ -202,7 +203,15 @@ REPORT_TEMPLATE = """<!DOCTYPE html>
   {% if narrative %}
   <section>
     <h2>Verified Analytics Narrative</h2>
-    <div class="narrative-box">{{ narrative }}</div>
+    <div id="raw-narrative" style="display:none;">{{ narrative }}</div>
+    <div class="narrative-box" id="rendered-narrative"></div>
+    <script>
+      if (typeof marked !== 'undefined') {
+        document.getElementById('rendered-narrative').innerHTML = marked.parse(document.getElementById('raw-narrative').innerText || document.getElementById('raw-narrative').textContent);
+      } else {
+        document.getElementById('rendered-narrative').innerText = document.getElementById('raw-narrative').innerText;
+      }
+    </script>
   </section>
   {% endif %}
 

@@ -27,7 +27,7 @@ from fastapi.staticfiles import StaticFiles
 from api.metrics import get_metrics_response
 from api.routes import (
     audit, ingest, ingest_v2, pipeline_run, preprocess,
-    report, results, run, stats,
+    report, results, run, stats, analyst, cohort
 )
 
 # ── Startup timestamp ─────────────────────────────────────────────────────────
@@ -64,6 +64,8 @@ app.include_router(report.api_router)   # Reports API (/api/reports/)
 app.include_router(results.router)      # View results
 app.include_router(run.router)          # Run pipeline
 app.include_router(audit.router)        # Audit logs
+app.include_router(analyst.router)      # Analyst ops
+app.include_router(cohort.router)       # Cohort analysis
 
 # Universal Data Intake Layer
 app.include_router(ingest_v2.router)

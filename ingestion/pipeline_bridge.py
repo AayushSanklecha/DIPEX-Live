@@ -277,7 +277,7 @@ class PipelineBridge:
         # ── Stage 7: Hard Gate 2 — Independent Statistical Verifier ──────────
         gate2_ok = self._run_stage(result, "verification", skip,
                                     self._stage_verify, df, model_metrics, self.run_id)
-        result.gate2_decision = "PASS" if gate2_ok is not False else "REJECT"
+        result.gate2_decision = "PASS" if gate2_ok is True else "REJECT"
 
         # ── Stage 8: Confidence Vector Aggregation ────────────────────────────
         conf_vector = self._run_stage(result, "confidence_vector", skip,
@@ -296,7 +296,8 @@ class PipelineBridge:
                 {"banking": 0.85, "healthcare": 0.90, "default": 0.70}.get(domain, 0.70),
             )
         )
-        if confidence_score < conf_thresh and result.gate2_decision == "PASS":
+        # Only run retries if confidence_vector succeeded (not None) and gate2 passed
+        if conf_vector is not None and confidence_score < conf_thresh and result.gate2_decision == "PASS":
             self._retry_engine_loop(
                 result=result, snapshot=snapshot, df=df,
                 target_col=target_col, skip=skip,
@@ -330,8 +331,19 @@ class PipelineBridge:
 
         # ── Stage 13: Audit Trail ─────────────────────────────────────────────
         hard_fails = [s for s in result.stages
-                      if s.status == "FAIL" and s.stage in ("validation", "governance")]
-        result.gate_decision  = "FAIL" if hard_fails else "PASS"
+                      if s.status == "FAIL" and s.stage in (
+                          "validation", "governance", "verification", 
+                          "confidence_vector", "rl_update", "proposal"
+                      )]
+                      
+        if hard_fails:
+            result.gate_decision = "FAIL"
+        elif result.gate1_decision == "REJECT" or result.gate2_decision == "REJECT":
+            result.gate_decision = "FAIL"
+        elif confidence_score < conf_thresh:
+            result.gate_decision = "WARN"
+        else:
+            result.gate_decision = "PASS"
         result.preprocessed_df = df
         result.completed_at   = datetime.now(timezone.utc).isoformat()
         self._audit(result, snapshot)
@@ -437,8 +449,7 @@ class PipelineBridge:
                 raise RuntimeError(f"Hard gate REJECTED: {result_gate.reason}")
             return True
         except ImportError:
-            logger.warning("HardGate not available — skipping deterministic validation")
-            return True
+            raise RuntimeError("Validation engine missing: HardGate is required for deterministic validation.")
 
     def _stage_profile(self, df: pd.DataFrame, run_id: str) -> dict:
         try:
@@ -562,41 +573,10 @@ class PipelineBridge:
             )
             return proposals
         except ImportError:
-            logger.warning("ProposalEngine not available — skipping proposal stage")
-            return {}
-        except Exception as exc:
-            logger.warning("Proposal stage failed (non-fatal): %s", exc)
-            return {}
+            raise RuntimeError("Proposal engine missing: ProposalEngine is strictly required.")
 
-    def _generate_narrative(self, pipeline_result: "PipelineResult") -> str:
-        """
-        Generate an LLM-backed narrative for the executive report.
-        Falls back to a rule-based summary if HuggingFace provider is
-        unavailable or the API key is not set.
-        """
-        try:
-            from reporting_service.llm_provider import get_llm_provider
-            provider = get_llm_provider(self.config)
-            verified_result = {
-                "run_id": pipeline_result.run_id,
-                "gate_decision": pipeline_result.gate1_decision,
-                "gate2_decision": pipeline_result.gate2_decision,
-                "confidence_score": (
-                    (pipeline_result.confidence_vector or {}).get("confidence_score", 0.0)
-                ),
-                "metrics": pipeline_result.model_metrics or {},
-                "retry_count": pipeline_result.retry_count,
-                "stages_failed": [
-                    s.stage for s in pipeline_result.stages if s.status == "FAIL"
-                ],
-            }
-            narrative = provider.generate_summary(verified_result)
-            logger.info("[%s] LLM narrative generated (%d chars)",
-                        self.run_id[:8], len(narrative))
-            return narrative
-        except Exception as exc:
-            logger.debug("LLM narrative unavailable (non-fatal): %s", exc)
-            return ""
+        # LLM narrative has been removed per architecture simplification
+        return ""
 
     def _stage_report(self, pipeline_result: "PipelineResult") -> str:
         """Stage 12 — Executive Report Generation.
@@ -608,7 +588,20 @@ class PipelineBridge:
         try:
             from reporting_service.executive_report import ExecutiveReportGenerator
             reporter = ExecutiveReportGenerator(config=self.config)
-            narrative = self._generate_narrative(pipeline_result)
+            
+            from reporting_service.llm_provider import get_llm_provider
+            llm = get_llm_provider(self.config)
+            
+            confidence_score = pipeline_result.confidence_vector.get("confidence_score", 0.0) if pipeline_result.confidence_vector else 0.0
+            
+            verified_result = {
+                "gate_decision": pipeline_result.gate_decision,
+                "confidence_score": confidence_score,
+                "confidence_vector": pipeline_result.confidence_vector,
+                "metrics": pipeline_result.model_metrics
+            }
+            narrative = llm.generate_summary(verified_result, run_id=pipeline_result.run_id)
+
             path = reporter.generate(
                 run_id=pipeline_result.run_id,
                 confidence_vector=pipeline_result.confidence_vector or {},
@@ -629,58 +622,35 @@ class PipelineBridge:
         try:
             import json
             os.makedirs("audit", exist_ok=True)
+            
+            conf_score = 0.0
+            if getattr(result, "confidence_vector", None) and isinstance(result.confidence_vector, dict):
+                conf_score = result.confidence_vector.get("confidence_score", 0.0)
+                
             entry = {
                 "event": "PIPELINE_RUN",
                 "run_id": result.run_id,
                 "dataset_id": result.dataset_id,
                 "snapshot_id": result.snapshot_id,
-                "source_type": snapshot.source_type,
-                "data_mode": snapshot.data_mode,
-                "schema_version": snapshot.schema_version,
-                "row_count": snapshot.row_count,
-                "quality_score": snapshot.quality_score,
+                "source_type": getattr(snapshot, "source_type", "unknown"),
+                "data_mode": getattr(snapshot, "data_mode", "unknown"),
+                "schema_version": getattr(snapshot, "schema_version", "unknown"),
+                "row_count": getattr(snapshot, "row_count", 0),
+                "quality_score": getattr(snapshot, "quality_score", 0.0),
                 "gate_decision": result.gate_decision,
-                "stages": [s.to_dict() for s in result.stages],
-                "timestamp": result.completed_at,
+                "gate1_decision": getattr(result, "gate1_decision", "UNKNOWN"),
+                "gate2_decision": getattr(result, "gate2_decision", "UNKNOWN"),
+                "confidence_score": conf_score,
+                "confidence_vector": getattr(result, "confidence_vector", {}),
+                "stages": [s.to_dict() for s in getattr(result, "stages", [])],
+                "timestamp": getattr(result, "completed_at", ""),
             }
             with open("audit/audit.jsonl", "a", encoding="utf-8") as f:
                 f.write(json.dumps(entry) + "\n")
         except Exception:  # noqa: BLE001
             pass
 
-        # ── Teach the AdaptiveLearner about every stage outcome ───────────────
-        try:
-            from ingestion.adaptive_learner import AdaptiveLearner, IngestionOutcome
-            learner = AdaptiveLearner()
-            for stage in result.stages:
-                learner.record_stage_outcome(
-                    dataset_id=result.dataset_id,
-                    stage=stage.stage,
-                    success=(stage.status in ("PASS", "SKIP")),
-                )
-            # Record the overall pipeline run as a learning outcome
-            learner.record(IngestionOutcome(
-                dataset_id=result.dataset_id,
-                source_type=snapshot.source_type,
-                success=(result.gate_decision == "PASS"),
-                quality_score=snapshot.quality_score,
-                validation_status=snapshot.validation_status,
-                row_count=snapshot.row_count,
-                schema_version=snapshot.schema_version,
-                stage_failures=[s.stage for s in result.stages if s.status == "FAIL"],
-                error_type=(
-                    "PIPELINE_STAGE_FAIL"
-                    if any(s.status == "FAIL" for s in result.stages) else None
-                ),
-                error_message=(
-                    "; ".join(
-                        f"{s.stage}: {s.error}"
-                        for s in result.stages if s.status == "FAIL" and s.error
-                    ) or None
-                ),
-            ))
-        except Exception:  # noqa: BLE001
-            pass
+        # AdaptiveLearner code has been removed per architecture simplification
 
         # ── RL Orchestrator & RL Updater: close the feedback loop ──────────
         try:
@@ -702,20 +672,7 @@ class PipelineBridge:
         except Exception:  # noqa: BLE001
             pass
 
-        try:
-            from learning.rl_updater import RLUpdater
-            updater = RLUpdater()
-            all_pass = result.gate_decision == "PASS"
-            confidence = snapshot.quality_score or 0.5
-            updater.update(
-                run_id=result.run_id,
-                model_type="pipeline",
-                task="classification",
-                confidence=confidence,
-                all_gates_passed=all_pass,
-            )
-        except Exception:  # noqa: BLE001
-            pass
+        # RLUpdater has been removed per architecture simplification
 
     # ── New Stage Implementations ──────────────────────────────────────────────
 
@@ -744,8 +701,7 @@ class PipelineBridge:
                 return False
             return True
         except Exception as exc:  # noqa: BLE001
-            logger.warning("Hard Gate 2 unavailable (non-fatal): %s", exc)
-            return True   # Graceful degradation
+            raise RuntimeError(f"Verifier engine error: {exc}")
 
     def _stage_confidence_vector(self, df: pd.DataFrame, model_metrics: Dict,
                                   snapshot: Any, gate2_ok: Any) -> Dict[str, Any]:
@@ -772,13 +728,11 @@ class PipelineBridge:
                 self.run_id[:8], vector.get("confidence_score", 0.0),
             )
             return vector
+        except ImportError:
+            logger.warning("ConfidenceVector engine missing — skipping.")
+            return {"confidence_score": 0.5}
         except Exception as exc:  # noqa: BLE001
-            logger.warning("ConfidenceVector aggregation unavailable: %s", exc)
-            # Fallback: simple quality-score-based vector
-            q = float(snapshot.quality_score or 0.5)
-            return {"confidence_score": q, "data_quality_score": q,
-                    "note": "fallback_quality_proxy"}
-
+            raise RuntimeError(f"ConfidenceVector aggregation failed: {exc}")
     def _retry_engine_loop(
         self,
         result: "PipelineResult",
@@ -1027,15 +981,8 @@ class PipelineBridge:
                 summary.sandbox_active,
             )
             return True
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("RL Update unavailable (non-fatal): %s", exc)
-            # Fallback: legacy updater
-            try:
-                from learning.rl_updater import RLUpdater
-                RLUpdater().update(
-                    run_id=self.run_id, model_type="pipeline",
-                    task="classification", confidence=0.5, all_gates_passed=False,
-                )
-            except Exception:  # noqa: BLE001
-                pass
+        except ImportError:
+            logger.warning("RL Update engine missing — skipping.")
             return False
+        except Exception as exc:  # noqa: BLE001
+            raise RuntimeError(f"RL Update failed: {exc}")

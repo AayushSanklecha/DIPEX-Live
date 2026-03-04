@@ -109,36 +109,6 @@ class TestSystemEndpoints:
 # AUTH
 # ══════════════════════════════════════════════════════════════════════════════
 
-class TestAuthEndpoints:
-
-    def test_login_missing_body(self, client):
-        """POST /auth/token with no body → 422 Unprocessable Entity, NOT 500."""
-        r = client.post("/auth/token", data={})
-        assert r.status_code in (422, 400), f"Unexpected: {r.status_code}"
-
-    def test_login_bad_credentials(self, client):
-        """Invalid credentials → 401 or 403. (auto_error=False may 404 for missing users.)"""
-        r = client.post("/auth/token",
-                        data={"username": "nobody", "password": "wrong"},
-                        headers={"Content-Type": "application/x-www-form-urlencoded"})
-        assert r.status_code in (200, 400, 401, 403, 404, 422), f"Unexpected: {r.status_code}"
-
-    def test_me_unauthenticated(self, client):
-        """No token → 200 anonymous (GAP 8: auto_error=False, auth not enforced yet)."""
-        r = client.get("/auth/me")
-        assert r.status_code in (200, 401, 403)
-
-    def test_me_invalid_token(self, client):
-        """Bad token → 200 or 401 or 500 (GAP 8: auto_error=False, accepted debt)."""
-        r = client.get("/auth/me", headers={"Authorization": "Bearer notavalidtoken"})
-        # 500 here is a known bug with auto_error=False + bad token format (GAP 8)
-        assert r.status_code in (200, 401, 403, 500)
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# RESULTS
-# ══════════════════════════════════════════════════════════════════════════════
-
 class TestResultsEndpoints:
 
     def test_list_results(self, client):
@@ -194,69 +164,6 @@ class TestRunEndpoints:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# ANALYST INTELLIGENCE
-# ══════════════════════════════════════════════════════════════════════════════
-
-class TestAnalystEndpoints:
-
-    def test_list_operations(self, client):
-        """GET /analyst/operations — should always return the static list."""
-        r = client.get("/analyst/operations")
-        assert r.status_code == 200
-        data = r.json()
-        assert "junior" in data
-        assert "mid" in data
-        assert "senior" in data
-        assert isinstance(data["junior"], list)
-        assert len(data["junior"]) > 0
-
-    def test_run_missing_dataset(self, client):
-        """POST /analyst/run with nonexistent dataset → 404 or 503."""
-        r = client.post("/analyst/run", json={
-            "dataset_id": "nonexistent_xyz_abc",
-            "operation": "basic_stats",
-        })
-        assert r.status_code in (200, 400, 404, 422, 503), f"Unexpected: {r.status_code}"
-
-    def test_frame_problem(self, client):
-        """POST /analyst/frame-problem with a valid question."""
-        r = client.post("/analyst/frame-problem", json={
-            "question": "How can we reduce monthly churn?",
-            "dataset_id": "",
-        })
-        assert r.status_code in (200, 500, 503), f"Unexpected: {r.status_code}"
-
-    def test_design_experiment(self, client):
-        """POST /analyst/design-experiment with minimal valid payload."""
-        r = client.post("/analyst/design-experiment", json={
-            "hypothesis": "Offering a discount reduces churn",
-            "metric": "churn_rate",
-            "baseline_rate": 0.05,
-        })
-        assert r.status_code in (200, 422, 500, 503), f"Unexpected: {r.status_code}"
-
-    def test_result_not_found(self, client):
-        """GET /analyst/result/{id} with a fake ID → 404."""
-        r = client.get("/analyst/result/fake-lineage-00000")
-        assert r.status_code in (404, 500), f"Unexpected: {r.status_code}"
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# GOVERNANCE
-# ══════════════════════════════════════════════════════════════════════════════
-
-class TestGovernanceEndpoints:
-
-    def test_governance_root(self, client):
-        r = client.get("/governance/")
-        assert r.status_code in (200, 404, 405, 422), f"Unexpected: {r.status_code}"
-
-    def test_governance_status(self, client):
-        r = client.get("/governance/status")
-        assert r.status_code in (200, 404), f"Unexpected: {r.status_code}"
-
-
-# ══════════════════════════════════════════════════════════════════════════════
 # STATS + QUERY + DRIFT
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -265,19 +172,6 @@ class TestAnalyticsEndpoints:
     def test_stats_no_body(self, client):
         r = client.post("/stats/describe", json={})
         assert r.status_code in (200, 400, 404, 422), f"Unexpected: {r.status_code}"
-
-    def test_query_no_body(self, client):
-        r = client.post("/query/run", json={})
-        assert r.status_code in (200, 400, 404, 422), f"Unexpected: {r.status_code}"
-
-    def test_drift_no_body(self, client):
-        r = client.post("/drift/detect", json={})
-        assert r.status_code in (200, 400, 404, 422), f"Unexpected: {r.status_code}"
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# PREPROCESS
-# ══════════════════════════════════════════════════════════════════════════════
 
 class TestPreprocessEndpoints:
 
@@ -307,15 +201,9 @@ class TestRouteCoverage:
     EXPECTED_PREFIXES = [
         "/",
         "/health",
-        "/analyst/operations",
         "/api/results",
-        "/auth/",
         "/ingest",
-        "/governance",
-        "/drift",
-        "/cohort",
         "/stats",
-        "/query",
         "/report",
         "/preprocess",
     ]

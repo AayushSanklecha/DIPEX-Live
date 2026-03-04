@@ -13,11 +13,11 @@ Raw Data ──► Bronze (Immutable) ──► Hard Gate 1 ──► Silver (Fr
                                                           │
                 Retry Engine ◄── Hard Gate 2 ◄── Profiling + Governance + Stats + ML
                       │                                   │
-              Experience Memory                    Confidence Vector
+                      │                           Confidence Vector
                       │                                   │
-               RL Policy Update                    Gold Output (if ≥ threshold)
-                      │                                   │
-                LLM Report ◄────────────────────── Approved Storage
+                      └─────────────────────────── Gold Output (if ≥ threshold)
+                                                          │
+                                                   Approved Storage
 ```
 
 **13-Stage Pipeline** (in `ingestion/pipeline_bridge.py`):
@@ -111,11 +111,6 @@ open http://localhost:3001   # admin / use GRAFANA_PASSWORD env var
 - **Silver cleaning**: imputation, dedup, dtype coercion, GDPR governance
 - **Gold outputs**: only QA-approved (Gate 1 + Gate 2 + Confidence ≥ threshold)
 
-### Analyst Intelligence (3 Tiers)
-- **Junior**: basic stats, data cleaning, SQL queries, pivot tables, visualizations, reports
-- **Mid**: EDA, cohort analysis, statistical tests, dashboard design, insight generation
-- **Senior**: problem framing, experiment design, causal inference, strategic advisory, mentorship
-
 ### Hard Gates
 - **Gate 1**: schema, null, range, type, regulatory rules — any fail = pipeline abort
 - **Gate 2**: statistical validity, drift, stability, domain rules — fail = retry engine
@@ -125,26 +120,10 @@ open http://localhost:3001   # admin / use GRAFANA_PASSWORD env var
 - UCB1 strategy selection — never same path twice
 - Escalation to `audit/retry_escalations.jsonl` on budget exhaustion
 
-### Reinforcement Learning
-- Meta-RL UCB1 (3 strategy families) + regret minimization
-- EWC smoothing (λ=0.90) — prevents catastrophic forgetting
-- Drift-conditioned ε boost (PSI > 0.2 → ε = 0.30)
-- Forbidden target protection (`assert_target_allowed`)
-- Sandbox mode: all writes are dry-run only
-
-### LLM Governance
-- Provider abstraction: only `reporting_service/llm_provider.py` may call LLMs
-- PII redaction before prompt and after response
-- Governance gate: refuses summarization of non-approved results
-- Prompt audit trail: SHA-256 hashes to `audit/llm_prompts.jsonl`
-- Cost tracker: cumulative token usage to `audit/llm_cost_log.jsonl`
-
 ### Security
-- **JWT** (HS256): access + refresh tokens, RBAC roles (VIEWER/ANALYST/ADMIN/API_SERVICE)
 - **RBAC**: `require_role()` dependency enforced on all mutation endpoints
 - **Encryption at-rest**: Fernet symmetric (DIPEX_ENCRYPTION_KEY) with PBKDF2 key derivation
-- **Audit access log**: daily-rotating `audit/access_log_YYYY-MM-DD.jsonl` per request
-- **PII detection**: ML NER + 8-pattern regex scanner across all DataFrame columns
+- **Governance**: PII detection with ML NER + regex scanners
 
 ---
 
@@ -158,18 +137,10 @@ Base URL: `http://localhost:8000`
 | GET | `/health` | Public | Health check (DB, registry, uptime) |
 | GET | `/metrics` | Public | Operational metrics JSON |
 | GET | `/prom-metrics` | Public | Prometheus scrape endpoint |
-| POST | `/auth/token` | Public | Login → JWT tokens |
-| GET | `/auth/me` | VIEWER | Current user info |
 | POST | `/ingest/file` | ANALYST | Upload file (UDIL, returns snapshot) |
 | POST | `/api/pipeline/run` | ANALYST | **Unified**: upload + full 13-stage pipeline in one call |
 | POST | `/api/run/` | ANALYST | Run pipeline on previously uploaded file |
 | GET | `/api/results` | VIEWER | List approved results |
-| POST | `/analyst/run` | ANALYST | Run single analyst operation |
-| GET | `/analyst/operations` | VIEWER | List all analyst operations |
-| POST | `/analyst/frame-problem` | ANALYST | Business question → KPI framework |
-| POST | `/analyst/design-experiment` | ANALYST | A/B test design + power calc |
-| POST | `/governance/evaluate` | ANALYST | Run governance checks |
-| GET | `/drift/detect` | ANALYST | PSI + KL drift detection |
 | GET | `/api/audit/` | VIEWER | Audit trail JSONL |
 
 Full interactive docs at `/docs` (Swagger UI) or `/redoc`.
@@ -181,11 +152,6 @@ Full interactive docs at `/docs` (Swagger UI) or `/redoc`.
 | Page | URL | Description |
 |---|---|---|
 | Overview | `/dashboard/index.html` | KPI cards, pipeline status, recent runs |
-| Analyst Ops | `/dashboard/analyst_ops.html` | Browse + run Junior/Mid/Senior operations |
-| RL Status | `/dashboard/rl_status.html` | Policy weights, reward history, safety log |
-| Streaming | `/dashboard/streaming.html` | Kafka lag, window buffers, live event stream |
-| Lineage | `/dashboard/lineage.html` | Bronze→Silver→Gold trace with HMAC hashes |
-| Drift Monitor | `/dashboard/index.html#drift` | PSI, KL, JS, Wasserstein drift history (section in main dashboard) |
 
 ---
 

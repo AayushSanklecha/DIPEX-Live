@@ -189,14 +189,26 @@ class LLMProvider:
                 f"**Quality Decomposition** — Data: {dq}, Statistical: {ss}"
             )
         if metrics:
-            metric_parts = [f"{k}={v}" for k, v in list(metrics.items())[:5]]
+            metric_parts = [f"`{k}={v}`" for k, v in list(metrics.items())[:5]]
             lines.append(f"**Key Metrics**: {', '.join(metric_parts)}")
+        
         lines.append(
-            "All results independently verified. No speculation or unverified "
-            "assertions in this summary."
+            "\n---\n"
+            "### Pipeline Verification Process\n"
+            "This report receives its verified grades via a strict **multi-stage Medallion architecture**:\n"
+            "- **Validation Engine (Gate 1)**: Deterministic Python rules strictly enforce schema constraints, missing values thresholds, and data typing.\n"
+            "- **Statistical Profiler (Gate 2)**: Evaluates statistical properties against threshold distributions to score data quality.\n"
+            "- **Confidence Vector Assembly**: The final confidence score aggregates Data Quality, Statistical Strength, and Verification coverage.\n\n"
+            "### AI & RAG Models Employed\n"
+            "By default, this narrative is generated via an **expert rule-based summarizer**. When an LLM model (like local Ollama `mistral`, or `HuggingFace API`) is enabled, the system uses it alongside a **RAG Retriever** that learns from `ExperienceMemory` repositories to improve context handling and reasoning about data anomalies."
         )
 
-        summary = " | ".join(lines)
+        lines.append(
+            "\n*All results independently verified. No speculation or unverified "
+            "assertions in this summary.*"
+        )
+
+        summary = "\n\n".join(lines)
         words   = summary.split()
         if len(words) > max_words:
             summary = " ".join(words[:max_words]) + "…"

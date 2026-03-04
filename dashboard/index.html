@@ -33,6 +33,12 @@
         <button class="nav-item active" onclick="showPage('overview')" id="nav-overview">
           <span class="nav-icon">◈</span><span class="nav-label">Dashboard</span>
         </button>
+        <button class="nav-item" onclick="showPage('pipeline')" id="nav-pipeline">
+          <span class="nav-icon">▶</span><span class="nav-label">Run Pipeline</span>
+        </button>
+        <button class="nav-item" onclick="showPage('reports')" id="nav-reports">
+          <span class="nav-icon">📊</span><span class="nav-label">Reports</span>
+        </button>
 
         <div class="nav-section-label" style="margin-top:20px">Developer</div>
         <button class="nav-item" onclick="showPage('api_docs')" id="nav-api_docs">
@@ -45,9 +51,8 @@
           <div class="status-dot" id="api-status-dot"></div>
           <span id="api-status-text">Checking…</span>
         </div>
-        <div class="sidebar-user" id="sidebar-user-info">Not logged in</div>
-        <button class="btn-ghost-sm" onclick="showPage('login')">⚿ Login / JWT</button>
-        <div class="version-tag">v3.1.0 · DIPEX</div>
+        <div class="sidebar-user" id="sidebar-user-info">Guest Mode</div>
+        <div class="version-tag">v1.0.0 · DIPEX</div>
       </div>
     </aside>
 
@@ -74,69 +79,7 @@
       ══════════════════════════════════════════════ -->
         <div class="page active" id="page-overview">
           <!-- Quick Actions -->
-          <div class="card mb-4">
-            <div class="card-header">🚀 Quick Actions</div>
-            <div class="card-body">
-              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-                <button class="btn-primary" onclick="quickUploadRun()" style="padding:16px">
-                  ▶ Upload & Run Pipeline
-                </button>
-                <button class="btn-secondary" onclick="quickViewReports()" style="padding:16px">
-                  📊 View Reports
-                </button>
-                <button class="btn-secondary" onclick="quickCheckHealth()" style="padding:16px">
-                  ❤️ System Health
-                </button>
-                <button class="btn-secondary" onclick="quickViewAudit()" style="padding:16px">
-                  📋 Audit Logs
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Upload & Run Section -->
-          <div class="card mb-4" id="quick-run-section" style="display:none">
-            <div class="card-header">Upload & Run Pipeline
-              <button class="btn-ghost btn-sm" onclick="closeQuickRun()">✕ Close</button>
-            </div>
-            <div class="card-body">
-              <div class="grid-2" style="gap:16px;margin-bottom:16px">
-                <div>
-                  <label class="form-label">Source Type</label>
-                  <select class="form-input" id="quick-source-kind">
-                    <option value="file" selected>File (CSV/Excel/JSON)</option>
-                    <option value="database">Database (SQL)</option>
-                    <option value="graph_db">Graph DB (Neo4j)</option>
-                    <option value="api">API Endpoint</option>
-                    <option value="live">Live Stream (Kafka)</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="form-label">Source Input (for DB/API/Live)</label>
-                  <input type="text" class="form-input" id="quick-source-input" placeholder="Connection URI / URL / Topic">
-                </div>
-              </div>
-              <div class="drop-zone" id="quick-drop-zone" style="margin-bottom:16px">
-                <input type="file" id="quick-file-input" accept=".csv,.xlsx,.xls,.json,.parquet,.xml" hidden>
-                <div class="drop-zone-icon">↑</div>
-                <div class="drop-zone-text">Drop file or click to select</div>
-                <button class="btn-sm btn-primary" style="margin-top:8px" onclick="document.getElementById('quick-file-input').click()">Select File</button>
-              </div>
-              <div id="quick-upload-status" class="status-msg hidden"></div>
-              <button class="btn-primary full-width" onclick="runQuickPipeline()" style="margin-top:12px">▶ Run Full Pipeline</button>
-            </div>
-          </div>
-
-          <!-- Pipeline Result -->
-          <div class="card mb-4" id="quick-result-card" style="display:none">
-            <div class="card-header">Pipeline Result
-              <span class="badge badge-running" id="quick-badge">RUNNING</span>
-            </div>
-            <div class="card-body">
-              <div class="log-console" id="quick-log" style="max-height:200px;margin-bottom:16px"></div>
-              <div id="quick-result-detail"></div>
-            </div>
-          </div>
+          <div class="card mb-4" id="overview-quick-actions" style="display:none;"></div>
 
           <!-- Stats Overview -->
           <div class="kpi-grid mb-4">
@@ -193,11 +136,82 @@
           </div>
         </div>
 
+        <!-- ══════════════════════════════════════════════
+           PAGE: PIPELINE
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-pipeline">
+          <!-- Upload & Run Section -->
+          <div class="card mb-4" id="quick-run-section">
+            <div class="card-header">Upload & Run Pipeline</div>
+            <div class="card-body">
+              <div class="grid-2" style="gap:16px;margin-bottom:16px">
+                <div>
+                  <label class="form-label">Source Type</label>
+                  <select class="form-input" id="quick-source-kind">
+                    <option value="file" selected>File (CSV/Excel/JSON)</option>
+                    <option value="database">Database (SQL)</option>
+                    <option value="graph_db">Graph DB (Neo4j)</option>
+                    <option value="api">API Endpoint</option>
+                    <option value="live">Live Stream (Kafka)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Source Input (for DB/API/Live)</label>
+                  <input type="text" class="form-input" id="quick-source-input" placeholder="Connection URI / URL / Topic">
+                </div>
+              </div>
+              <div class="drop-zone" id="quick-drop-zone" style="margin-bottom:16px">
+                <input type="file" id="quick-file-input" accept=".csv,.xlsx,.xls,.json,.parquet,.xml" hidden>
+                <div class="drop-zone-icon">↑</div>
+                <div class="drop-zone-text">Drop file or click to select</div>
+                <button class="btn-sm btn-primary" style="margin-top:8px" onclick="document.getElementById('quick-file-input').click()">Select File</button>
+              </div>
+              <div id="quick-upload-status" class="status-msg hidden"></div>
+              <button class="btn-primary full-width" onclick="runQuickPipeline()" style="margin-top:12px">▶ Run Full Pipeline</button>
+            </div>
+          </div>
 
+          <!-- Pipeline Result -->
+          <div class="card mb-4" id="quick-result-card" style="display:none">
+            <div class="card-header">Pipeline Result
+              <span class="badge badge-running" id="quick-badge">RUNNING</span>
+            </div>
+            <div class="card-body">
+              <div class="log-console" id="quick-log" style="max-height:200px;margin-bottom:16px"></div>
+              <div id="quick-result-detail"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: REPORTS
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-reports">
+          <div class="card mb-4" id="reports-list-card">
+            <div class="card-header">Pipeline Reports
+              <button class="btn-ghost btn-sm" onclick="quickViewReports()">↻ Refresh</button>
+            </div>
+            <div class="card-body">
+              <div id="reports-list-detail"></div>
+            </div>
+          </div>
+
+          <!-- Pipeline Individual Result -->
+          <div class="card mb-4" id="report-detail-card" style="display:none">
+            <div class="card-header">Report Detail
+              <span class="badge badge-running" id="report-detail-badge">LOADING</span>
+              <button class="btn-ghost btn-sm" onclick="backToReportsList()">← Back</button>
+            </div>
+            <div class="card-body">
+              <div class="log-console" id="report-detail-log" style="max-height:100px;margin-bottom:16px"></div>
+              <div id="report-detail-content"></div>
+            </div>
+          </div>
+        </div>
         <!-- ══════════════════════════════════════════════
            PAGE: API DOCS
       ══════════════════════════════════════════════ -->
-        <div class="page" id="page-api_docs" style="height:100%;display:none;flex-direction:column">
+        <div class="page" id="page-api_docs" style="height:100%;flex-direction:column">
           <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
             <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
               API Docs — Swagger UI

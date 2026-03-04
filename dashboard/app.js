@@ -17,7 +17,9 @@ const TOKEN = {
 
 // ── Page Meta ────────────────────────────────────────────────────────
 const PAGE_META = {
-    overview: { title: 'Dashboard', subtitle: 'One-click data pipeline and analytics' },
+    overview: { title: 'Dashboard', subtitle: 'Pipeline metrics & recent snapshots' },
+    pipeline: { title: 'Run Pipeline', subtitle: 'Upload datasets and trigger pipelines' },
+    reports: { title: 'Reports', subtitle: 'View detailed pipeline results' },
     api_docs: { title: 'API Docs', subtitle: 'Interactive Swagger UI — explore and test every endpoint' },
 };
 
@@ -75,7 +77,9 @@ function showPage(pageId) {
 
 function onPageLoad(pageId) {
     const loaders = {
-        overview: () => { loadMetrics(); loadSnapshots(); setupQuickDropZone(); },
+        overview: () => { loadMetrics(); loadSnapshots(); },
+        pipeline: () => { setupQuickDropZone(); document.getElementById('quick-result-card').style.display='none'; },
+        reports: () => { loadReportsList(); },
         api_docs: () => lazyLoadIframe('api-docs-iframe', 'http://localhost:8000/docs'),
     };
     (loaders[pageId] || (() => { }))();
@@ -135,14 +139,14 @@ async function loadMetrics() {
     try {
         const data = await apiFetch('/metrics');
         const totalRuns = data.total_pipeline_runs || 0;
-        const passRate = data.total_pipeline_runs
-            ? ((data.total_pipeline_runs - (data.retry_runs || 0)) / data.total_pipeline_runs * 100)
-            : 0;
+        const passRate = (data.pass_rate || 0) * 100;
+        const passedRuns = data.passed_runs ?? 0;
+        const reportsGen = data.reports_generated ?? 0;
         const el = (id) => document.getElementById(id);
         animateCounter(el('kpi-total-runs'), totalRuns);
         el('kpi-pass-rate').textContent = passRate.toFixed(1) + '%';
-        el('kpi-approved').textContent = data.approved_runs || totalRuns || '—';
-        el('kpi-reports').textContent = data.reports_count || '—';
+        el('kpi-approved').textContent = passedRuns || '—';
+        el('kpi-reports').textContent = reportsGen || '—';
     } catch (e) {
         const el = (id) => document.getElementById(id);
         ['kpi-total-runs', 'kpi-pass-rate', 'kpi-approved', 'kpi-reports'].forEach(id =>
@@ -156,67 +160,58 @@ async function loadMetrics() {
 // ══════════════════════════════════════════════════════════════════════
 let quickSelectedFile = null;
 
-function quickUploadRun() {
-    document.getElementById('quick-run-section').style.display = 'block';
-    document.getElementById('quick-result-card').style.display = 'none';
-    document.getElementById('quick-run-section').scrollIntoView({ behavior: 'smooth' });
-}
+// Removed quick run actions from overview, now using dedicated pages
 
-function closeQuickRun() {
-    document.getElementById('quick-run-section').style.display = 'none';
-}
-
-async function quickViewReports() {
+async function loadReportsList() {
     try {
         const data = await apiFetch('/api/results');
         const runs = data.runs || [];
+        
+        const listCard = document.getElementById('reports-list-card');
+        const detailCard = document.getElementById('report-detail-card');
+        const listDetail = document.getElementById('reports-list-detail');
+        
+        listCard.style.display = 'block';
+        detailCard.style.display = 'none';
+        
         if (runs.length === 0) {
-            showToast('No pipeline runs found yet', 'info');
+            listDetail.innerHTML = '<div class="status-msg info">No pipeline runs found yet</div>';
             return;
         }
-        // Display runs in the result card
-        const resultCard = document.getElementById('quick-result-card');
-        const badge = document.getElementById('quick-badge');
-        const detailEl = document.getElementById('quick-result-detail');
-        const logEl = document.getElementById('quick-log');
-        
-        resultCard.style.display = 'block';
-        badge.className = 'badge badge-info';
-        badge.textContent = 'RECENT RUNS';
-        logEl.innerHTML = `<div class="log-line info">[DIPEX] Found ${runs.length} recent pipeline runs</div>`;
-        
+
         const recentRuns = runs.slice(-10).reverse();
-        detailEl.innerHTML = `
-            <div style="margin-top:16px">
-                <h4 style="margin-bottom:12px">Recent Pipeline Runs (Click to view details)</h4>
-                <table class="data-table" style="width:100%">
-                    <thead>
+        listDetail.innerHTML = `
+            <table class="data-table" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Run ID</th>
+                        <th>Dataset</th>
+                        <th>Gate</th>
+                        <th>Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${recentRuns.map(r => `
                         <tr>
-                            <th>Run ID</th>
-                            <th>Dataset</th>
-                            <th>Gate</th>
-                            <th>Time</th>
-                            <th>Action</th>
+                            <td class="mono" style="font-size:0.7rem">${(r.run_id || '').slice(0, 16)}...</td>
+                            <td>${r.dataset_id || '—'}</td>
+                            <td><span class="badge ${r.gate_decision === 'PASS' ? 'badge-pass' : r.gate_decision === 'WARN' ? 'badge-warn' : 'badge-fail'}">${r.gate_decision || 'UNKNOWN'}</span></td>
+                            <td style="font-size:0.72rem">${r.timestamp ? new Date(r.timestamp).toLocaleString() : '—'}</td>
+                            <td><button class="btn-primary btn-sm" onclick="viewRunDetails('${r.run_id}')">View</button></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        ${recentRuns.map(r => `
-                            <tr>
-                                <td class="mono" style="font-size:0.7rem">${(r.run_id || '').slice(0, 16)}...</td>
-                                <td>${r.dataset_id || '—'}</td>
-                                <td><span class="badge ${r.gate_decision === 'PASS' ? 'badge-pass' : r.gate_decision === 'WARN' ? 'badge-warn' : 'badge-fail'}">${r.gate_decision || 'UNKNOWN'}</span></td>
-                                <td style="font-size:0.72rem">${r.timestamp ? new Date(r.timestamp).toLocaleString() : '—'}</td>
-                                <td><button class="btn-ghost btn-sm" onclick="viewRunDetails('${r.run_id}')">View</button></td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
+                    `).join('')}
+                </tbody>
+            </table>
         `;
-        resultCard.scrollIntoView({ behavior: 'smooth' });
     } catch (e) {
         showToast('Failed to load reports: ' + e.message, 'error');
     }
+}
+
+function backToReportsList() {
+    document.getElementById('report-detail-card').style.display = 'none';
+    document.getElementById('reports-list-card').style.display = 'block';
 }
 
 async function quickCheckHealth() {
@@ -233,28 +228,23 @@ async function quickCheckHealth() {
 async function viewRunDetails(runId) {
     try {
         const data = await apiFetch(`/api/results/${runId}`);
-        const resultCard = document.getElementById('quick-result-card');
-        const badge = document.getElementById('quick-badge');
-        const detailEl = document.getElementById('quick-result-detail');
-        const logEl = document.getElementById('quick-log');
+        const listCard = document.getElementById('reports-list-card');
+        const detailCard = document.getElementById('report-detail-card');
+        const badge = document.getElementById('report-detail-badge');
+        const detailEl = document.getElementById('report-detail-content');
+        const logEl = document.getElementById('report-detail-log');
         
-        resultCard.style.display = 'block';
+        listCard.style.display = 'none';
+        detailCard.style.display = 'block';
         badge.className = 'badge badge-info';
-        badge.textContent = 'PIPELINE RUN STATS';
+        badge.textContent = 'RESULTS';
         logEl.innerHTML = `<div class="log-line info">[Analytics] Viewing run: ${runId.slice(0, 16)}...</div>`;
         
         const status = data.status || 'UNKNOWN';
         const statusClass = status === 'COMPLETED' ? 'badge-pass' : status === 'FAILED' ? 'badge-fail' : 'badge-info';
         const gateClass = data.gate_decision === 'PASS' ? 'badge-pass' : data.gate_decision === 'FAIL' ? 'badge-fail' : 'badge-info';
-        
         detailEl.innerHTML = `
             <div style="margin-top:20px">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-                    <h3 style="color: var(--text-primary);margin:0">Pipeline Results</h3>
-                    <button onclick="location.reload()" class="btn-primary" style="padding:8px 16px">
-                        ← Back to Home
-                    </button>
-                </div>
                 
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px">
                     <div style="background:var(--bg-subtle);padding:16px;border-radius:8px;border:1px solid var(--border)">
@@ -296,7 +286,7 @@ async function viewRunDetails(runId) {
                 </div>
             </div>
         `;
-        resultCard.scrollIntoView({ behavior: 'smooth' });
+        detailCard.scrollIntoView({ behavior: 'smooth' });
         showToast('Run details loaded', 'success');
     } catch (e) {
         showToast('Failed to load run details: ' + e.message, 'error');
@@ -320,13 +310,11 @@ async function viewSnapshotDetails(snapshotId, datasetId) {
                 <div class="status-msg info">Dataset: ${datasetId}</div>
                 <div class="status-msg info">Snapshot: ${snapshotId.slice(0, 32)}</div>
             </div>
-            <div class="status-msg info">
-                Click "View Reports" button above to see all pipeline runs and detailed statistics.
             </div>
         </div>
     `;
     resultCard.scrollIntoView({ behavior: 'smooth' });
-    showToast('Snapshot selected', 'info');
+    showToast('Snapshot selected. Please switch to "Run Pipeline" tab or "Reports" tab to view pipeline information.', 'info');
 }
 
 async function quickViewAudit() {
@@ -635,12 +623,8 @@ async function loadAnalytics() {
         const data = await apiFetch(runId ? '/api/results/' + runId : '/api/results/latest');
         renderAnalyticsUI(data);
     } catch (e) {
-        renderAnalyticsUI({
-            confidence_score: 0.87, gate1_decision: 'PASS', gate2_decision: 'PASS',
-            dimensions: { data_quality: 0.92, statistical_strength: 0.84, stability: 0.88, compliance: 0.91 },
-            narrative: 'Analysis complete — demo data. Hard Gate 1 (data quality) and Hard Gate 2 (statistical verification) both PASS. Confidence vector: data_quality 0.92 · statistical_strength 0.84 · stability 0.88 · compliance 0.91.'
-        });
-        if (runId) showToast('Using demo data: ' + e.message, 'warn');
+        showToast('Failed to load analytics: ' + e.message, 'error');
+        renderAnalyticsUI({});
     }
 }
 
@@ -658,7 +642,7 @@ function renderAnalyticsUI(data) {
     if (bar) { bar.style.width = (conf * 100) + '%'; bar.className = 'conf-bar ' + (conf >= 0.85 ? 'high' : conf >= 0.70 ? 'medium' : 'low'); }
     const narr = document.getElementById('narrative-content');
     if (narr) narr.textContent = data.narrative || data.insight || 'No narrative available.';
-    renderRadarChart(data.dimensions || { data_quality: 0.92, statistical_strength: 0.84, stability: 0.88, compliance: 0.91 });
+    renderRadarChart(data.dimensions || { data_quality: 0, statistical_strength: 0, stability: 0, compliance: 0 });
 }
 
 function drawGauge(conf) {
@@ -1312,8 +1296,8 @@ async function loadCohortRetention() {
         renderCohortUI(data);
         showToast('Cohort analysis complete', 'success');
     } catch (e) {
-        renderCohortDemoData();
-        if (runId || cohortCol) showToast('Using demo data: ' + e.message, 'warn');
+        showToast('Failed to load cohort data: ' + e.message, 'error');
+        renderCohortUI({});
     }
 }
 
