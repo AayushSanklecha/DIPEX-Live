@@ -235,4 +235,4 @@ dipex/
 
 ## License
 
-This project is part of the DIP2026-23191 research programme.
+This is a personal project and an original idea of Aayush Sanklecha and Pranav gund . 
