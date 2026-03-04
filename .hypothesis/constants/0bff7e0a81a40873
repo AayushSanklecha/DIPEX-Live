@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\api\routes\query.py
+# hypothesis_version: 6.151.9
+
+[400, 404, 500, '.csv', '/named', '/query', '/save', 'SQL Query Engine', '_cleaned.csv', '_sample.csv', 'adhoc', 'columns', 'data', 'data/uploads', 'df', 'dipex.api.query', 'elapsed_ms', 'name', 'queries', 'rows', 'saved', 'sql', 'status']

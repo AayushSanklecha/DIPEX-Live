@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\quality_gate.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1e-09, 1e-06, 0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.7, 0.75, 0.85, 1.0, 3.0, 100, 'FAILED', 'PASSED', 'WARN', 'dataset_id', 'distribution_drift', 'duplicate_count', 'duplicate_rate', 'float', 'int', 'max_duplicate_rate', 'max_null_rate', 'min_quality_score', 'outlier_iqr_factor', 'overall_null_rate', 'psi_fail_threshold', 'psi_warn_threshold', 'quality_score', 'quality_thresholds', 'row_count', 'snapshot_id', 'universal_intake', 'validation_status', 'violations', 'warn_quality_score', 'warnings']

@@ -1,0 +1,27 @@
+﻿...............F..F.....................................F.............F. [ 87%]
+..........                                                               [100%]
+================================== FAILURES ===================================
+______ TestStreamingIsolation.test_window_checksum_is_unique_per_window _______
+tests\test_isolation_guarantee.py:326: in test_window_checksum_is_unique_per_window
+    from ingestion.stream_processor import StreamProcessor, _compute_checksum
+E   ImportError: cannot import name '_compute_checksum' from 'ingestion.stream_processor' (C:\Users\sankl\Desktop\dipex\ingestion\stream_processor.py)
+_ TestImmutabilityGuardIntegration.test_unauthorized_component_cannot_write_bronze _
+tests\test_isolation_guarantee.py:388: in test_unauthorized_component_cannot_write_bronze
+    LayerWriteGuard.assert_write_allowed(
+E   TypeError: LayerWriteGuard.assert_write_allowed() got an unexpected keyword argument 'operation'
+_________ TestWatermark.test_event_time_extraction_from_milliseconds __________
+tests\test_streaming.py:277: in test_event_time_extraction_from_milliseconds
+    assert abs(extracted - epoch_ms / 1000.0) < 1e-3
+E   assert 999000000000.0 < 0.001
+E    +  where 999000000000.0 = abs((1000000000000.0 - (1000000000000 / 1000.0)))
+________ TestNaNInfInjection.test_extreme_outlier_detected_by_profiler ________
+tests\test_chaos.py:162: in test_extreme_outlier_detected_by_profiler
+    assert outliers > 0, "Extreme outlier not detected by Z-score"
+E   AssertionError: Extreme outlier not detected by Z-score
+E   assert 0 > 0
+=========================== short test summary info ===========================
+FAILED tests/test_isolation_guarantee.py::TestStreamingIsolation::test_window_checksum_is_unique_per_window
+FAILED tests/test_isolation_guarantee.py::TestImmutabilityGuardIntegration::test_unauthorized_component_cannot_write_bronze
+FAILED tests/test_streaming.py::TestWatermark::test_event_time_extraction_from_milliseconds
+FAILED tests/test_chaos.py::TestNaNInfInjection::test_extreme_outlier_detected_by_profiler
+4 failed, 78 passed in 10.29s

@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\stream_processor.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.1, 0.8, 1.0, 1000.0, 1000000000000.0, 100, 120, 300, 600, 10000, 'CORRECTIVE', 'PASS', 'QA_ERROR', 'REJECT', 'SKIPPED', 'both', 'consumer_lag', 'corrective', 'corrective_snapshots', 'current_watermark', 'dipex.streaming', 'dropped_events', 'event_time_field', 'iso', 'late_events', 'max_queue_depth', 'queue_depth', 'records', 'slide_stride_seconds', 'sliding', 'stream', 'stream_final', 'streaming', 'timestamp', 'total_events', 'tumbling', 'utf-8', 'window_mode', 'windows_closed']

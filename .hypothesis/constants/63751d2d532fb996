@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\explanation\audit_logger.py
+# hypothesis_version: 6.151.9
+
+[100, 'a', 'audit/audit.jsonl', 'data', 'event_type', 'r', 'timestamp', 'utf-8']

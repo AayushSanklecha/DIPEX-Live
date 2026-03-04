@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\auth\__init__.py
+# hypothesis_version: 6.151.9
+
+['JWTAuth', 'RBACMiddleware', 'ROLES', 'get_current_user', 'require_role']

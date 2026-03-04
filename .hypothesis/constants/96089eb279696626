@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\api\routes\model.py
+# hypothesis_version: 6.151.9
+
+[404, 500, '/model', '/predict', '/registry', '/train', 'Modeling', '_cleaned.csv', '_sample.csv', 'algorithms', 'best_model', 'config.yaml', 'cv_metrics', 'dipex.api.model', 'eval_report', 'model', 'modeling', 'models', 'models_trained', 'n_predictions', 'predict_proba', 'predictions', 'probabilities', 'promoted', 'r', 'results', 'run_id', 'target']

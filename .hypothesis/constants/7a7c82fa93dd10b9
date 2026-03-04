@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\query_engine\sql_engine.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1000, ':memory:', 'QueryRegistry', 'columns', 'elapsed_ms', 'error', 'records', 'rows', 'sql', 'success']

@@ -1,0 +1,125 @@
+environment: development
+data_layers:
+  bronze_dir: data/bronze
+  silver_dir: data/silver
+  gold_dir: data/gold
+  model_registry: data/model_registry
+  audit_dir: audit
+pipeline:
+  domain: default
+  auto_stage_timeout_s: 300
+  confidence:
+    threshold: 0.7
+    domain_thresholds:
+      default: 0.7
+      banking: 0.85
+      healthcare: 0.9
+      finance: 0.8
+  retry:
+    max_retries: 3
+    backoff_base_s: 2
+    escalate_after: 3
+hard_gate_1:
+  max_null_rate: 0.3
+  critical_columns: []
+  allow_schema_drift: false
+  regulatory_domain: default
+hard_gate_2:
+  min_sample_size: 30
+  drift_psi_threshold: 0.2
+  stability_cv_threshold: 0.3
+rl:
+  epsilon_min: 0.05
+  epsilon_max: 0.3
+  drift_epsilon_boost: 0.3
+  ewc_lambda: 0.9
+  instability_threshold: -0.1
+  instability_window: 3
+  sandbox_mode: false
+  max_episodes: 500
+llm:
+  provider: ollama
+  model: llama3
+  max_prompt_tokens: 3000
+  fallback_on_error: true
+  pii_redaction: true
+  audit_prompts: true
+  cost_tracking: true
+streaming:
+  kafka_bootstrap: kafka:9092
+  consumer_group: dipex-pipeline
+  topics:
+    raw_events: dipex.raw_events
+    cleaned: dipex.cleaned
+    gold_outputs: dipex.gold_outputs
+    drift_alerts: dipex.drift_alerts
+    rl_signals: dipex.rl_signals
+  window_config:
+    tumbling_5m:
+      type: tumbling
+      size_s: 300
+    sliding_1m:
+      type: sliding
+      size_s: 60
+      advance_s: 30
+  max_queue_depth: 1000
+  late_data_tolerance_s: 30
+  consumer_lag_warn_threshold: 1000
+  consumer_lag_crit_threshold: 10000
+database:
+  default_engine: duckdb
+  duckdb_path: data/dipex.duckdb
+  sql:
+    pool_size: 5
+    max_overflow: 10
+    pool_timeout_s: 30
+  mongo:
+    default_db: dipex
+    batch_size: 1000
+api:
+  host: 0.0.0.0
+  port: 8000
+  reload: false
+  cors_origins:
+  - http://localhost:3000
+  - http://localhost:8080
+  rate_limit_rpm: 120
+  rate_limit_burst: 20
+  jwt_expire_mins: 60
+  jwt_refresh_hours: 24
+security:
+  encryption_at_rest: false
+  audit_access_log: true
+  pii_detection: true
+  pii_mask_char: '***'
+  rbac_enforce: true
+monitoring:
+  prometheus_scrape_interval: 15s
+  grafana_port: 3001
+  alert_rules_path: monitoring/alert_rules.yml
+  thresholds:
+    pipeline_failure_rate: 0.2
+    confidence_median_min: 0.7
+    retry_escalations_per_hr: 5
+    kafka_lag_warn: 1000
+    kafka_lag_crit: 10000
+    llm_tokens_per_hr: 500000
+project:
+  name: DIPEX
+  version: 3.0.0
+  environment: development
+storage:
+  report_dir: reports
+  snapshot_dir: data/snapshots
+  upload_dir: data/uploads
+  schema_version: '1.0'
+preprocessing:
+  impute_strategy: median
+  scale_strategy: standard
+  encode_strategy: onehot
+  outlier_method: iqr
+  outlier_factor: 1.5
+universal_intake:
+  snapshot_dir: data/snapshots
+  quality_threshold: 0.6
+  max_file_size_mb: 500

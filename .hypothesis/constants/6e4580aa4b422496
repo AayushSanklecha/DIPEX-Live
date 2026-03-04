@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\verifier\domain_verifier.py
+# hypothesis_version: 6.151.9
+
+[-1.0, 1e-10, 0.01, 10.0, 1000000000.0, 1000000000000.0, 150, '; ', 'DomainVerifier', 'INFO', 'OK', 'VIOLATION', 'WARNING', 'banking', 'child_col', 'column', 'columns', 'custom_fn', 'default', 'description', 'detail', 'domain', 'domain_rules', 'finance', 'fn', 'healthcare', 'max', 'max_proportion', 'message', 'metric', 'min', 'no_inf', 'no_nan', 'non_negative', 'number', 'parent_col', 'passed', 'pipeline', 'range', 'ratio', 'rule', 'rule_results', 'severity', 'threshold', 'type', 'unique_ids', 'value', 'violations', 'warnings']

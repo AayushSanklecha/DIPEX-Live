@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\api\routes\pipeline_run.py
+# hypothesis_version: 6.151.9
+
+[422, 500, ',', '.csv', '/api', '/pipeline/run', 'Pipeline', 'batch', 'confidence_vector', 'config.yaml', 'data/snapshots', 'dataset_id', 'file', 'gate1_decision', 'gate2_decision', 'gate_decision', 'model_metrics', 'ok', 'quality_score', 'r', 'report_path', 'retry_count', 'row_count', 'run_id', 'schema_version', 'snapshot', 'snapshot_dir', 'snapshot_id', 'stages', 'status', 'storage', 'upload', 'utf-8', 'validation_status', 'wb']

@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\stats\descriptive.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.05, 0.25, 0.5, 0.75, 0.95, 100, 5000, 'All values are null', 'NON_NORMAL', 'NORMAL', 'column', 'columns', 'columns_analyzed', 'conclusion', 'cv', 'dagostino-pearson', 'dataset_summary', 'error', 'iqr', 'is_normal', 'kurtosis', 'max', 'mean', 'median', 'min', 'mode', 'n', 'negative_count', 'normality_dagostino', 'normality_shapiro', 'null_count', 'null_pct', 'numeric_columns', 'p25', 'p5', 'p50', 'p75', 'p95', 'p_value', 'range', 'reason', 'shapiro-wilk', 'skewness', 'skipped', 'statistic', 'std', 'test', 'total_columns', 'total_rows', 'unique_count', 'variance', 'zero_count']

@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\batch_processor.py
+# hypothesis_version: 6.151.9
+
+[60.0, 1000, 1000000, '*_issf.json', ', ', '.', '_data.csv', '_data.parquet', '_issf', '_issf.json', 'a', 'audit', 'completed_at', 'data/archive', 'data/schema_registry', 'data/snapshots', 'data/watermarks.json', 'db_config', 'errors', 'extra', 'failed', 'full_refresh', 'incremental', 'interval_s', 'job_id', 'kafka_offset', 'log_file', 'log_pos', 'lsn', 'mode', 'mysql_binlog', 'offsets', 'partition', 'pg_wal_lsn', 'rb', 'snapshots', 'started_at', 'succeeded', 'topic', 'total_rows_ingested', 'total_sources', 'type', 'updated_at', 'utf-8', 'w', 'watermark_column', 'watermark_last_value', 'watermark_new_value', 'wb']

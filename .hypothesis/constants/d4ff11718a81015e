@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\connectors\duckdb_connector.py
+# hypothesis_version: 6.151.9
+
+[50000, ':memory:', 'DUCKDB_PATH', 'SELECT 1', 'SHOW TABLES', 'access_mode', 'chunk_size', 'columns', 'description', 'dtypes', 'duckdb_path', 'error', 'estimated_row_count', 'memory_limit', 'parquet_glob', 'query', 'read_only', 'source', 'table', 'tables', 'threads']

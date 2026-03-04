@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\api\routes\feedback.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.6, 0.75, 1.0, '/', '/api/feedback', '/history/{run_id}', '/reload', '/reparametrize', '/retry', '/rl-status', 'Dataset identifier', 'OK', 'Optional tags/labels', 'Original run ID', 'RECORDED', 'REPARAM_SCHEDULED', 'RETRY_SCHEDULED', 'Reason for retry', 'USER_FEEDBACK', 'User rating in [0,1]', 'applied_params', 'audit', 'available_strategies', 'bandit', 'bandit_state', 'bronze_ingestion', 'config.yaml', 'data_uri', 'dataset_id', 'default', 'dipex.api.feedback', 'domain', 'eda_summary', 'event', 'event_count', 'events', 'feedback', 'message', 'new_data', 'new_data_upload', 'new_run_id', 'next_stage', 'original_run_id', 'parameter_change', 'proposal_routing', 'r', 'reload', 'reparametrize', 'reparametrize_run_id', 'restart_domain', 'retry', 'retry_run_id', 'run_id', 'selected_strategy', 'stage', 'status', 'user_initiated']

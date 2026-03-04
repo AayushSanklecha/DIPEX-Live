@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DIPEX — Analyst Intelligence</title>
+  <meta name="description" content="DIPEX Analyst Intelligence — trigger and inspect junior, mid, and senior analyst operations from verified Gold artefacts."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #0d1117;
+      --bg2:      #161b22;
+      --bg3:      #1f2937;
+      --border:   #30363d;
+      --accent:   #4f46e5;
+      --accent2:  #7c3aed;
+      --green:    #10b981;
+      --yellow:   #f59e0b;
+      --red:      #ef4444;
+      --text:     #e6edf3;
+      --muted:    #8b949e;
+      --radius:   12px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    /* Nav */
+    nav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 2rem; display:flex; align-items:center; gap:2rem; height:56px; position:sticky; top:0; z-index:100; }
+    .nav-brand { font-weight:700; font-size:1.1rem; color:var(--text); text-decoration:none; display:flex; align-items:center; gap:.5rem; }
+    .nav-brand span { background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    nav a { color:var(--muted); text-decoration:none; font-size:.875rem; padding:.25rem .5rem; border-radius:6px; transition:all .2s; }
+    nav a:hover, nav a.active { color:var(--text); background:var(--bg3); }
+
+    /* Layout */
+    main { max-width:1400px; margin:0 auto; padding:2rem; }
+    h1 { font-size:1.5rem; font-weight:700; margin-bottom:.25rem; }
+    .subtitle { color:var(--muted); font-size:.9rem; margin-bottom:2rem; }
+
+    /* Grid */
+    .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-bottom:2rem; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+    @media(max-width:900px) { .grid-3,.grid-2 { grid-template-columns:1fr; } }
+
+    /* Cards */
+    .card { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; }
+    .card-header { font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:.75rem; }
+
+    /* Tier badges */
+    .tier-badge { display:inline-block; padding:.2rem .6rem; border-radius:999px; font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+    .tier-junior  { background:rgba(16,185,129,.15); color:var(--green); border:1px solid rgba(16,185,129,.3); }
+    .tier-mid     { background:rgba(245,158,11,.15); color:var(--yellow); border:1px solid rgba(245,158,11,.3); }
+    .tier-senior  { background:rgba(79,70,229,.15);  color:#818cf8; border:1px solid rgba(79,70,229,.3); }
+
+    /* Operations list */
+    .op-list { display:flex; flex-direction:column; gap:.5rem; }
+    .op-item { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:.75rem 1rem; display:flex; align-items:center; justify-content:space-between; cursor:pointer; transition:all .2s; }
+    .op-item:hover { border-color:var(--accent); background:rgba(79,70,229,.06); }
+    .op-name { font-size:.875rem; font-weight:500; }
+    .op-desc { font-size:.75rem; color:var(--muted); margin-top:.15rem; }
+
+    /* Run panel */
+    .run-panel { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; }
+    .run-panel h3 { font-size:1rem; font-weight:600; margin-bottom:1rem; }
+    label { font-size:.8rem; color:var(--muted); font-weight:500; display:block; margin-bottom:.3rem; }
+    input, select, textarea {
+      width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      color:var(--text); padding:.6rem .9rem; font-size:.875rem; font-family:inherit; margin-bottom:1rem; outline:none;
+      transition:border-color .2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color:var(--accent); }
+    textarea { min-height:80px; resize:vertical; }
+    .btn { padding:.6rem 1.2rem; border:none; border-radius:8px; font-size:.875rem; font-weight:600; cursor:pointer; transition:all .2s; }
+    .btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; }
+    .btn-primary:hover { opacity:.9; transform:translateY(-1px); }
+    .btn-primary:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+    /* Result */
+    .result-box { margin-top:1.5rem; background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:1rem; max-height:350px; overflow-y:auto; }
+    .result-box pre { font-size:.8rem; white-space:pre-wrap; word-break:break-word; color:var(--text); }
+
+    /* Confidence badge */
+    .conf-badge { display:inline-flex; align-items:center; gap:.35rem; padding:.3rem .8rem; border-radius:999px; font-size:.75rem; font-weight:600; }
+    .conf-pass   { background:rgba(16,185,129,.15); color:var(--green); border:1px solid rgba(16,185,129,.3); }
+    .conf-warn   { background:rgba(245,158,11,.15);  color:var(--yellow); border:1px solid rgba(245,158,11,.3); }
+    .conf-reject { background:rgba(239,68,68,.15);   color:var(--red);    border:1px solid rgba(239,68,68,.3); }
+    .dot { width:7px; height:7px; border-radius:50%; }
+    .dot-green  { background:var(--green); }
+    .dot-yellow { background:var(--yellow); }
+    .dot-red    { background:var(--red); }
+
+    /* Status bar */
+    .status-bar { display:flex; align-items:center; gap:1rem; padding:.75rem 1rem; background:rgba(79,70,229,.08); border:1px solid rgba(79,70,229,.2); border-radius:8px; font-size:.8rem; margin-bottom:1.5rem; }
+    .spin { display:inline-block; width:14px; height:14px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="index.html">DIPEX <span>v3</span></a>
+  <a href="index.html">Overview</a>
+  <a href="pipeline.html">Pipeline</a>
+  <a href="analyst_ops.html" class="active">Analyst Ops</a>
+  <a href="rl_status.html">RL Status</a>
+  <a href="streaming.html">Streaming</a>
+  <a href="lineage.html">Lineage</a>
+</nav>
+<main>
+  <h1>Analyst Intelligence Operations</h1>
+  <p class="subtitle">Trigger Junior · Mid · Senior analyst operations on verified Gold artefacts. All results are QA-gated before display.</p>
+
+  <div id="statusBar" class="status-bar" style="display:none">
+    <span class="spin"></span>
+    <span id="statusMsg">Running operation…</span>
+  </div>
+
+  <div class="grid-2">
+    <!-- Left: Operation Browser -->
+    <div>
+      <div class="card" style="margin-bottom:1.25rem">
+        <div class="card-header">Junior Operations <span class="tier-badge tier-junior">Junior</span></div>
+        <div class="op-list" id="juniorOps"></div>
+      </div>
+      <div class="card" style="margin-bottom:1.25rem">
+        <div class="card-header">Mid-Level Operations <span class="tier-badge tier-mid">Mid</span></div>
+        <div class="op-list" id="midOps"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">Senior Operations <span class="tier-badge tier-senior">Senior</span></div>
+        <div class="op-list" id="seniorOps"></div>
+      </div>
+    </div>
+
+    <!-- Right: Run Panel -->
+    <div class="run-panel">
+      <h3>Run Operation</h3>
+      <label>Dataset ID</label>
+      <input type="text" id="datasetId" placeholder="e.g. sales_q4_2024" value="demo_dataset"/>
+
+      <label>Operation</label>
+      <input type="text" id="selectedOp" placeholder="Click an operation on the left" readonly/>
+
+      <label>Tier (auto-detected if blank)</label>
+      <select id="tierSel">
+        <option value="">Auto-detect</option>
+        <option value="junior">Junior</option>
+        <option value="mid">Mid</option>
+        <option value="senior">Senior</option>
+      </select>
+
+      <label>Problem Statement (optional)</label>
+      <textarea id="problemStatement" placeholder="e.g. 'Why is revenue declining in Q4?'"></textarea>
+
+      <button class="btn btn-primary" onclick="runOperation()" id="runBtn">▶ Run Operation</button>
+
+      <div id="resultArea" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:1.5rem;margin-bottom:.5rem">
+          <strong style="font-size:.875rem">Result</strong>
+          <div id="confBadge"></div>
+        </div>
+        <div class="result-box"><pre id="resultJson"></pre></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = '';
+const TOKEN = () => localStorage.getItem('dipex_token') || '';
+
+const OPS = {
+  junior: [
+    {name:'basic_stats',           desc:'Descriptive statistics for all columns'},
+    {name:'missing_analysis',      desc:'Null rates, patterns, and imputation suggestions'},
+    {name:'data_cleaning',         desc:'Remove duplicates, fix dtypes, standardize formats'},
+    {name:'schema_validation',     desc:'Validate schema against expected contract'},
+    {name:'basic_visualization_spec', desc:'Auto chart-type specs with misleading-viz detection'},
+    {name:'merge_files',           desc:'Multi-source concat/join with lineage tracking'},
+    {name:'export_report',         desc:'Export Gold artefact as Markdown/HTML/JSON report'},
+  ],
+  mid: [
+    {name:'eda',                   desc:'Full exploratory data analysis'},
+    {name:'correlation_analysis',  desc:'Pearson/Spearman + heatmap spec'},
+    {name:'segmentation',          desc:'K-Means + DBSCAN segment discovery'},
+    {name:'anomaly_detection',     desc:'IQR, Z-score, Isolation Forest anomalies'},
+    {name:'time_series_analysis',  desc:'Trend, seasonality, stationarity tests'},
+    {name:'funnel_analysis',       desc:'Conversion funnel with drop-off rates'},
+  ],
+  senior: [
+    {name:'causal_inference_proxy',    desc:'DiD + PSM — OBSERVATIONAL only, clearly labelled'},
+    {name:'bias_detection',            desc:'Disparate Impact Ratio + Demographic Parity'},
+    {name:'north_star_metric_definition', desc:'KPI ranking → North Star + guardrails + baselines'},
+    {name:'strategic_advisor',         desc:'Growth signals, revenue optimization, risk forecasting'},
+    {name:'experiment_designer',       desc:'A/B test design with power calculation + validity checks'},
+  ]
+};
+
+function renderOps() {
+  ['junior','mid','senior'].forEach(tier => {
+    const el = document.getElementById(tier+'Ops');
+    el.innerHTML = OPS[tier].map(op => `
+      <div class="op-item" onclick="selectOp('${op.name}','${tier}')">
+        <div>
+          <div class="op-name">${op.name}</div>
+          <div class="op-desc">${op.desc}</div>
+        </div>
+        <span class="tier-badge tier-${tier}">→</span>
+      </div>`).join('');
+  });
+}
+
+function selectOp(name, tier) {
+  document.getElementById('selectedOp').value = name;
+  document.getElementById('tierSel').value = tier;
+  document.getElementById('selectedOp').style.borderColor = 'var(--accent)';
+}
+
+async function runOperation() {
+  const op = document.getElementById('selectedOp').value.trim();
+  const dataset = document.getElementById('datasetId').value.trim();
+  if (!op || !dataset) { alert('Select an operation and enter a dataset ID.'); return; }
+
+  const btn = document.getElementById('runBtn');
+  const sb  = document.getElementById('statusBar');
+  btn.disabled = true;
+  sb.style.display = 'flex';
+  document.getElementById('statusMsg').textContent = `Running "${op}" on "${dataset}"…`;
+  document.getElementById('resultArea').style.display = 'none';
+
+  try {
+    const body = {
+      dataset_id:       dataset,
+      operation:        op,
+      tier:             document.getElementById('tierSel').value || undefined,
+      problem_statement: document.getElementById('problemStatement').value || undefined,
+    };
+    const r = await fetch(API + '/analyst/run', {
+      method:  'POST',
+      headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN()},
+      body:    JSON.stringify(body),
+    });
+    const data = await r.json();
+    document.getElementById('resultJson').textContent = JSON.stringify(data, null, 2);
+    document.getElementById('resultArea').style.display = 'block';
+
+    const conf = data.confidence_score;
+    const badge = document.getElementById('confBadge');
+    if (conf >= 0.85) {
+      badge.innerHTML = '<span class="conf-badge conf-pass"><span class="dot dot-green"></span>'+Math.round(conf*100)+'% Verified</span>';
+    } else if (conf >= 0.70) {
+      badge.innerHTML = '<span class="conf-badge conf-warn"><span class="dot dot-yellow"></span>'+Math.round(conf*100)+'% Caution</span>';
+    } else {
+      badge.innerHTML = '<span class="conf-badge conf-reject"><span class="dot dot-red"></span>'+(conf?Math.round(conf*100):'?')+'% Low Conf</span>';
+    }
+  } catch(e) {
+    document.getElementById('resultJson').textContent = 'Error: ' + e.message + '\n\n(Is the API running? Check /docs)';
+    document.getElementById('resultArea').style.display = 'block';
+    document.getElementById('confBadge').innerHTML = '';
+  } finally {
+    btn.disabled = false;
+    sb.style.display = 'none';
+  }
+}
+
+renderOps();
+</script>
+</body>
+</html>

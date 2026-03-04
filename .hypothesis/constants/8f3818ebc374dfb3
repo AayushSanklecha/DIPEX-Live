@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\middleware\rate_limiter.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1.0, 60.0, 429, ',', '/', '/docs', '/favicon.ico', '/health', '/openapi.json', '/redoc', '/static', 'Authorization', 'Bearer ', 'Retry-After', 'Too Many Requests', 'X-Forwarded-For', 'X-RateLimit-Limit', 'X-RateLimit-Reset', 'detail', 'error', 'retry_after_seconds', 'sub', 'unknown']

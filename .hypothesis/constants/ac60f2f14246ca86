@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\governance\governance_engine.py
+# hypothesis_version: 6.151.9
+
+[0.6, 0.75, 'AML', 'BLOCK', 'CRITICAL', 'CUSTOM', 'ERROR', 'G001', 'G002', 'G002_pii_enforcement', 'G003', 'G003_audit_mandatory', 'G004', 'G005', 'G005_banking_aml', 'G006', 'G006_healthcare_phi', 'GovernanceEngine', 'PASS', 'REJECT', 'SUSPICIOUS', 'WARN', 'WARNING', 'audit/audit.jsonl', 'audit_log', 'audit_log_path', 'banking', 'check', 'confidence_score', 'context', 'critical_count', 'decision', 'domain', 'error_count', 'evaluated_at', 'gate1', 'gate2', 'generic', 'governance', 'healthcare', 'id', 'message', 'min_confidence', 'narrative', 'phi_columns', 'pii_columns', 'pii_enforcement', 'policies', 'policies_checked', 'policies_file', 'policy_id', 'r', 'regulatory', 'run_id', 'severity', 'storage', 'threshold', 'utf-8', 'validation', 'value', 'violations', 'warning_count']

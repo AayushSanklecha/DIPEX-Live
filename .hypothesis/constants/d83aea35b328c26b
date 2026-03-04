@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\cognitive\uncertainty_quantifier.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.1, 0.2, 0.5, 0.9, 1.0, 'MODERATE', 'PRECISE', 'SPECULATIVE', 'aps_conformal', 'classes_', 'classification', 'coverage_target', 'empirical_coverage', 'error', 'fallback_2sigma', 'heuristic', 'heuristic_mean', 'heuristic_prop', 'heuristic_quantiles', 'interval_width', 'intervals', 'method', 'n_calib', 'not_calibrated', 'point_estimates', 'prediction_sets', 'q_hat', 'regression', 'set_sizes']

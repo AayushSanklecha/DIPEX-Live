@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\connectors\__init__.py
+# hypothesis_version: 6.151.9
+
+['APIConnector', 'BaseConnector', 'ClickHouseConnector', 'ConnectorFactory', 'DuckDBConnector', 'KafkaConnector', 'MongoConnector', 'Neo4jConnector', 'SQLConnector']

@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\proposal\proposers\bandit_proposer.py
+# hypothesis_version: 6.151.9
+
+[0.1, 0.5, 0.8, 0.9, 1.0, 1.1, 'GradientBoosting', 'LinearModel', 'RandomForest', 'abort_and_log', 'adaptive_windows', 'bandit', 'candidates', 'contexts', 'encoding_policy', 'exploration_rate', 'exponential_backoff', 'immediate_retry', 'keep_all', 'label_encoding', 'longer_windows', 'model_family', 'no_change', 'one_hot', 'prefer_scaling', 'proposal', 'q_value', 'r', 'recommendation', 'retry_strategy', 'shorter_windows', 'storage_path', 'strategy_candidates', 'target_encoding', 'w', 'window_policy']

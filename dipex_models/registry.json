@@ -1,0 +1,66 @@
+{
+  "schema_classifier": {
+    "version": "2.0",
+    "trained_at": "2026-02-26T08:09:44.161372",
+    "metrics": {
+      "train": 1.0,
+      "val": 1.0,
+      "test": 1.0,
+      "gap": 0.0,
+      "dummy": 0.4253968253968254,
+      "improvement": 0.5746031746031746
+    },
+    "n_samples": 2101,
+    "n_classes": 4,
+    "best_iteration": 453
+  },
+  "nlp_query_classifier": {
+    "version": "2.0",
+    "method": "TF-IDF (1-4gram, 60K) + CalibratedLinearSVC",
+    "trained_at": "2026-02-26T09:45:24.233433",
+    "metrics": {
+      "train": 0.9259165037624186,
+      "val": 0.9043989002749313,
+      "test": 0.9085910652920962,
+      "gap": 0.021517603487487325,
+      "dummy": 0.5576814931848003,
+      "method": "TF-IDF (1-4gram, 60K) + CalibratedLinearSVC"
+    },
+    "n_samples": 106695
+  },
+  "proposal_confidence": {
+    "version": "2.0",
+    "method": "Quantile LightGBM (median)",
+    "trained_at": "2026-02-26T09:45:25.012432",
+    "metrics": {
+      "roc_auc": 1.0,
+      "train": 1.0,
+      "val": 0.9772727272727273,
+      "test": 1.0,
+      "gap": 0.022727272727272707,
+      "mapie_coverage": null,
+      "mapie_width": null
+    }
+  },
+  "chart_relevance_scorer": {
+    "version": "2.0",
+    "trained_at": "2026-02-26T09:45:37.782638",
+    "metrics": {
+      "train": 1.0,
+      "val": 0.9777777777777777,
+      "test": 1.0,
+      "gap": 0.022222222222222254,
+      "dummy": 0.2971698113207547
+    },
+    "n_samples": 303,
+    "top2_acc": 1.0,
+    "vizml_samples": 0
+  },
+  "_meta": {
+    "created_at": "2026-02-26T09:45:37.782770",
+    "platform": "Google Colab",
+    "total_models": 6,
+    "all_real_data": true,
+    "synthetic_data": false
+  }
+}

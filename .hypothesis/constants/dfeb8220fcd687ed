@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\readers\universal_fallback.py
+# hypothesis_version: 6.151.9
+
+[b'\x1f\x8b', b'%PDF', b'ARROW1', b'OBj\x01', b'PAR1', b'PK', b'PK\x03\x04', b'\x89PNG', b'\xd0\xcf\x11\xe0', 1024, 4096, 100000, ',', ',;\t|:', '.', ':', ';', '_content', '_file_ext', '_file_path', '_file_size_bytes', '_header_b64', '_line', '_note', '_source', '_text', 'all', 'ascii', 'avro', 'binary', 'cp1252', 'csv', 'delimiter', 'encoding', 'excel', 'excel_xls', 'feather', 'format', 'fwf', 'gz', 'gzip', 'htm', 'html', 'json', 'jsonl', 'latin-1', 'log', 'none', 'parquet', 'pdf', 'png_image', 'raw_text', 'rb', 'replace', 'tsv', 'txt', 'unknown', 'utf-16', 'utf-8', 'warn', 'xls', 'xlsx', 'xlsx_or_zip', 'xml', 'zip', '|']

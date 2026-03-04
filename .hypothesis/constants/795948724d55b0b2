@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\stats\residual_diagnostics.py
+# hypothesis_version: 6.151.9
+
+[0.05, 1.0, 1.5, 2.5, 3.0, 100, 5000, "D'Agostino-Pearson", 'FAIL', 'PASS', 'Shapiro-Wilk', 'WARN', 'checks', 'details', 'durbin_watson', 'f_p_value', 'f_stat', 'fail_count', 'heteroscedasticity', 'interpretation', 'kurtosis', 'lb_pvalue', 'lb_stat', 'ljung_box_p', 'ljung_box_stat', 'lm_stat', 'max_cooks_d', 'model_name', 'n_influential', 'n_obs', 'name', 'overall_status', 'p_value', 'pct_influential', 'residual_normality', 'skewness', 'statistic', 'status', 'test', 'threshold', 'warn_count', 'warnings']

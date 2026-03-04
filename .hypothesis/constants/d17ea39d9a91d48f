@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\api\routes\results.py
+# hypothesis_version: 6.151.9
+
+[0.94, '/api/results', '/{run_id}', 'COMPLETED', 'PIPELINE_RUN', 'audit/audit.jsonl', 'confidence_score', 'dataset_id', 'event', 'explanation', 'gate_decision', 'insight', 'profile_report_url', 'r', 'results', 'run_id', 'runs', 'status', 'timestamp', 'total', 'utf-8']

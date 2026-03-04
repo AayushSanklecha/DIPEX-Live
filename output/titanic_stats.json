@@ -1,0 +1,551 @@
+{
+  "descriptive": {
+    "columns": {
+      "PassengerId": {
+        "column": "PassengerId",
+        "n": 891,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "mean": 446.0,
+        "median": 446.0,
+        "mode": 1.0,
+        "std": 257.353842,
+        "variance": 66231.0,
+        "cv": 0.577,
+        "min": 1.0,
+        "max": 891.0,
+        "range": 890.0,
+        "p5": 45.5,
+        "p25": 223.5,
+        "p50": 446.0,
+        "p75": 668.5,
+        "p95": 846.5,
+        "iqr": 445.0,
+        "skewness": 0.0,
+        "kurtosis": -1.2,
+        "zero_count": 0,
+        "negative_count": 0,
+        "unique_count": 891,
+        "normality_shapiro": {
+          "test": "shapiro-wilk",
+          "statistic": 0.954797,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        },
+        "normality_dagostino": {
+          "test": "dagostino-pearson",
+          "statistic": 642.807362,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        }
+      },
+      "Survived": {
+        "column": "Survived",
+        "n": 891,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "mean": 0.383838,
+        "median": 0.0,
+        "mode": 0.0,
+        "std": 0.486592,
+        "variance": 0.236772,
+        "cv": 1.2677,
+        "min": 0.0,
+        "max": 1.0,
+        "range": 1.0,
+        "p5": 0.0,
+        "p25": 0.0,
+        "p50": 0.0,
+        "p75": 1.0,
+        "p95": 1.0,
+        "iqr": 1.0,
+        "skewness": 0.4785,
+        "kurtosis": -1.775,
+        "zero_count": 549,
+        "negative_count": 0,
+        "unique_count": 2,
+        "normality_shapiro": {
+          "test": "shapiro-wilk",
+          "statistic": 0.616658,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        },
+        "normality_dagostino": {
+          "test": "dagostino-pearson",
+          "statistic": 4070.917079,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        }
+      },
+      "Pclass": {
+        "column": "Pclass",
+        "n": 891,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "mean": 2.308642,
+        "median": 3.0,
+        "mode": 3.0,
+        "std": 0.836071,
+        "variance": 0.699015,
+        "cv": 0.3621,
+        "min": 1.0,
+        "max": 3.0,
+        "range": 2.0,
+        "p5": 1.0,
+        "p25": 2.0,
+        "p50": 3.0,
+        "p75": 3.0,
+        "p95": 3.0,
+        "iqr": 1.0,
+        "skewness": -0.6305,
+        "kurtosis": -1.28,
+        "zero_count": 0,
+        "negative_count": 0,
+        "unique_count": 3,
+        "normality_shapiro": {
+          "test": "shapiro-wilk",
+          "statistic": 0.71833,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        },
+        "normality_dagostino": {
+          "test": "dagostino-pearson",
+          "statistic": 1437.109,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        }
+      },
+      "Age": {
+        "column": "Age",
+        "n": 714,
+        "null_count": 177,
+        "null_pct": 19.87,
+        "mean": 29.699118,
+        "median": 28.0,
+        "mode": 24.0,
+        "std": 14.526497,
+        "variance": 211.019125,
+        "cv": 0.4891,
+        "min": 0.42,
+        "max": 80.0,
+        "range": 79.58,
+        "p5": 4.0,
+        "p25": 20.125,
+        "p50": 28.0,
+        "p75": 38.0,
+        "p95": 56.0,
+        "iqr": 17.875,
+        "skewness": 0.3891,
+        "kurtosis": 0.1783,
+        "zero_count": 0,
+        "negative_count": 0,
+        "unique_count": 88,
+        "normality_shapiro": {
+          "test": "shapiro-wilk",
+          "statistic": 0.981458,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        },
+        "normality_dagostino": {
+          "test": "dagostino-pearson",
+          "statistic": 18.105033,
+          "p_value": 0.000117,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        }
+      },
+      "SibSp": {
+        "column": "SibSp",
+        "n": 891,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "mean": 0.523008,
+        "median": 0.0,
+        "mode": 0.0,
+        "std": 1.102743,
+        "variance": 1.216043,
+        "cv": 2.1085,
+        "min": 0.0,
+        "max": 8.0,
+        "range": 8.0,
+        "p5": 0.0,
+        "p25": 0.0,
+        "p50": 0.0,
+        "p75": 1.0,
+        "p95": 3.0,
+        "iqr": 1.0,
+        "skewness": 3.6954,
+        "kurtosis": 17.8804,
+        "zero_count": 608,
+        "negative_count": 0,
+        "unique_count": 7,
+        "normality_shapiro": {
+          "test": "shapiro-wilk",
+          "statistic": 0.512966,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        },
+        "normality_dagostino": {
+          "test": "dagostino-pearson",
+          "statistic": 722.874045,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        }
+      },
+      "Parch": {
+        "column": "Parch",
+        "n": 891,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "mean": 0.381594,
+        "median": 0.0,
+        "mode": 0.0,
+        "std": 0.806057,
+        "variance": 0.649728,
+        "cv": 2.1123,
+        "min": 0.0,
+        "max": 6.0,
+        "range": 6.0,
+        "p5": 0.0,
+        "p25": 0.0,
+        "p50": 0.0,
+        "p75": 0.0,
+        "p95": 2.0,
+        "iqr": 0.0,
+        "skewness": 2.7491,
+        "kurtosis": 9.7781,
+        "zero_count": 678,
+        "negative_count": 0,
+        "unique_count": 7,
+        "normality_shapiro": {
+          "test": "shapiro-wilk",
+          "statistic": 0.532814,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        },
+        "normality_dagostino": {
+          "test": "dagostino-pearson",
+          "statistic": 543.035282,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        }
+      },
+      "Fare": {
+        "column": "Fare",
+        "n": 891,
+        "null_count": 0,
+        "null_pct": 0.0,
+        "mean": 32.204208,
+        "median": 14.4542,
+        "mode": 8.05,
+        "std": 49.693429,
+        "variance": 2469.436846,
+        "cv": 1.5431,
+        "min": 0.0,
+        "max": 512.3292,
+        "range": 512.3292,
+        "p5": 7.225,
+        "p25": 7.9104,
+        "p50": 14.4542,
+        "p75": 31.0,
+        "p95": 112.07915,
+        "iqr": 23.0896,
+        "skewness": 4.7873,
+        "kurtosis": 33.3981,
+        "zero_count": 15,
+        "negative_count": 0,
+        "unique_count": 248,
+        "normality_shapiro": {
+          "test": "shapiro-wilk",
+          "statistic": 0.521891,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        },
+        "normality_dagostino": {
+          "test": "dagostino-pearson",
+          "statistic": 904.587271,
+          "p_value": 0.0,
+          "is_normal": false,
+          "conclusion": "NON_NORMAL"
+        }
+      }
+    },
+    "dataset_summary": {
+      "total_rows": 891,
+      "total_columns": 11,
+      "numeric_columns": 7,
+      "columns_analyzed": [
+        "PassengerId",
+        "Survived",
+        "Pclass",
+        "Age",
+        "SibSp",
+        "Parch",
+        "Fare"
+      ]
+    }
+  },
+  "correlation": {
+    "correlation_matrix": {
+      "method": "spearman",
+      "n_observations": 714,
+      "columns": [
+        "PassengerId",
+        "Survived",
+        "Pclass",
+        "Age",
+        "SibSp",
+        "Parch",
+        "Fare"
+      ],
+      "correlation_matrix": {
+        "PassengerId": {
+          "PassengerId": 1.0,
+          "Survived": 0.02972,
+          "Pclass": -0.034418,
+          "Age": 0.04101,
+          "SibSp": -0.065982,
+          "Parch": -0.00541,
+          "Fare": -0.020341
+        },
+        "Survived": {
+          "PassengerId": 0.02972,
+          "Survived": 1.0,
+          "Pclass": -0.360656,
+          "Age": -0.052565,
+          "SibSp": 0.073244,
+          "Parch": 0.156444,
+          "Fare": 0.339027
+        },
+        "Pclass": {
+          "PassengerId": -0.034418,
+          "Survived": -0.360656,
+          "Pclass": 1.0,
+          "Age": -0.361666,
+          "SibSp": -0.050959,
+          "Parch": -0.018489,
+          "Fare": -0.730578
+        },
+        "Age": {
+          "PassengerId": 0.04101,
+          "Survived": -0.052565,
+          "Pclass": -0.361666,
+          "Age": 1.0,
+          "SibSp": -0.182061,
+          "Parch": -0.254212,
+          "Fare": 0.135051
+        },
+        "SibSp": {
+          "PassengerId": -0.065982,
+          "Survived": 0.073244,
+          "Pclass": -0.050959,
+          "Age": -0.182061,
+          "SibSp": 1.0,
+          "Parch": 0.426955,
+          "Fare": 0.422994
+        },
+        "Parch": {
+          "PassengerId": -0.00541,
+          "Survived": 0.156444,
+          "Pclass": -0.018489,
+          "Age": -0.254212,
+          "SibSp": 0.426955,
+          "Parch": 1.0,
+          "Fare": 0.40715
+        },
+        "Fare": {
+          "PassengerId": -0.020341,
+          "Survived": 0.339027,
+          "Pclass": -0.730578,
+          "Age": 0.135051,
+          "SibSp": 0.422994,
+          "Parch": 0.40715,
+          "Fare": 1.0
+        }
+      },
+      "p_value_matrix": {
+        "PassengerId": {
+          "PassengerId": 1.0,
+          "Survived": 0.42782521,
+          "Pclass": 0.35844108,
+          "Age": 0.27379831,
+          "SibSp": 0.07808029,
+          "Parch": 0.8852595,
+          "Fare": 0.58738616
+        },
+        "Survived": {
+          "PassengerId": 0.42782521,
+          "Survived": 1.0,
+          "Pclass": 0.0,
+          "Age": 0.16058855,
+          "SibSp": 0.05042621,
+          "Parch": 2.683e-05,
+          "Fare": 0.0
+        },
+        "Pclass": {
+          "PassengerId": 0.35844108,
+          "Survived": 0.0,
+          "Pclass": 1.0,
+          "Age": 0.0,
+          "SibSp": 0.17377952,
+          "Parch": 0.62185282,
+          "Fare": 0.0
+        },
+        "Age": {
+          "PassengerId": 0.27379831,
+          "Survived": 0.16058855,
+          "Pclass": 0.0,
+          "Age": 1.0,
+          "SibSp": 9.7e-07,
+          "Parch": 0.0,
+          "Fare": 0.00029581
+        },
+        "SibSp": {
+          "PassengerId": 0.07808029,
+          "Survived": 0.05042621,
+          "Pclass": 0.17377952,
+          "Age": 9.7e-07,
+          "SibSp": 1.0,
+          "Parch": 0.0,
+          "Fare": 0.0
+        },
+        "Parch": {
+          "PassengerId": 0.8852595,
+          "Survived": 2.683e-05,
+          "Pclass": 0.62185282,
+          "Age": 0.0,
+          "SibSp": 0.0,
+          "Parch": 1.0,
+          "Fare": 0.0
+        },
+        "Fare": {
+          "PassengerId": 0.58738616,
+          "Survived": 0.0,
+          "Pclass": 0.0,
+          "Age": 0.00029581,
+          "SibSp": 0.0,
+          "Parch": 0.0,
+          "Fare": 1.0
+        }
+      },
+      "strong_correlations": [
+        {
+          "col_a": "Pclass",
+          "col_b": "Fare",
+          "r": -0.730578,
+          "p_value": 0.0,
+          "significant": true,
+          "strength": "strong"
+        }
+      ],
+      "significance_threshold": 0.05
+    },
+    "vif": {
+      "vif_scores": [
+        {
+          "feature": "Pclass",
+          "vif": 4.3314,
+          "multicollinearity": "LOW"
+        },
+        {
+          "feature": "Age",
+          "vif": 3.8,
+          "multicollinearity": "LOW"
+        },
+        {
+          "feature": "PassengerId",
+          "vif": 3.7053,
+          "multicollinearity": "LOW"
+        },
+        {
+          "feature": "Fare",
+          "vif": 1.8735,
+          "multicollinearity": "LOW"
+        },
+        {
+          "feature": "Survived",
+          "vif": 1.7123,
+          "multicollinearity": "LOW"
+        },
+        {
+          "feature": "SibSp",
+          "vif": 1.6223,
+          "multicollinearity": "LOW"
+        },
+        {
+          "feature": "Parch",
+          "vif": 1.5542,
+          "multicollinearity": "LOW"
+        }
+      ],
+      "high_vif_features": [],
+      "interpretation": "VIF > 10 indicates severe multicollinearity; > 5 moderate."
+    },
+    "target_correlation": {
+      "target": "Survived",
+      "method": "spearman",
+      "ranked": [
+        {
+          "feature": "Pclass",
+          "r": -0.339668,
+          "abs_r": 0.339668,
+          "p_value": 0.0,
+          "significant": true
+        },
+        {
+          "feature": "Fare",
+          "r": 0.323736,
+          "abs_r": 0.323736,
+          "p_value": 0.0,
+          "significant": true
+        },
+        {
+          "feature": "Parch",
+          "r": 0.138266,
+          "abs_r": 0.138266,
+          "p_value": 3.454e-05,
+          "significant": true
+        },
+        {
+          "feature": "SibSp",
+          "r": 0.088879,
+          "abs_r": 0.088879,
+          "p_value": 0.00794143,
+          "significant": true
+        },
+        {
+          "feature": "Age",
+          "r": -0.052565,
+          "abs_r": 0.052565,
+          "p_value": 0.16058855,
+          "significant": false
+        },
+        {
+          "feature": "PassengerId",
+          "r": -0.005007,
+          "abs_r": 0.005007,
+          "p_value": 0.88136578,
+          "significant": false
+        }
+      ],
+      "top_features": [
+        "Pclass",
+        "Fare",
+        "Parch",
+        "SibSp"
+      ]
+    }
+  }
+}

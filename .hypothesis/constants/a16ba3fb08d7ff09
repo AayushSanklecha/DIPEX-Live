@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\profiling\correlation_engine.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.8, 0.95, 'STRONG_CORRELATION', 'category', 'columns', 'correlation', 'cramers_v', 'detail', 'flag', 'highlights', 'method', 'object', 'pearson', 'profiling', 'spearman', 'strong_threshold', 'value']

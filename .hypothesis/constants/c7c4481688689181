@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\stats\drift_detection.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1e-10, 1e-06, 0.05, 0.1, 0.2, 0.25, 0.5, 0.75, 1.0, 100, 'MAJOR_DRIFT', 'MINOR_DRIFT', 'STABLE', 'categorical', 'chi2_p_value', 'chi2_significant', 'chi2_statistic', 'column', 'column_results', 'columns_checked', 'current_distribution', 'current_rows', 'current_stats', 'dof', 'dtype', 'error', 'insufficient data', 'interpretation', 'js_divergence', 'kl_divergence', 'ks_p_value', 'ks_significant', 'ks_statistic', 'mean', 'missing_categories', 'new_categories', 'numeric', 'overall_severity', 'p25', 'p50', 'p75', 'p_value', 'psi', 'reference_rows', 'reference_stats', 'severity', 'significant', 'stable_columns', 'statistic', 'std', 'summary', 'wasserstein_distance']

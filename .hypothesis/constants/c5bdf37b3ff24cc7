@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\api\routes\auth.py
+# hypothesis_version: 6.151.9
+
+[401, 3600, '/auth', '/me', '/refresh', '/token', 'ADMIN', 'ANALYST', 'API_SERVICE', 'Authentication', 'Bearer', 'VIEWER', 'WWW-Authenticate', 'bearer', 'can_modify_catalog', 'can_run_pipeline', 'can_train_models', 'can_view_reports', 'dipex.api.auth', 'full_name', 'permissions', 'refresh', 'role', 'sub', 'type', 'username']

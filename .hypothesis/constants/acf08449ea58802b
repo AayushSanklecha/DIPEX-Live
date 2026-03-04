@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\kafka_pipeline.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1000, '?', 'KAFKA_DLQ', 'SKIP', 'a', 'audit', 'batch_size', 'batches_processed', 'columns', 'confidence_score', 'confidence_vector', 'consecutive_errors', 'consumer_lag', 'dataset_id', 'dipex-kafka-consumer', 'dipex.kafka_pipeline', 'dlq_count', 'error', 'event', 'events_processed', 'gate_decision', 'kafka', 'kafka_batch', 'pipeline', 'pipeline_errors', 'records', 'row_count', 'run_id', 'sample_json', 'skip_stages', 'stages', 'target_col', 'timestamp', 'topics', 'utf-8']

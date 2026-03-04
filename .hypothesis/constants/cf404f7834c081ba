@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\verifier\confidence_aggregator.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 1.0, 100, 'all_gates_passed', 'baseline', 'confidence_score', 'domain', 'drift', 'passed', 'stability', 'statistical', 'vector']

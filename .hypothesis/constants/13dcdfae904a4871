@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\issf.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1.0, 'ERROR', 'FAILED', 'ISSFSnapshot', 'PASSED', 'WARN', 'api', 'batch', 'column', 'column_metadata', 'correlation_id', 'data/snapshots', 'data_mode', 'data_preview', 'database', 'dataset_id', 'dtype', 'error_logs', 'error_type', 'file', 'fingerprint', 'ingestion_timestamp', 'is_compliant', 'is_pk_candidate', 'live', 'max_val', 'message', 'min_val', 'name', 'null_count', 'null_rate', 'quality_score', 'records', 'row_count', 'row_index', 'sample_values', 'schema_version', 'severity', 'snappy', 'snapshot_id', 'source_type', 'source_uri', 'stream', 'timestamp', 'unique_count', 'utf-8', 'validation_status', 'w']

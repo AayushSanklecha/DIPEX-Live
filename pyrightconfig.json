@@ -1,0 +1,42 @@
+{
+  "include": [
+    "."
+  ],
+  "exclude": [
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    ".hypothesis",
+    "node_modules",
+    "tests/fixtures/canary"
+  ],
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Windows",
+  "pythonPath": "C:/Users/sankl/anaconda3/python.exe",
+  "venvPath": "C:/Users/sankl/anaconda3",
+  "typeCheckingMode": "off",
+  "extraPaths": [
+    "C:/Users/sankl/anaconda3/Lib/site-packages",
+    "."
+  ],
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none",
+  "reportMissingTypeStubs": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportGeneralTypeIssues": "none",
+  "reportAttributeAccessIssue": "none",
+  "reportOperatorIssue": "none",
+  "reportReturnType": "none",
+  "reportArgumentType": "none",
+  "reportIndexIssue": "none",
+  "reportCallIssue": "none",
+  "reportOptionalCall": "none",
+  "reportOptionalMemberAccess": "none",
+  "reportOptionalSubscript": "none",
+  "reportUndefinedVariable": "none",
+  "reportPrivateImportUsage": "none",
+  "useLibraryCodeForTypes": true,
+  "stubPath": "typestubs"
+}

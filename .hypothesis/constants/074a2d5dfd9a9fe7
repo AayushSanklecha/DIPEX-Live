@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\lineage.py
+# hypothesis_version: 6.151.9
+
+[0.0, '.json', '1.0.0', '[^\\w\\-]', '_', 'bronze', 'data/lineage', 'generating_component', 'gold', 'input_shape', 'output_layer', 'output_shape', 'silver', 'source_dataset_id', 'source_snapshot_id', 'system', 'transformation_steps', 'utf-8', 'w']

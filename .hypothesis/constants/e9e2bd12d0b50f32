@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\stats\time_series.py
+# hypothesis_version: 6.151.9
+
+[0.05, 'ADF', 'AIC', 'ARIMA', 'KPSS', 'NON_STATIONARY', 'SARIMA', 'STATIONARY', 'acf', 'additive', 'adf_statistic', 'aic', 'auto', 'bic', 'c', 'ci_lower', 'ci_upper', 'conclusion', 'critical_values', 'error', 'forecast', 'interpretation', 'is_stationary', 'kpss_statistic', 'lags_used', 'model', 'n_obs', 'nlags', 'order', 'p_value', 'pacf', 'period', 'residual', 'result', 'seasonal', 'seasonal_order', 'series_name', 'test_name', 'trend', 'warnings']

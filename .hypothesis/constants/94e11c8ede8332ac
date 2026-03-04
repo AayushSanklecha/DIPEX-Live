@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\validation\regulatory\base_rule.py
+# hypothesis_version: 6.151.9
+
+['REGULATORY_VIOLATION', 'base_rule', 'column', 'domain', 'generic', 'message', 'offending_count', 'remediation', 'rule_name', 'severity', 'type']

@@ -1,0 +1,283 @@
+﻿---
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# DIPEX Kubernetes Manifests â€” Production Deployment
+# Apply with: kubectl apply -f k8s/
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+# â”€â”€ Namespace â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dipex
+  labels:
+    app.kubernetes.io/name: dipex
+    app.kubernetes.io/managed-by: kubectl
+
+---
+# â”€â”€ ConfigMap â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dipex-config
+  namespace: dipex
+data:
+  DIPEX_DOMAIN: "default"
+  DIPEX_AUTH_STRICT: "true"   # enforce 401 for unauthenticated requests in production
+  KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"
+  KAFKA_GROUP_ID: "dipex-pipeline"
+  KAFKA_TOPICS: "raw_events"
+  KAFKA_BATCH_SIZE: "1000"
+  KAFKA_AUTO_OFFSET_RESET: "latest"
+  KAFKA_SECURITY_PROTOCOL: "PLAINTEXT"
+  LLM_PROVIDER: "fallback"
+  HF_MODEL_NAME: "mistralai/Mistral-7B-Instruct-v0.2"
+  RATE_LIMIT_RPM: "120"
+  RATE_LIMIT_BURST: "20"
+  CORS_ORIGINS: "https://your-dashboard-domain.com"
+  MODEL_REGISTRY_PATH: "/app/data/model_registry"
+
+---
+# â”€â”€ Secret (create manually â€” do NOT commit actual values) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# kubectl create secret generic dipex-secrets \
+#   --namespace=dipex \
+#   --from-literal=JWT_SECRET_KEY="$(openssl rand -hex 32)" \
+#   --from-literal=HF_API_KEY="hf_your_token_here" \
+#   --from-literal=POSTGRES_URI="postgresql://user:pass@host:5432/dipex" \
+#   --from-literal=MONGO_URI="mongodb://host:27017/dipex"
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dipex-secrets
+  namespace: dipex
+type: Opaque
+stringData:
+  JWT_SECRET_KEY: "REPLACE_WITH_STRONG_RANDOM_SECRET"
+  HF_API_KEY: ""
+  POSTGRES_URI: ""
+  MONGO_URI: ""
+
+---
+# â”€â”€ PersistentVolumeClaim â€” shared data directory â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dipex-data-pvc
+  namespace: dipex
+spec:
+  accessModes: ["ReadWriteMany"]        # RWX so all replicas share storage
+  storageClassName: standard            # change to your cloud provider's class
+  resources:
+    requests:
+      storage: 20Gi
+
+---
+# â”€â”€ Deployment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dipex-api
+  namespace: dipex
+  labels:
+    app: dipex-api
+    version: "3.1.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dipex-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0               # zero-downtime rolling update
+  template:
+    metadata:
+      labels:
+        app: dipex-api
+        version: "3.1.0"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/prom-metrics"
+        prometheus.io/port: "8000"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: dipex-api
+          image: ghcr.io/aayushsanklecha/dipproj:latest   # update to your registry
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: dipex-config
+            - secretRef:
+                name: dipex-secrets
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2000m"
+              memory: "4Gi"
+          volumeMounts:
+            - name: dipex-data
+              mountPath: /app/data
+            - name: dipex-reports
+              mountPath: /app/reports
+            - name: dipex-audit
+              mountPath: /app/audit
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 5"]   # drain connections
+      volumes:
+        - name: dipex-data
+          persistentVolumeClaim:
+            claimName: dipex-data-pvc
+        - name: dipex-reports
+          emptyDir: {}                  # replace with PVC for persistence
+        - name: dipex-audit
+          emptyDir: {}                  # replace with PVC for persistence
+
+---
+# â”€â”€ Service â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+apiVersion: v1
+kind: Service
+metadata:
+  name: dipex-api-service
+  namespace: dipex
+  labels:
+    app: dipex-api
+spec:
+  type: ClusterIP
+  selector:
+    app: dipex-api
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+      name: http
+
+---
+# â”€â”€ HorizontalPodAutoscaler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: dipex-api-hpa
+  namespace: dipex
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: dipex-api
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+# â”€â”€ Ingress (nginx) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dipex-ingress
+  namespace: dipex
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"    # allow large file uploads
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"     # TLS via cert-manager
+spec:
+  tls:
+    - hosts:
+        - api.dipex.yourdomain.com
+      secretName: dipex-tls
+  rules:
+    - host: api.dipex.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dipex-api-service
+                port:
+                  number: 80
+
+---
+# â”€â”€ Kafka Pipeline â€” Deployment (optional streaming mode) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dipex-kafka-consumer
+  namespace: dipex
+  labels:
+    app: dipex-kafka-consumer
+spec:
+  replicas: 1                       # single consumer group member (scale with partitions)
+  selector:
+    matchLabels:
+      app: dipex-kafka-consumer
+  template:
+    metadata:
+      labels:
+        app: dipex-kafka-consumer
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: kafka-consumer
+          image: ghcr.io/aayushsanklecha/dipproj:latest
+          command: ["python", "scripts/start_kafka_pipeline.py"]
+          envFrom:
+            - configMapRef:
+                name: dipex-config
+            - secretRef:
+                name: dipex-secrets
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2000m"
+              memory: "4Gi"
+          volumeMounts:
+            - name: dipex-data
+              mountPath: /app/data
+      volumes:
+        - name: dipex-data
+          persistentVolumeClaim:
+            claimName: dipex-data-pvc
+

@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\auth\rbac.py
+# hypothesis_version: 6.151.9
+
+[999, 'ADMIN', 'ANALYST', 'API_SERVICE', 'VIEWER', 'admin_only', 'execute_sql', 'generate_report', 'preprocess', 'role', 'run_cohort', 'run_drift', 'run_pipeline', 'run_stats', 'train_model', 'view_audit', 'view_governance', 'view_model_registry', 'view_reports']

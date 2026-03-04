@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\validation\regulatory\finance_rules.py
+# hypothesis_version: 6.151.9
+
+[0.01, 0.08, 0.2, 'CRITICAL', 'ERROR', 'WARNING', 'capital_adequacy', 'double_entry_balance', 'fair_value_hierarchy', 'finance', 'nan', 'net_position_limit', 'revenue_recognition', 'sec_filing_bounds']

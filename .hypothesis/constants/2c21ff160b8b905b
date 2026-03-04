@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\governance\pii_detector.py
+# hypothesis_version: 6.151.9
+
+[0.05, 200, ' | ', '***', '..', 'DATE', 'EMAIL', 'GPE', 'MONEY', 'ORG', 'PERSON', '\\b\\d{5}(?:-\\d{4})?\\b', '^\\d+(\\.\\d+)?$', 'credit_card', 'details', 'dob', 'email', 'en_core_web_sm', 'ip_address', 'method', 'models', 'object', 'passport', 'phone', 'pii_columns', 'pii_ner_model', 'regex+custom_ner', 'regex+spacy_sm', 'regex_only', 'safe_columns', 'ssn', 'string', 'us_zip']

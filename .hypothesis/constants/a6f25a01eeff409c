@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\data_layers.py
+# hypothesis_version: 6.151.9
+
+[1000, '.meta.json', '.sha256', '[^\\w\\-]', '_', 'bronze', 'checksum', 'component', 'created_at', 'data', 'dataset_id', 'error', 'file_path', 'gold', 'ingestion', 'layer', 'layer_id', 'lineage', 'lineage_id', 'meta_path', 'normaliser', 'shape', 'silver', 'snapshot_id', 'source_snapshot_id', 'system', 'tags', 'transform', 'transformation_steps', 'utf-8', 'verified', 'w']

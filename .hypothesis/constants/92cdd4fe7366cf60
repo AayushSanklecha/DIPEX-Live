@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\api\routes\audit.py
+# hypothesis_version: 6.151.9
+
+['/', '/api/audit', 'audit']

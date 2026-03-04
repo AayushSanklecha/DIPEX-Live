@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIPEX — Enterprise Analytics Platform</title>
+  <meta name="description"
+    content="DIPEX Enterprise Analytics Platform — Deterministic-first, statistically disciplined, governance-enforced analytics OS. Automates the complete cognitive workflow of a professional data analyst.">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+  <div class="app-shell">
+
+    <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-logo">DX</div>
+        <div class="brand-text">
+          <div class="brand-name">DIPEX</div>
+          <div class="brand-sub">Enterprise Analytics</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Core</div>
+        <button class="nav-item active" onclick="showPage('overview')" id="nav-overview">
+          <span class="nav-icon">◈</span><span class="nav-label">Overview</span>
+        </button>
+        <button class="nav-item" onclick="showPage('pipeline')" id="nav-pipeline">
+          <span class="nav-icon">⟳</span><span class="nav-label">Pipeline</span>
+        </button>
+        <button class="nav-item" onclick="showPage('ingest_all')" id="nav-ingest_all">
+          <span class="nav-icon">⊛</span><span class="nav-label">Multi-DB Ingest</span>
+          <span class="nav-badge">New</span>
+        </button>
+
+        <div class="nav-section-label">Analytics</div>
+        <button class="nav-item" onclick="showPage('analytics')" id="nav-analytics">
+          <span class="nav-icon">◉</span><span class="nav-label">Analytics</span>
+        </button>
+        <button class="nav-item" onclick="showPage('statistics')" id="nav-statistics">
+          <span class="nav-icon">∑</span><span class="nav-label">Statistics</span>
+        </button>
+        <button class="nav-item" onclick="showPage('modeling')" id="nav-modeling">
+          <span class="nav-icon">⬡</span><span class="nav-label">Modeling</span>
+        </button>
+        <button class="nav-item" onclick="showPage('sql')" id="nav-sql">
+          <span class="nav-icon">⊞</span><span class="nav-label">SQL Console</span>
+        </button>
+
+        <div class="nav-section-label">Intelligence</div>
+        <button class="nav-item" onclick="showPage('analyst_ops')" id="nav-analyst_ops">
+          <span class="nav-icon">🧠</span><span class="nav-label">Analyst Ops</span>
+        </button>
+        <button class="nav-item" onclick="showPage('analyst_tiers')" id="nav-analyst_tiers">
+          <span class="nav-icon">⬟</span><span class="nav-label">Analyst Tiers</span>
+        </button>
+        <button class="nav-item" onclick="showPage('rl_status')" id="nav-rl_status">
+          <span class="nav-icon">🤖</span><span class="nav-label">RL Status</span>
+        </button>
+        <button class="nav-item" onclick="showPage('streaming')" id="nav-streaming">
+          <span class="nav-icon">〜</span><span class="nav-label">Streaming</span>
+        </button>
+        <button class="nav-item" onclick="showPage('lineage')" id="nav-lineage">
+          <span class="nav-icon">⇢</span><span class="nav-label">Data Lineage</span>
+        </button>
+
+        <div class="nav-section-label">Monitoring</div>
+        <button class="nav-item" onclick="showPage('drift')" id="nav-drift">
+          <span class="nav-icon">⟡</span><span class="nav-label">Drift Monitor</span>
+        </button>
+        <button class="nav-item" onclick="showPage('cohort')" id="nav-cohort">
+          <span class="nav-icon">⊕</span><span class="nav-label">Cohort Analysis</span>
+        </button>
+        <button class="nav-item" onclick="showPage('calibration')" id="nav-calibration">
+          <span class="nav-icon">⬦</span><span class="nav-label">Calibration</span>
+        </button>
+
+        <div class="nav-section-label">System</div>
+        <button class="nav-item" onclick="showPage('reports')" id="nav-reports">
+          <span class="nav-icon">⚡</span><span class="nav-label">Reports</span>
+        </button>
+        <button class="nav-item" onclick="showPage('governance')" id="nav-governance">
+          <span class="nav-icon">🏛</span><span class="nav-label">Governance</span>
+        </button>
+        <button class="nav-item" onclick="showPage('audit')" id="nav-audit">
+          <span class="nav-icon">≡</span><span class="nav-label">Audit Trail</span>
+        </button>
+        <button class="nav-item" onclick="showPage('login')" id="nav-login">
+          <span class="nav-icon">⚿</span><span class="nav-label">Auth / Login</span>
+        </button>
+
+        <div class="nav-section-label">Developer</div>
+        <button class="nav-item" onclick="showPage('api_docs')" id="nav-api_docs">
+          <span class="nav-icon">⎇</span><span class="nav-label">API Docs</span>
+        </button>
+        <button class="nav-item" onclick="showPage('grafana')" id="nav-grafana">
+          <span class="nav-icon">📊</span><span class="nav-label">Grafana</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="api-status">
+          <div class="status-dot" id="api-status-dot"></div>
+          <span id="api-status-text">Checking…</span>
+        </div>
+        <div class="sidebar-user" id="sidebar-user-info">Not logged in</div>
+        <button class="btn-ghost-sm" onclick="showPage('login')">⚿ Login / JWT</button>
+        <div class="version-tag">v3.1.0 · DIPEX</div>
+      </div>
+    </aside>
+
+    <!-- ═══════════════════ MAIN ═══════════════════ -->
+    <div class="main-content">
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="page-title" id="page-title">Overview</h1>
+          <span class="page-subtitle" id="page-subtitle">Platform health and KPI summary</span>
+        </div>
+        <div class="topbar-right">
+          <button class="btn-ghost btn-sm" onclick="refreshData()">↻ Refresh</button>
+          <div class="topbar-time" id="current-time"></div>
+        </div>
+      </header>
+
+      <!-- Page content area -->
+      <div class="page-container">
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: OVERVIEW
+      ══════════════════════════════════════════════ -->
+        <div class="page active" id="page-overview">
+          <div class="kpi-grid">
+            <div class="kpi-card blue">
+              <div class="kpi-icon blue">⟳</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="kpi-total-runs">—</div>
+                <div class="kpi-label">Total Pipeline Runs</div>
+              </div>
+            </div>
+            <div class="kpi-card cyan">
+              <div class="kpi-icon cyan">✓</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="kpi-pass-rate">—</div>
+                <div class="kpi-label">Pass Rate</div>
+              </div>
+            </div>
+            <div class="kpi-card green">
+              <div class="kpi-icon green">⬡</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="kpi-approved">—</div>
+                <div class="kpi-label">Approved Outputs</div>
+              </div>
+            </div>
+            <div class="kpi-card amber">
+              <div class="kpi-icon amber">⚡</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="kpi-reports">—</div>
+                <div class="kpi-label">Reports Generated</div>
+              </div>
+            </div>
+          </div>
+          <div class="grid-2 mb-4">
+            <div class="card">
+              <div class="card-header">Confidence Score History</div>
+              <div class="card-body"><canvas id="confidence-chart" height="180"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-header">Pipeline Status</div>
+              <div class="card-body"><canvas id="status-chart" height="180"></canvas></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Recent Activity
+              <button class="btn-ghost btn-sm" onclick="loadAudit()">↻ Refresh</button>
+            </div>
+            <div class="card-body" style="padding:0">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Event</th>
+                    <th>Run ID</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-activity"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: PIPELINE
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-pipeline">
+          <div class="grid-2 mb-4">
+            <div class="card">
+              <div class="card-header">Upload Dataset</div>
+              <div class="card-body">
+                <div class="drop-zone" id="drop-zone">
+                  <input type="file" id="file-input" accept=".csv,.xlsx,.xls,.json,.parquet,.xml" hidden>
+                  <div class="drop-zone-icon">↑</div>
+                  <div class="drop-zone-text">Drop CSV / Excel / JSON / Parquet</div>
+                  <div class="drop-zone-sub">or click to select a file</div>
+                  <button class="btn-primary btn-sm" style="margin-top:12px"
+                    onclick="event.stopPropagation();document.getElementById('file-input').click()">Select File</button>
+                </div>
+                <div id="upload-status" class="status-msg hidden" style="margin-top:12px"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">Configure Run</div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Run ID</label>
+                  <input type="text" class="form-input" id="run-id" placeholder="auto-generated on upload">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Target Column</label>
+                  <input type="text" class="form-input" id="target-col" value="target" placeholder="target">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Dataset ID (optional)</label>
+                  <input type="text" class="form-input" id="pipeline-dataset-id" placeholder="e.g. sales_q4">
+                </div>
+                <button class="btn-primary full-width" style="margin-bottom:8px" onclick="runPipeline()">▶ Start
+                  Pipeline Run</button>
+                <button class="btn-secondary full-width" onclick="runPreprocess()">⚙ Preprocess Only</button>
+              </div>
+            </div>
+          </div>
+          <div class="card mb-4" id="pipeline-log-card" style="display:none">
+            <div class="card-header">
+              Pipeline Log
+              <span class="badge badge-running" id="pipeline-badge">RUNNING</span>
+            </div>
+            <div class="card-body">
+              <div class="log-console" id="pipeline-log"></div>
+            </div>
+          </div>
+          <div class="card" id="pipeline-result-card" style="display:none">
+            <div class="card-header">Run Result</div>
+            <div class="card-body" id="pipeline-result"></div>
+          </div>
+          <!-- Snapshots -->
+          <div class="card mt-4">
+            <div class="card-header">Recent Snapshots
+              <button class="btn-ghost btn-sm" onclick="loadSnapshots()">↻ Load</button>
+            </div>
+            <div class="card-body" style="padding:0">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Dataset</th>
+                    <th>Snapshot ID</th>
+                    <th>Rows</th>
+                    <th>Quality</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody id="snapshots-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: MULTI-DB INGEST
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-ingest_all">
+          <div class="section-header">
+            <div class="section-title">Multi-Database Aggregation</div>
+            <div class="section-subtitle">Pull from all configured sources simultaneously through the UniversalIntake
+              pipeline</div>
+          </div>
+          <div class="db-grid" id="db-cards-grid">
+            <div class="db-card" id="db-mongodb">
+              <div class="db-icon">🍃</div>
+              <div class="db-name">MongoDB</div>
+              <div class="db-status">Idle</div>
+            </div>
+            <div class="db-card" id="db-redis">
+              <div class="db-icon">🔴</div>
+              <div class="db-name">Redis</div>
+              <div class="db-status">Idle</div>
+            </div>
+            <div class="db-card" id="db-postgres">
+              <div class="db-icon">🐘</div>
+              <div class="db-name">PostgreSQL</div>
+              <div class="db-status">Idle</div>
+            </div>
+            <div class="db-card" id="db-neo4j">
+              <div class="db-icon">🔵</div>
+              <div class="db-name">Neo4j</div>
+              <div class="db-status">Idle</div>
+            </div>
+            <div class="db-card" id="db-kafka">
+              <div class="db-icon">📨</div>
+              <div class="db-name">Kafka</div>
+              <div class="db-status">Idle</div>
+            </div>
+            <div class="db-card" id="db-duckdb">
+              <div class="db-icon">🦆</div>
+              <div class="db-name">DuckDB</div>
+              <div class="db-status">Idle</div>
+            </div>
+            <div class="db-card" id="db-parquet">
+              <div class="db-icon">📦</div>
+              <div class="db-name">Parquet</div>
+              <div class="db-status">Idle</div>
+            </div>
+          </div>
+          <div class="grid-2 mb-4">
+            <div class="card">
+              <div class="card-header">Trigger Aggregation</div>
+              <div class="card-body">
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:16px">
+                  Triggers <code style="color:var(--accent);font-family:monospace">POST /ingest/all-databases</code>,
+                  which pulls from every configured source and runs each through profiling, quality gating, and schema
+                  validation.
+                </p>
+                <button class="btn-primary full-width" onclick="triggerIngestAll()" id="ingest-all-btn">
+                  ⊛ Trigger All-DB Ingest
+                </button>
+                <div id="ingest-all-status" class="status-msg hidden" style="margin-top:12px"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">Aggregation Result</div>
+              <div class="card-body" id="ingest-all-result">
+                <div style="color:var(--text-muted);font-size:0.82rem">Run an aggregation to see per-source results.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: ANALYTICS
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-analytics">
+          <div class="form-row mb-4">
+            <input type="text" class="form-input" id="analytics-run-id" placeholder="Run ID (leave blank for latest)">
+            <button class="btn-primary" onclick="loadAnalytics()">Load Analytics</button>
+          </div>
+          <div class="grid-3 mb-4">
+            <div class="card card-glow-accent">
+              <div class="card-header">Confidence Score</div>
+              <div class="card-body center" style="text-align:center">
+                <canvas id="gauge-canvas" width="200" height="120"></canvas>
+                <div class="gauge-value" id="gauge-value">—</div>
+                <div class="gauge-label">Overall Confidence</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">Gate Decisions</div>
+              <div class="card-body">
+                <div class="gate-row"><span class="gate-label">Gate 1 · Data Quality</span><span class="badge"
+                    id="gate1-badge">—</span></div>
+                <div class="gate-row"><span class="gate-label">Gate 2 · Statistical</span><span class="badge"
+                    id="gate2-badge">—</span></div>
+                <div style="margin-top:12px">
+                  <div class="conf-bar-wrap">
+                    <div class="conf-bar" id="conf-bar-fill" style="width:0%"></div>
+                  </div>
+                  <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px">Confidence threshold progress
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">Confidence Dimensions</div>
+              <div class="card-body"><canvas id="radar-chart" height="160"></canvas></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Insight Narrative</div>
+            <div class="card-body">
+              <div class="narrative-box" id="narrative-content">Load a pipeline run to view the verified insight
+                narrative.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: STATISTICS
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-statistics">
+          <div class="grid-2 mb-4">
+            <div class="card">
+              <div class="card-header">Descriptive Statistics</div>
+              <div class="card-body">
+                <input type="text" class="form-input" id="stats-run-id" placeholder="Run ID (optional)"
+                  style="margin-bottom:10px">
+                <button class="btn-primary full-width" onclick="loadDescriptiveStats()">Compute Statistics</button>
+                <div id="stats-output" class="mt-4"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">Hypothesis Test</div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Test Type</label>
+                  <select class="form-input" id="ht-test">
+                    <option value="two_sample_t">Two-Sample T-Test</option>
+                    <option value="one_sample_t">One-Sample T-Test</option>
+                    <option value="mann_whitney">Mann-Whitney U</option>
+                    <option value="anova">One-Way ANOVA</option>
+                    <option value="kruskal">Kruskal-Wallis</option>
+                    <option value="pearson">Pearson Correlation</option>
+                    <option value="spearman">Spearman Correlation</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Column A</label>
+                  <input class="form-input" id="ht-col-a" placeholder="column name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Column B / Group Column</label>
+                  <input class="form-input" id="ht-col-b" placeholder="column name (if needed)">
+                </div>
+                <button class="btn-primary full-width" onclick="runHypothesisTest()">Run Test</button>
+                <div id="ht-output" class="mt-4"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Regression Analysis</div>
+            <div class="card-body">
+              <div class="form-row">
+                <input class="form-input" id="reg-target" placeholder="Target column">
+                <select class="form-input" id="reg-model">
+                  <option value="ols">OLS</option>
+                  <option value="logistic">Logistic</option>
+                  <option value="ridge">Ridge</option>
+                  <option value="lasso">Lasso</option>
+                </select>
+                <button class="btn-primary" onclick="runRegression()">Fit Model</button>
+              </div>
+              <div id="reg-output" class="mt-4"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: MODELING
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-modeling">
+          <div class="card mb-4">
+            <div class="card-header">Train ML Models</div>
+            <div class="card-body">
+              <div class="form-row">
+                <input class="form-input" id="model-run-id" placeholder="Run ID">
+                <input class="form-input" id="model-target" placeholder="Target column" value="target">
+                <button class="btn-primary" onclick="trainModels()">▶ Train All Models</button>
+              </div>
+              <div id="model-train-status" class="mt-4"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Model Registry
+              <button class="btn-ghost btn-sm" onclick="loadModelRegistry()">↻ Refresh</button>
+            </div>
+            <div class="card-body" style="padding:0">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Run ID</th>
+                    <th>Model</th>
+                    <th>Task</th>
+                    <th>Saved</th>
+                    <th>Champion</th>
+                  </tr>
+                </thead>
+                <tbody id="model-registry-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: SQL CONSOLE
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-sql">
+          <div class="card mb-4">
+            <div class="card-header">SQL Query Console <span
+                style="color:var(--text-muted);font-size:0.7rem;margin-left:8px">DuckDB dialect</span></div>
+            <div class="card-body">
+              <textarea class="code-editor" id="sql-editor" rows="8" placeholder="SELECT * FROM df LIMIT 20
+
+-- Available table: df (current dataset after upload)
+-- Examples:
+--   SELECT column, COUNT(*) as n FROM df GROUP BY column ORDER BY n DESC
+--   SELECT AVG(metric) as avg_m FROM df
+--   SELECT * FROM df WHERE amount > 1000 LIMIT 100"></textarea>
+              <div class="form-row" style="margin-top:12px">
+                <input class="form-input" id="sql-run-id" placeholder="Run ID (optional)">
+                <button class="btn-primary" onclick="executeSQL()">▶ Execute</button>
+                <button class="btn-secondary" onclick="saveQuery()">⊞ Save</button>
+              </div>
+              <div id="sql-status" class="status-msg hidden" style="margin-top:10px"></div>
+            </div>
+          </div>
+          <div class="card mb-4" id="sql-result-card" style="display:none">
+            <div class="card-header">
+              Query Results
+              <span id="sql-result-meta" class="meta-tag"></span>
+            </div>
+            <div class="card-body" style="overflow-x:auto;padding:0">
+              <table class="data-table" id="sql-result-table"></table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Saved Queries
+              <button class="btn-ghost btn-sm" onclick="loadNamedQueries()">↻ Load</button>
+            </div>
+            <div class="card-body" id="named-queries-output">
+              <div style="color:var(--text-muted);font-size:0.82rem">No saved queries yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: ANALYST OPS
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-analyst_ops">
+          <div class="section-header">
+            <div class="section-title">Analyst Intelligence Operations</div>
+            <div class="section-subtitle">Trigger Junior · Mid · Senior analyst operations on verified Gold artefacts
+            </div>
+          </div>
+
+          <div id="analyst-ops-status" class="status-msg hidden" style="margin-bottom:16px"></div>
+
+          <div class="grid-1-2">
+            <!-- Left: Operation browser -->
+            <div>
+              <div class="card mb-4">
+                <div class="card-header">Junior Operations <span class="badge tier-junior">Junior</span></div>
+                <div class="card-body" style="padding:12px">
+                  <div class="op-list" id="juniorOps"></div>
+                </div>
+              </div>
+              <div class="card mb-4">
+                <div class="card-header">Mid-Level Operations <span class="badge tier-mid">Mid</span></div>
+                <div class="card-body" style="padding:12px">
+                  <div class="op-list" id="midOps"></div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header">Senior Operations <span class="badge tier-senior">Senior</span></div>
+                <div class="card-body" style="padding:12px">
+                  <div class="op-list" id="seniorOps"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Run panel -->
+            <div class="card">
+              <div class="card-header">Run Operation</div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Dataset ID</label>
+                  <input type="text" class="form-input" id="ao-dataset-id" placeholder="e.g. sales_q4_2024"
+                    value="demo_dataset">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Selected Operation</label>
+                  <input type="text" class="form-input" id="ao-selected-op" placeholder="Click an operation on the left"
+                    readonly>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tier</label>
+                  <select class="form-input" id="ao-tier">
+                    <option value="">Auto-detect</option>
+                    <option value="junior">Junior</option>
+                    <option value="mid">Mid</option>
+                    <option value="senior">Senior</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Problem Statement (optional)</label>
+                  <textarea class="form-input" id="ao-problem"
+                    placeholder="e.g. Why is revenue declining in Q4?"></textarea>
+                </div>
+                <button class="btn-primary full-width" onclick="runAnalystOp()" id="ao-run-btn">▶ Run Operation</button>
+                <div id="ao-result" style="display:none;margin-top:16px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                    <strong style="font-size:0.82rem">Result</strong>
+                    <div id="ao-conf-badge"></div>
+                  </div>
+                  <div class="json-result" style="max-height:300px">
+                    <pre id="ao-result-json"></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: ANALYST TIERS
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-analyst_tiers">
+          <div class="section-header">
+            <div class="section-title">Analyst Tier Automation</div>
+            <div class="section-subtitle">Junior · Mid · Senior analyst pipeline operations on Gold layer copies</div>
+          </div>
+          <div class="grid-3 mb-4">
+            <div class="kpi-card green">
+              <div class="kpi-icon green">🎓</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="at-junior-count">7</div>
+                <div class="kpi-label">Junior Operations</div>
+              </div>
+            </div>
+            <div class="kpi-card amber">
+              <div class="kpi-icon amber">📊</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="at-mid-count">6</div>
+                <div class="kpi-label">Mid Operations</div>
+              </div>
+            </div>
+            <div class="kpi-card blue">
+              <div class="kpi-icon blue">🧪</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="at-senior-count">5</div>
+                <div class="kpi-label">Senior Operations</div>
+              </div>
+            </div>
+          </div>
+          <div class="grid-2 mb-4">
+            <div class="card">
+              <div class="card-header">Configure Tier Operation</div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Dataset ID</label>
+                  <input type="text" class="form-input" id="at-dataset-id" placeholder="dataset_id">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Snapshot ID (ISSF)</label>
+                  <input type="text" class="form-input" id="at-snapshot-id" placeholder="snapshot_id">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Analyst Level</label>
+                  <select class="form-input" id="at-level">
+                    <option value="junior">Junior — Basic cleanup, aggregation, SQL</option>
+                    <option value="mid">Mid — EDA, anomaly detection, segmentation</option>
+                    <option value="senior">Senior — Causal inference, bias detection, strategy</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Operation</label>
+                  <select class="form-input" id="at-operation">
+                    <option value="basic_cleaning">basic_cleaning</option>
+                    <option value="remove_duplicates">remove_duplicates</option>
+                    <option value="filter_rows">filter_rows</option>
+                    <option value="simple_aggregation">simple_aggregation</option>
+                    <option value="kpi_tracking">kpi_tracking</option>
+                    <option value="percent_change">percent_change</option>
+                    <option value="executive_summary">executive_summary</option>
+                    <option value="feature_engineering">feature_engineering</option>
+                    <option value="risk_scoring">risk_scoring</option>
+                    <option value="windowed_aggregation">windowed_aggregation</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Target Column (for senior ops)</label>
+                  <input type="text" class="form-input" id="at-target" placeholder="target">
+                </div>
+                <button class="btn-primary full-width" onclick="runTierOperation()">▶ Run Analyst Operation</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">Result</div>
+              <div class="card-body">
+                <div id="at-result" class="json-result" style="min-height:200px">
+                  <pre style="color:var(--text-muted)">Run an operation to see the Gold artefact result.</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Layer Records
+              <button class="btn-ghost btn-sm" onclick="loadLayerRecords()">↻ Load Layers</button>
+            </div>
+            <div class="card-body" style="padding:0">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Layer</th>
+                    <th>Dataset ID</th>
+                    <th>Snapshot ID</th>
+                    <th>Checksum</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <tbody id="layer-records-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: RL STATUS
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-rl_status">
+          <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div class="section-title">Reinforcement Learning Status</div>
+              <div class="section-subtitle">Meta-RL policy weights · exploration rate · reward history · safety rails
+              </div>
+            </div>
+            <button class="btn-ghost" onclick="loadRLStatus()">↻ Refresh</button>
+          </div>
+          <div class="grid-4 mb-4">
+            <div class="kpi-card blue">
+              <div class="kpi-icon blue">ε</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="rl-epsilon">—</div>
+                <div class="kpi-label">Exploration Rate (ε)</div>
+                <div class="bar-wrap" style="margin-top:6px">
+                  <div class="bar-fill bar-primary" id="rl-epsilon-bar" style="width:0%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="kpi-card cyan">
+              <div class="kpi-icon cyan">R</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="rl-avg-reward">—</div>
+                <div class="kpi-label">Avg Reward (last 10)</div>
+              </div>
+            </div>
+            <div class="kpi-card amber">
+              <div class="kpi-icon amber">↻</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="rl-retry-rate">—</div>
+                <div class="kpi-label">Retry Rate</div>
+                <div class="bar-wrap" style="margin-top:6px">
+                  <div class="bar-fill bar-warning" id="rl-retry-bar" style="width:0%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="kpi-card green">
+              <div class="kpi-icon green">🛡</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="rl-violations" style="color:var(--success)">0</div>
+                <div class="kpi-label">Safety Violations</div>
+              </div>
+            </div>
+          </div>
+          <div class="grid-2 mb-4">
+            <div class="card">
+              <div class="card-header">Meta-RL Policy Weights (Top Strategies)</div>
+              <div class="card-body" style="padding:0">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Strategy</th>
+                      <th>Domain</th>
+                      <th>Q-Value</th>
+                      <th>Regret</th>
+                      <th>Calls</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rl-policy-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">Reward History (last 20 episodes)</div>
+              <div class="card-body">
+                <div class="reward-chart" id="rl-reward-chart"></div>
+                <div
+                  style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-muted);margin-top:4px">
+                  <span>Episode N-19</span><span>Episode N</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">Confidence Score Trend</div>
+              <div class="card-body">
+                <div class="reward-chart" id="rl-conf-chart"></div>
+                <div
+                  style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-muted);margin-top:4px">
+                  <span>Older</span><span>Latest</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">Safety Rail Log</div>
+              <div class="card-body" id="rl-safety-log"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: STREAMING
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-streaming">
+          <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div class="section-title">Streaming Monitor</div>
+              <div class="section-subtitle">Kafka consumer lag · window state · backpressure · late event rate ·
+                watermark</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span class="status-dot online"></span>
+              <span style="font-size:0.8rem;color:var(--success)">Live</span>
+              <button class="btn-ghost" onclick="refreshStreaming()">↻ Refresh</button>
+            </div>
+          </div>
+          <div class="grid-4 mb-4">
+            <div class="kpi-card green">
+              <div class="kpi-icon green">↓</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="stream-lag" style="color:var(--success)">0</div>
+                <div class="kpi-label">Consumer Lag</div>
+                <div class="bar-wrap" style="margin-top:6px">
+                  <div class="bar-fill bar-success" id="stream-lag-bar" style="width:5%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="kpi-card amber">
+              <div class="kpi-icon amber">⏱</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="stream-late-rate">—</div>
+                <div class="kpi-label">Late Event Rate</div>
+              </div>
+            </div>
+            <div class="kpi-card blue">
+              <div class="kpi-icon blue">⊡</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="stream-backpressure" style="color:var(--success)">OFF</div>
+                <div class="kpi-label">Backpressure</div>
+              </div>
+            </div>
+            <div class="kpi-card cyan">
+              <div class="kpi-icon cyan">W</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="stream-watermark" style="font-size:0.9rem">—</div>
+                <div class="kpi-label">Watermark (UTC)</div>
+              </div>
+            </div>
+          </div>
+          <div class="grid-2 mb-4">
+            <div class="card">
+              <div class="card-header">Kafka Topics — Consumer Group: dipex-pipeline</div>
+              <div class="card-body" style="padding:0">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Topic</th>
+                      <th>Partitions</th>
+                      <th>Lag</th>
+                      <th>Rate (msg/s)</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="stream-topics-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">Active Window Buffers</div>
+              <div class="card-body" id="stream-windows"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Live Event Stream <span class="status-dot online"
+                style="float:right;margin-top:2px"></span></div>
+            <div class="card-body" style="padding:10px">
+              <div class="event-stream" id="stream-events"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: DATA LINEAGE
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-lineage">
+          <div class="section-header">
+            <div class="section-title">Data Lineage</div>
+            <div class="section-subtitle">Trace any Gold artefact back to Bronze. Full audit chain: Bronze → Silver →
+              Gold</div>
+          </div>
+          <div class="grid-1-2">
+            <div>
+              <div class="card mb-4">
+                <div class="card-header">Search & Filter</div>
+                <div class="card-body">
+                  <input type="text" class="form-input" id="lineage-search" placeholder="Search dataset ID…"
+                    oninput="filterDatasets()" style="margin-bottom:8px">
+                  <select class="form-input" id="lineage-layer-filter" onchange="filterDatasets()">
+                    <option value="">All Layers</option>
+                    <option value="bronze">Bronze only</option>
+                    <option value="silver">Silver+</option>
+                    <option value="gold">Gold (Approved)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header">Datasets
+                  <button class="btn-ghost btn-sm" onclick="loadLineageDatasets()">↻ Load</button>
+                </div>
+                <div class="card-body" id="lineage-dataset-list">
+                  <div style="color:var(--text-muted);font-size:0.82rem">Click Load to fetch snapshots.</div>
+                </div>
+              </div>
+            </div>
+            <div class="card" id="lineage-panel">
+              <div class="card-header">Lineage Graph</div>
+              <div class="card-body" style="text-align:center;padding:3rem;color:var(--text-muted)">
+                <div style="font-size:2rem;margin-bottom:8px">🔍</div>
+                <div>Select a dataset to trace its lineage</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: DRIFT MONITOR
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-drift">
+          <div class="section-header">
+            <div class="section-title">Drift Monitor</div>
+            <div class="section-subtitle">PSI · KL Divergence · Jensen-Shannon · Wasserstein</div>
+          </div>
+          <div class="grid-3 mb-4">
+            <div class="kpi-card blue">
+              <div class="kpi-icon blue">⚡</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="drift-status-badge">—</div>
+                <div class="kpi-label">Overall Drift Status</div>
+              </div>
+            </div>
+            <div class="kpi-card amber">
+              <div class="kpi-icon amber">↗</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="drift-max-psi">—</div>
+                <div class="kpi-label">Max PSI Score</div>
+              </div>
+            </div>
+            <div class="kpi-card cyan">
+              <div class="kpi-icon cyan">⚠</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="drift-flagged-cols">—</div>
+                <div class="kpi-label">Columns Flagged</div>
+              </div>
+            </div>
+          </div>
+          <div class="card mb-4">
+            <div class="card-header">Run Drift Detection</div>
+            <div class="card-body">
+              <div class="form-row">
+                <input id="drift-ref-run" class="form-input" placeholder="Reference Run ID">
+                <input id="drift-cur-run" class="form-input" placeholder="Current Run ID">
+                <button class="btn-primary" onclick="runDriftDetection()">▶ Detect Drift</button>
+              </div>
+              <div id="drift-results-table" class="mt-4"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Drift History — PSI by Column</div>
+            <div class="card-body"><canvas id="drift-chart" height="200"></canvas></div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: COHORT ANALYSIS
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-cohort">
+          <div class="section-header">
+            <div class="section-title">Cohort Analysis</div>
+            <div class="section-subtitle">Retention Matrix · LTV Curves · Period-over-Period</div>
+          </div>
+          <div class="card mb-4">
+            <div class="card-header">Configure Cohort</div>
+            <div class="card-body">
+              <div class="form-row">
+                <input id="cohort-run-id" class="form-input" placeholder="Run ID (optional)">
+                <input id="cohort-col" class="form-input" placeholder="Cohort column (e.g. signup_month)">
+                <input id="entity-col" class="form-input" placeholder="Entity column (e.g. user_id)">
+                <input id="activity-col" class="form-input" placeholder="Activity column (e.g. activity_month)">
+                <button class="btn-primary" onclick="loadCohortRetention()">▶ Compute Retention</button>
+              </div>
+            </div>
+          </div>
+          <div class="grid-3 mb-4">
+            <div class="kpi-card blue">
+              <div class="kpi-icon blue">◎</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="cohort-count">—</div>
+                <div class="kpi-label">Cohorts</div>
+              </div>
+            </div>
+            <div class="kpi-card cyan">
+              <div class="kpi-icon cyan">P</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="cohort-p1-ret">—</div>
+                <div class="kpi-label">Avg Period-1 Retention</div>
+              </div>
+            </div>
+            <div class="kpi-card green">
+              <div class="kpi-icon green">★</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="cohort-best">—</div>
+                <div class="kpi-label">Best Cohort (P3)</div>
+              </div>
+            </div>
+          </div>
+          <div class="card mb-4">
+            <div class="card-header">Retention Matrix</div>
+            <div class="card-body" style="overflow-x:auto">
+              <div id="cohort-matrix"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Period Average Retention Trend</div>
+            <div class="card-body"><canvas id="cohort-chart" height="200"></canvas></div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: CALIBRATION
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-calibration">
+          <div class="section-header">
+            <div class="section-title">Model Calibration</div>
+            <div class="section-subtitle">Reliability Diagram · ECE · Brier Score · Platt / Isotonic</div>
+          </div>
+          <div class="grid-3 mb-4">
+            <div class="kpi-card amber">
+              <div class="kpi-icon amber">B</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="cal-brier-before">—</div>
+                <div class="kpi-label">Brier Score (Before)</div>
+              </div>
+            </div>
+            <div class="kpi-card green">
+              <div class="kpi-icon green">B</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="cal-brier-after">—</div>
+                <div class="kpi-label">Brier Score (After)</div>
+              </div>
+            </div>
+            <div class="kpi-card blue">
+              <div class="kpi-icon blue">E</div>
+              <div class="kpi-body">
+                <div class="kpi-value" id="cal-ece-after">—</div>
+                <div class="kpi-label">ECE After Calibration</div>
+              </div>
+            </div>
+          </div>
+          <div class="card mb-4">
+            <div class="card-header">Reliability Diagram</div>
+            <div class="card-body">
+              <canvas id="calibration-chart" height="280"></canvas>
+              <p class="chart-note">Perfect calibration = diagonal line. Below diagonal = overconfident. Above =
+                underconfident.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Calibration Interpretation</div>
+            <div class="card-body">
+              <div class="narrative-box" id="cal-interpretation">Run the model pipeline to see calibration results.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: REPORTS
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-reports">
+          <div class="card mb-4">
+            <div class="card-header">Generate Executive Report</div>
+            <div class="card-body">
+              <div class="form-row">
+                <input class="form-input" id="report-run-id" placeholder="Run ID">
+                <button class="btn-primary" onclick="generateReport()">⚡ Generate Report</button>
+              </div>
+              <div id="report-gen-status" class="status-msg hidden" style="margin-top:12px"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Available Reports
+              <button class="btn-ghost btn-sm" onclick="loadReports()">↻ Refresh</button>
+            </div>
+            <div class="card-body" style="padding:0">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Run ID</th>
+                    <th>Size</th>
+                    <th>Download</th>
+                  </tr>
+                </thead>
+                <tbody id="reports-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: GOVERNANCE
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-governance">
+          <div class="grid-2 mb-4">
+            <div class="card">
+              <div class="card-header">Governance Evaluation</div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Run ID</label>
+                  <input class="form-input" id="gov-run-id" placeholder="Run ID">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confidence Score</label>
+                  <input class="form-input" id="gov-confidence" type="number" min="0" max="1" step="0.01" value="0.75">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Gate 1 Decision</label>
+                  <select class="form-input" id="gov-gate1">
+                    <option value="PASS">PASS</option>
+                    <option value="REJECT">REJECT</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Gate 2 Decision</label>
+                  <select class="form-input" id="gov-gate2">
+                    <option value="PASS">PASS</option>
+                    <option value="REJECT">REJECT</option>
+                  </select>
+                </div>
+                <button class="btn-primary full-width" onclick="evaluateGovernance()">Evaluate Governance</button>
+                <div id="gov-output" class="mt-4"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">Policy Registry
+                <button class="btn-ghost btn-sm" onclick="loadPolicies()">↻ Load</button>
+              </div>
+              <div class="card-body" id="policies-output">
+                <div style="color:var(--text-muted);font-size:0.82rem">Click Load to fetch policies.</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">Data Catalog
+              <div style="display:flex;gap:8px">
+                <button class="btn-ghost btn-sm" onclick="loadCatalog()">↻ Load</button>
+                <button class="btn-secondary btn-sm" onclick="showCatalogForm()">+ Register Column</button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="catalog-form" style="display:none;margin-bottom:16px">
+                <div class="form-row">
+                  <input class="form-input" id="cat-col" placeholder="Column name">
+                  <select class="form-input" id="cat-class">
+                    <option value="PII">PII</option>
+                    <option value="SENSITIVE">SENSITIVE</option>
+                    <option value="INTERNAL" selected>INTERNAL</option>
+                    <option value="PUBLIC">PUBLIC</option>
+                  </select>
+                  <input class="form-input" id="cat-desc" placeholder="Description">
+                  <button class="btn-primary" onclick="registerCatalogEntry()">Register</button>
+                </div>
+              </div>
+              <div style="overflow-x:auto">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Column</th>
+                      <th>Classification</th>
+                      <th>Data Type</th>
+                      <th>Description</th>
+                      <th>Output OK</th>
+                    </tr>
+                  </thead>
+                  <tbody id="catalog-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: AUDIT TRAIL
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-audit">
+          <div class="card">
+            <div class="card-header">
+              System Audit Trail
+              <input type="text" class="form-input inline-search" id="audit-search" placeholder="Search events…"
+                oninput="filterAudit()">
+            </div>
+            <div class="card-body" style="padding:0">
+              <button class="btn-ghost btn-sm" style="margin:12px" onclick="loadAudit()">↻ Refresh Log</button>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Run ID</th>
+                    <th>Event</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="audit-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: AUTH / LOGIN
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-login">
+          <div class="section-header">
+            <div class="section-title">Authentication</div>
+            <div class="section-subtitle">JWT Login · Role-Based Access · Token Management</div>
+          </div>
+          <div class="grid-2">
+            <div class="card card-glow-primary">
+              <div class="card-header">Login to DIPEX API</div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Username</label>
+                  <input id="login-username" class="form-input" placeholder="admin / analyst / viewer">
+                </div>
+                <div class="form-group" style="margin-top:12px">
+                  <label class="form-label">Password</label>
+                  <input id="login-password" class="form-input" type="password" placeholder="••••••••"
+                    onkeydown="if(event.key==='Enter')performLogin()">
+                </div>
+                <button class="btn-primary full-width" style="margin-top:16px" onclick="performLogin()">⚿ Login</button>
+                <div id="login-status" class="status-msg hidden" style="margin-top:12px"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="card mb-4">
+                <div class="card-header">Active Session</div>
+                <div class="card-body">
+                  <div class="gate-row"><span class="gate-label">Status</span><span id="auth-status">Not
+                      authenticated</span></div>
+                  <div class="gate-row"><span class="gate-label">Username</span><span id="auth-username">—</span></div>
+                  <div class="gate-row"><span class="gate-label">Role</span><span id="auth-role">—</span></div>
+                  <div class="gate-row"><span class="gate-label">Token Expires</span><span id="auth-expiry">—</span>
+                  </div>
+                  <button class="btn-ghost btn-sm" style="margin-top:12px;width:100%" onclick="performLogout()">⊗
+                    Logout</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">Roles Reference</div>
+                <div class="card-body" style="padding:0">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Role</th>
+                        <th>Capabilities</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><span class="badge badge-warn">VIEWER</span></td>
+                        <td>View reports, audit, governance</td>
+                      </tr>
+                      <tr>
+                        <td><span class="badge badge-info">ANALYST</span></td>
+                        <td>Run pipeline, stats, SQL, cohort, drift</td>
+                      </tr>
+                      <tr>
+                        <td><span class="badge badge-purple">ADMIN</span></td>
+                        <td>Train models, modify governance catalog</td>
+                      </tr>
+                      <tr>
+                        <td><span class="badge badge-pass">API_SERVICE</span></td>
+                        <td>Full programmatic access</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: API DOCS
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-api_docs" style="height:100%;display:none;flex-direction:column">
+          <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+              API Docs — Swagger UI
+              <a href="http://localhost:8000/docs" target="_blank" class="btn-ghost btn-sm"
+                style="text-decoration:none">↗ Open in new tab</a>
+            </div>
+            <div style="flex:1;position:relative">
+              <iframe id="api-docs-iframe" src="about:blank"
+                style="width:100%;height:100%;min-height:calc(100vh - 180px);border:none;border-radius:0 0 8px 8px;background:#fff"
+                loading="lazy" title="DIPEX API Docs"></iframe>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+           PAGE: GRAFANA
+      ══════════════════════════════════════════════ -->
+        <div class="page" id="page-grafana" style="height:100%;display:none;flex-direction:column">
+          <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+              Grafana — Monitoring Dashboard
+              <a href="http://localhost:3001" target="_blank" class="btn-ghost btn-sm" style="text-decoration:none">↗
+                Open in new tab</a>
+            </div>
+            <div style="flex:1;position:relative">
+              <iframe id="grafana-iframe" src="about:blank"
+                style="width:100%;height:100%;min-height:calc(100vh - 180px);border:none;border-radius:0 0 8px 8px"
+                loading="lazy" title="Grafana Monitoring"></iframe>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /page-container -->
+    </div><!-- /main-content -->
+  </div><!-- /app-shell -->
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

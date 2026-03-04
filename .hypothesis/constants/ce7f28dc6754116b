@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\error_handler.py
+# hypothesis_version: 6.151.9
+
+['API_RESPONSE_ERROR', 'API_TIMEOUT_ERROR', 'ConnectTimeout', 'DATA_FORMAT_ERROR', 'DB_CONNECTION_ERROR', 'ENCODING_ERROR', 'ERROR', 'EmptyDataError', 'INGESTION_ERROR', 'INTAKE_ERROR', 'InterfaceError', 'JSONDecodeError', 'OperationalError', 'PARTIAL_DATA_ERROR', 'ParserError', 'QUALITY_GATE_ERROR', 'ReadTimeout', 'SCHEMA_ERROR', 'STREAM_LAG_ERROR', 'SchemaInferenceError', 'T', 'TimeoutError', 'UnicodeDecodeError', 'UnicodeError', 'WARN', 'a', 'audit', 'audit/audit.jsonl', 'correlation_id', 'dataset_id', 'error_type', 'event', 'file', 'message', 'source_type', 'timestamp', 'utf-8']

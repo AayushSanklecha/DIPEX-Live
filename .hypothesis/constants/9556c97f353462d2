@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\reporting_service\executive_report.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.8, '%Y-%m-%d %H:%M UTC', '1.0', 'N/A', 'PASS', 'QA_APPROVED', 'QA_CONDITIONAL', 'QA_REJECTED', 'audit', 'confidence', 'confidence_score', 'data_quality', 'domain', 'generic', 'kpi', 'model_performance', 'narrative', 'regulatory', 'report_dir', 'reports', 'risk', 'storage', 'utf-8', 'validation', 'w']

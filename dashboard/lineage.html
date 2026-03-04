@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DIPEX — Data Lineage</title>
+    <meta name="description"
+        content="DIPEX Data Lineage — trace any Gold artefact back through Silver and Bronze snapshots with full audit chain." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0d1117;
+            --bg2: #161b22;
+            --bg3: #1f2937;
+            --border: #30363d;
+            --accent: #4f46e5;
+            --accent2: #7c3aed;
+            --bronze: #d97706;
+            --silver: #94a3b8;
+            --gold: #f59e0b;
+            --green: #10b981;
+            --red: #ef4444;
+            --text: #e6edf3;
+            --muted: #8b949e;
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        nav {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            height: 56px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .nav-brand span {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: .875rem;
+            padding: .25rem .5rem;
+            border-radius: 6px;
+            transition: all .2s;
+        }
+
+        nav a:hover,
+        nav a.active {
+            color: var(--text);
+            background: var(--bg3);
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: .25rem;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: .9rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.25rem;
+        }
+
+        @media(max-width:900px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        .card-header {
+            font-size: .7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            margin-bottom: .75rem;
+        }
+
+        input,
+        select {
+            width: 100%;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            padding: .6rem .9rem;
+            font-size: .875rem;
+            font-family: inherit;
+            margin-bottom: .75rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--accent);
+        }
+
+        .btn {
+            padding: .6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: .875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            opacity: .9;
+        }
+
+        /* Lineage graph */
+        .lineage-container {
+            position: relative;
+            padding: 1.5rem;
+        }
+
+        /* Node row */
+        .lineage-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .lineage-row::before {
+            content: '';
+            position: absolute;
+            left: 27px;
+            top: 55px;
+            width: 2px;
+            height: calc(100% + .5rem);
+            background: var(--border);
+        }
+
+        .lineage-row:last-child::before {
+            display: none;
+        }
+
+        /* Layer badge */
+        .layer-node {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .layer-bronze {
+            background: rgba(217, 119, 6, .15);
+            border: 2px solid rgba(217, 119, 6, .4);
+        }
+
+        .layer-silver {
+            background: rgba(148, 163, 184, .1);
+            border: 2px solid rgba(148, 163, 184, .3);
+        }
+
+        .layer-gold {
+            background: rgba(245, 158, 11, .15);
+            border: 2px solid rgba(245, 158, 11, .4);
+            box-shadow: 0 0 20px rgba(245, 158, 11, .15);
+        }
+
+        .lineage-info {
+            flex: 1;
+        }
+
+        .lineage-name {
+            font-size: .95rem;
+            font-weight: 600;
+            margin-bottom: .25rem;
+        }
+
+        .lineage-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+            margin-bottom: .5rem;
+        }
+
+        .meta-chip {
+            font-size: .7rem;
+            padding: .15rem .5rem;
+            border-radius: 4px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        .meta-chip.hash {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+        }
+
+        /* Transforms list */
+        .transforms {
+            font-size: .75rem;
+            color: var(--muted);
+        }
+
+        .transform-item {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .25rem 0;
+            border-bottom: 1px solid rgba(48, 54, 61, .3);
+        }
+
+        .transform-item:last-child {
+            border-bottom: none;
+        }
+
+        .transform-icon {
+            width: 16px;
+            text-align: center;
+        }
+
+        /* QA badge */
+        .qa-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .2rem .6rem;
+            border-radius: 999px;
+            font-size: .72rem;
+            font-weight: 600;
+        }
+
+        .qa-pass {
+            background: rgba(16, 185, 129, .15);
+            color: var(--green);
+            border: 1px solid rgba(16, 185, 129, .3);
+        }
+
+        .qa-warn {
+            background: rgba(245, 158, 11, .15);
+            color: var(--gold);
+            border: 1px solid rgba(245, 158, 11, .3);
+        }
+
+        /* Dataset list */
+        .dataset-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .6rem .75rem;
+            background: var(--bg3);
+            border-radius: 8px;
+            margin-bottom: .4rem;
+            cursor: pointer;
+            transition: all .2s;
+            border: 1px solid transparent;
+        }
+
+        .dataset-item:hover,
+        .dataset-item.active {
+            border-color: var(--accent);
+        }
+
+        .dataset-name {
+            font-size: .875rem;
+            font-weight: 500;
+        }
+
+        .dataset-sub {
+            font-size: .72rem;
+            color: var(--muted);
+            margin-top: .1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: .75rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a class="nav-brand" href="index.html">DIPEX <span>v3</span></a>
+        <a href="index.html">Overview</a>
+        <a href="analyst_ops.html">Analyst Ops</a>
+        <a href="rl_status.html">RL Status</a>
+        <a href="streaming.html">Streaming</a>
+        <a href="lineage.html" class="active">Lineage</a>
+    </nav>
+    <main>
+        <h1>Data Lineage</h1>
+        <p class="subtitle">Trace any Gold artefact back to its Bronze snapshot. Full audit chain: Bronze → Silver →
+            Gold with transforms, checksums, and QA badges.</p>
+
+        <div class="grid-2">
+            <!-- Left: dataset selector -->
+            <div>
+                <div class="card" style="margin-bottom:1.25rem">
+                    <div class="card-header">Search</div>
+                    <input type="text" id="searchInput" placeholder="Search dataset ID…" oninput="filterDatasets()" />
+                    <select id="layerFilter" onchange="filterDatasets()">
+                        <option value="">All Layers</option>
+                        <option value="bronze">Bronze</option>
+                        <option value="silver">Silver</option>
+                        <option value="gold">Gold (Approved)</option>
+                    </select>
+                </div>
+                <div class="card">
+                    <div class="card-header">Datasets</div>
+                    <div id="datasetList">
+                        <div style="color:var(--muted);font-size:.8rem">Loading datasets…</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: lineage graph -->
+            <div class="card" id="lineagePanel">
+                <div class="card-header">Lineage Graph</div>
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <div>Select a dataset to trace its lineage</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API = '';
+        const TOKEN = () => localStorage.getItem('dipex_token') || '';
+
+        // Demo datasets
+        const DATASETS = [
+            { id: 'sales_q4_2024', label: 'Sales Q4 2024', bronzeTs: '2024-10-01', silver: true, gold: true, conf: 0.87, retries: 0 },
+            { id: 'customer_churn_v2', label: 'Customer Churn v2', bronzeTs: '2024-11-15', silver: true, gold: true, conf: 0.82, retries: 1 },
+            { id: 'inventory_weekly', label: 'Inventory Weekly', bronzeTs: '2024-12-01', silver: true, gold: false, conf: null, retries: 2 },
+            { id: 'marketing_kpis', label: 'Marketing KPIs', bronzeTs: '2025-01-07', silver: true, gold: true, conf: 0.91, retries: 0 },
+            { id: 'support_tickets', label: 'Support Tickets', bronzeTs: '2025-02-01', silver: false, gold: false, conf: null, retries: 0 },
+        ];
+
+        let filtered = [...DATASETS];
+        let selected = null;
+
+        function filterDatasets() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const layer = document.getElementById('layerFilter').value;
+            filtered = DATASETS.filter(d => {
+                const matchQ = !q || d.id.includes(q) || d.label.toLowerCase().includes(q);
+                const matchL = !layer
+                    || (layer === 'bronze')
+                    || (layer === 'silver' && d.silver)
+                    || (layer === 'gold' && d.gold);
+                return matchQ && matchL;
+            });
+            renderList();
+        }
+
+        function renderList() {
+            const el = document.getElementById('datasetList');
+            if (!filtered.length) { el.innerHTML = '<div style="color:var(--muted);font-size:.8rem">No results</div>'; return; }
+            el.innerHTML = filtered.map(d => `
+    <div class="dataset-item ${selected === d.id ? 'active' : ''}" onclick="selectDataset('${d.id}')">
+      <div>
+        <div class="dataset-name">${d.label}</div>
+        <div class="dataset-sub">${d.id} · ${d.bronzeTs}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem">
+        ${d.gold ? `<span class="qa-badge qa-pass">✓ Gold</span>` : d.silver ? `<span class="qa-badge qa-warn">Silver</span>` : '<span style="font-size:.7rem;color:var(--muted)">Bronze only</span>'}
+        ${d.conf ? `<span style="font-size:.72rem;color:var(--muted)">${(d.conf * 100).toFixed(0)}%</span>` : ''}
+      </div>
+    </div>`).join('');
+        }
+
+        function selectDataset(id) {
+            selected = id;
+            renderList();
+            const d = DATASETS.find(x => x.id === id);
+            if (d) renderLineage(d);
+        }
+
+        function fakeHash(s) {
+            let h = 0;
+            for (let i = 0; i < s.length; i++) h = (h << 5) - h + s.charCodeAt(i) | 0;
+            return 'sha256:' + Math.abs(h).toString(16).padStart(8, '0') + '…';
+        }
+
+        function renderLineage(d) {
+            const rows = [];
+
+            // Bronze
+            rows.push(`
+    <div class="lineage-row">
+      <div class="layer-node layer-bronze">🥉</div>
+      <div class="lineage-info">
+        <div class="lineage-name">Bronze — Raw Snapshot</div>
+        <div class="lineage-meta">
+          <span class="meta-chip">${d.id}</span>
+          <span class="meta-chip">${d.bronzeTs}</span>
+          <span class="meta-chip hash" title="SHA-256 hash">${fakeHash(d.id + 'bronze')}</span>
+          <span class="meta-chip">Immutable · Write-once</span>
+        </div>
+        <div class="transforms">
+          <div class="transform-item"><span class="transform-icon">📥</span> Ingested via Universal Intake Layer v2</div>
+          <div class="transform-item"><span class="transform-icon">🔒</span> HMAC-SHA256 sealed by ISSF</div>
+          <div class="transform-item"><span class="transform-icon">📋</span> Schema version recorded</div>
+        </div>
+      </div>
+    </div>`);
+
+            // Silver
+            if (d.silver) {
+                rows.push(`
+      <div class="lineage-row">
+        <div class="layer-node layer-silver">🥈</div>
+        <div class="lineage-info">
+          <div class="lineage-name">Silver — Cleaned & Validated</div>
+          <div class="lineage-meta">
+            <span class="meta-chip">Hard Gate 1 PASS</span>
+            <span class="meta-chip hash">${fakeHash(d.id + 'silver')}</span>
+            <span class="meta-chip">Copy-on-write</span>
+          </div>
+          <div class="transforms">
+            <div class="transform-item"><span class="transform-icon">🧹</span> Null imputation (KNN) · dedup · dtype coercion</div>
+            <div class="transform-item"><span class="transform-icon">📊</span> Profiling: PSI drift check (stable)</div>
+            <div class="transform-item"><span class="transform-icon">🏛️</span> Governance policy enforcement (GDPR)</div>
+            <div class="transform-item"><span class="transform-icon">🔬</span> Statistical analysis: descriptive + hypothesis tests</div>
+          </div>
+        </div>
+      </div>`);
+            }
+
+            // Gold
+            if (d.gold) {
+                rows.push(`
+      <div class="lineage-row">
+        <div class="layer-node layer-gold">🥇</div>
+        <div class="lineage-info">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.25rem">
+            <div class="lineage-name">Gold — QA-Approved Output</div>
+            <span class="qa-badge qa-pass">✓ Verified · ${(d.conf * 100).toFixed(0)}% Confidence</span>
+            ${d.retries > 0 ? `<span class="qa-badge qa-warn">↻ ${d.retries} retr${d.retries > 1 ? 'ies' : 'y'}</span>` : ''}
+          </div>
+          <div class="lineage-meta">
+            <span class="meta-chip">Hard Gate 2 PASS</span>
+            <span class="meta-chip">Confidence ≥ ${d.conf >= 0.85 ? '0.85' : '0.70'}</span>
+            <span class="meta-chip hash">${fakeHash(d.id + 'gold')}</span>
+            <span class="meta-chip">ExperienceMemoryV2</span>
+          </div>
+          <div class="transforms">
+            <div class="transform-item"><span class="transform-icon">🤖</span> ML modeling: ${['RandomForest', 'XGBoost', 'LogisticRegression'][d.id.length % 3]} selected by RL AutoML</div>
+            <div class="transform-item"><span class="transform-icon">🧮</span> Independent statistical verification (Hard Gate 2)</div>
+            <div class="transform-item"><span class="transform-icon">📐</span> Confidence vector: data_quality · statistical_strength · stability · compliance</div>
+            <div class="transform-item"><span class="transform-icon">💾</span> Stored in ExperienceMemory (HMAC-sealed, append-only)</div>
+            <div class="transform-item"><span class="transform-icon">📄</span> Executive report generated · RL policy updated</div>
+          </div>
+        </div>
+      </div>`);
+            } else {
+                rows.push(`
+      <div class="lineage-row">
+        <div class="layer-node" style="background:rgba(239,68,68,.1);border:2px solid rgba(239,68,68,.3)">❌</div>
+        <div class="lineage-info">
+          <div class="lineage-name" style="color:var(--red)">Gold — NOT Approved</div>
+          <div style="font-size:.8rem;color:var(--muted);margin-top:.25rem">
+            ${d.retries >= 2 ? 'Retry budget exhausted — escalated to monitoring' : 'Confidence below threshold after retry attempts'}
+          </div>
+        </div>
+      </div>`);
+            }
+
+            document.getElementById('lineagePanel').innerHTML = `
+    <div class="card-header">Lineage: ${d.label}</div>
+    <div class="lineage-container">${rows.join('')}</div>`;
+        }
+
+        // Initial load
+        try {
+            fetch(API + '/results/', { headers: { 'Authorization': 'Bearer ' + TOKEN() } })
+                .then(r => r.json()).then(() => renderList()).catch(() => renderList());
+        } catch (e) { renderList(); }
+        renderList();
+    </script>
+</body>
+
+</html>

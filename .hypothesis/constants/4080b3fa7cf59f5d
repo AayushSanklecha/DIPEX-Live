@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\readers\file_reader.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.5, 512, 1000, 50000, 65536, ',', ',\t|;:', '.avro', '.csv', '.feather', '.ipc', '.json', '.jsonl', '.log', '.ndjson', '.parquet', '.pq', '.tsv', '.txt', '.xls', '.xlsm', '.xlsx', '.xml', 'DATA_FORMAT_ERROR', 'ERROR', 'WARN', '\\{.*\\}', 'avro', 'confidence', 'cp1252', 'csv', 'data', 'delimiter', 'encoding', 'excel', 'feather', 'items', 'json', 'jsonl', 'latin-1', 'log', 'openpyxl', 'parquet', 'raw_line', 'raw_log', 'rb', 'record_tag', 'records', 'replace', 'results', 'rows', 'sheet_name', 'tsv', 'utf-8', 'utf-8-sig', 'warn', 'xlrd', 'xml', '\ufeff']

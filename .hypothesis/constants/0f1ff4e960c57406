@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\validation\soft_validator.py
+# hypothesis_version: 6.151.9
+
+[0.01, 100, 'fallback', 'fallback_exception', 'hard_count', 'hard_mask', 'isolation_forest', 'method', 'no_violations', 'number', 'soft_count', 'soft_mask']

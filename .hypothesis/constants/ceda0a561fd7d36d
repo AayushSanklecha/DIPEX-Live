@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\connectors\kafka_connector.py
+# hypothesis_version: 6.151.9
+
+[1.0, 1000, 10000, 30000, ',', 'KAFKA_BROKERS', 'KAFKA_SASL_PASS', 'KAFKA_SASL_USER', 'PLAIN', 'PLAINTEXT', 'auto.offset.reset', 'auto_offset_reset', 'bootstrap.servers', 'bootstrap_servers', 'columns', 'description', 'dipex-consumer', 'dtypes', 'enable.auto.commit', 'enable_auto_commit', 'estimated_row_count', 'group.id', 'group_id', 'json', 'latest', 'localhost:9092', 'max_messages', 'poll_timeout_s', 'raw', 'sasl.mechanisms', 'sasl.password', 'sasl.username', 'sasl_mechanism', 'sasl_password', 'sasl_username', 'security.protocol', 'security_protocol', 'session.timeout.ms', 'string', 'timestamp', 'timestamp_field', 'topics', 'utf-8', 'value', 'value_deserializer']

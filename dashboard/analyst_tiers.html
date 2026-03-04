@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DIPEX — Analyst Tier Automation (Ph 15/16/17)</title>
+    <meta name="description"
+        content="DIPEX Analyst Tier Automation — Phase 15 (Junior), 16 (Mid), 17 (Senior) analyst endpoints. Submit inline data and run any of 20 tier operations directly from the browser." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0d1117;
+            --bg2: #161b22;
+            --bg3: #1f2937;
+            --border: #30363d;
+            --accent: #4f46e5;
+            --accent2: #7c3aed;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --blue: #3b82f6;
+            --text: #e6edf3;
+            --muted: #8b949e;
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── Nav ─────────────────────────── */
+        nav {
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            height: 56px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin-right: 1rem;
+        }
+
+        .nav-brand span {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: .875rem;
+            padding: .25rem .6rem;
+            border-radius: 6px;
+            transition: all .2s;
+        }
+
+        nav a:hover,
+        nav a.active {
+            color: var(--text);
+            background: var(--bg3);
+        }
+
+        .nav-version {
+            margin-left: auto;
+            font-size: .7rem;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            padding: .2rem .6rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        /* ── Layout ──────────────────────── */
+        main {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: .3rem;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: .9rem;
+            line-height: 1.6;
+        }
+
+        /* ── Tier tabs ───────────────────── */
+        .tier-tabs {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+        }
+
+        .tier-tab {
+            padding: .6rem 1.2rem;
+            border-radius: 8px 8px 0 0;
+            font-size: .875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            transition: all .2s;
+            margin-bottom: -1px;
+            background: transparent;
+            color: var(--muted);
+        }
+
+        .tier-tab.active {
+            background: var(--bg2);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .tier-tab-junior.active {
+            border-top: 2px solid var(--green);
+        }
+
+        .tier-tab-mid.active {
+            border-top: 2px solid var(--yellow);
+        }
+
+        .tier-tab-senior.active {
+            border-top: 2px solid #818cf8;
+        }
+
+        /* ── Two-col layout ──────────────── */
+        .workspace {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        @media(max-width:1100px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── Operation list ──────────────── */
+        .ops-panel {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .ops-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ops-header span {
+            font-size: .75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+        }
+
+        .op-list {
+            padding: .5rem;
+        }
+
+        .op-item {
+            padding: .75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+
+        .op-item:hover {
+            background: var(--bg3);
+        }
+
+        .op-item.selected {
+            background: rgba(79, 70, 229, .12);
+            border: 1px solid rgba(79, 70, 229, .4);
+        }
+
+        .op-name {
+            font-size: .875rem;
+            font-weight: 500;
+        }
+
+        .op-route {
+            font-size: .7rem;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: .15rem;
+        }
+
+        /* ── Badges ──────────────────────── */
+        .badge {
+            display: inline-block;
+            padding: .2rem .6rem;
+            border-radius: 999px;
+            font-size: .68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .badge-junior {
+            background: rgba(16, 185, 129, .15);
+            color: var(--green);
+            border: 1px solid rgba(16, 185, 129, .3);
+        }
+
+        .badge-mid {
+            background: rgba(245, 158, 11, .15);
+            color: var(--yellow);
+            border: 1px solid rgba(245, 158, 11, .3);
+        }
+
+        .badge-senior {
+            background: rgba(129, 140, 248, .15);
+            color: #818cf8;
+            border: 1px solid rgba(129, 140, 248, .3);
+        }
+
+        /* ── Run panel ───────────────────── */
+        .run-panel {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        .run-panel h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: .25rem;
+        }
+
+        .run-panel .run-route {
+            font-size: .75rem;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            font-size: .8rem;
+            color: var(--muted);
+            font-weight: 500;
+            display: block;
+            margin-bottom: .3rem;
+            margin-top: .75rem;
+        }
+
+        label:first-of-type {
+            margin-top: 0;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            padding: .6rem .9rem;
+            font-size: .875rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--accent);
+        }
+
+        textarea {
+            min-height: 160px;
+            resize: vertical;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem;
+        }
+
+        .btn {
+            padding: .65rem 1.3rem;
+            border: none;
+            border-radius: 8px;
+            font-size: .875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            opacity: .9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, .3);
+        }
+
+        .btn-primary:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg3);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            color: var(--text);
+            border-color: var(--text);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: .75rem;
+            margin-top: 1rem;
+        }
+
+        /* ── Result ──────────────────────── */
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            margin-bottom: .5rem;
+        }
+
+        .result-header strong {
+            font-size: .875rem;
+        }
+
+        .conf-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .3rem .8rem;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 600;
+        }
+
+        .conf-pass {
+            background: rgba(16, 185, 129, .15);
+            color: var(--green);
+            border: 1px solid rgba(16, 185, 129, .3);
+        }
+
+        .conf-warn {
+            background: rgba(245, 158, 11, .15);
+            color: var(--yellow);
+            border: 1px solid rgba(245, 158, 11, .3);
+        }
+
+        .conf-fail {
+            background: rgba(239, 68, 68, .15);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, .3);
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-g {
+            background: var(--green);
+        }
+
+        .dot-y {
+            background: var(--yellow);
+        }
+
+        .dot-r {
+            background: var(--red);
+        }
+
+        .result-box {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .result-box pre {
+            font-size: .78rem;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--text);
+        }
+
+        /* ── Status bar ──────────────────── */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .65rem 1rem;
+            background: rgba(79, 70, 229, .08);
+            border: 1px solid rgba(79, 70, 229, .2);
+            border-radius: 8px;
+            font-size: .8rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .spin {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2.5px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Stats row ───────────────────── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.1rem 1.25rem;
+        }
+
+        .stat-label {
+            font-size: .7rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--muted);
+            margin-bottom: .35rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-value.green {
+            color: var(--green);
+        }
+
+        .stat-value.yellow {
+            color: var(--yellow);
+        }
+
+        .stat-value.purple {
+            color: #818cf8;
+        }
+
+        /* ── API explorer panel ──────────── */
+        .api-explorer {
+            margin-top: 2rem;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .api-explorer-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .api-explorer-header span {
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .api-explorer-body {
+            padding: 1.25rem;
+            display: none;
+        }
+
+        .api-explorer-body.open {
+            display: block;
+        }
+
+        .endpoint-row {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .5rem .75rem;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-size: .8rem;
+            border: 1px solid transparent;
+        }
+
+        .endpoint-row:hover {
+            background: var(--bg3);
+            border-color: var(--border);
+        }
+
+        .method {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            font-weight: 700;
+            padding: .15rem .45rem;
+            border-radius: 4px;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .method-post {
+            background: rgba(16, 185, 129, .15);
+            color: var(--green);
+        }
+
+        .method-get {
+            background: rgba(59, 130, 246, .15);
+            color: var(--blue);
+        }
+
+        .ep-path {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text);
+            flex: 1;
+        }
+
+        .ep-desc {
+            color: var(--muted);
+            font-size: .75rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a class="nav-brand" href="index.html">DIPEX <span>v3.1</span></a>
+        <a href="index.html">Overview</a>
+        <a href="analyst_ops.html">Analyst Ops</a>
+        <a href="analyst_tiers.html" class="active">Tier Automation</a>
+        <a href="rl_status.html">RL Status</a>
+        <a href="streaming.html">Streaming</a>
+        <a href="lineage.html">Lineage</a>
+        <span class="nav-version">API v3.1.0</span>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <h1>Analyst Tier Automation — Phase 15 · 16 · 17</h1>
+            <p class="subtitle">
+                20 production-grade analyst endpoints across Junior · Mid · Senior tiers.
+                All operations run on Gold-layer copies and never mutate Bronze or Silver data.
+            </p>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Junior Endpoints</div>
+                <div class="stat-value green" id="juniorCount">7</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Mid Endpoints</div>
+                <div class="stat-value yellow" id="midCount">8</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Senior Endpoints</div>
+                <div class="stat-value purple" id="seniorCount">5</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Tier Endpoints</div>
+                <div class="stat-value" id="totalCount">20</div>
+            </div>
+        </div>
+
+        <!-- Status bar -->
+        <div id="statusBar" class="status-bar" style="display:none">
+            <span class="spin"></span>
+            <span id="statusMsg">Running operation…</span>
+        </div>
+
+        <!-- Tier tabs -->
+        <div class="tier-tabs">
+            <button class="tier-tab tier-tab-junior active" onclick="switchTier('junior',this)" id="tab-junior">
+                🟢 Junior Analyst
+            </button>
+            <button class="tier-tab tier-tab-mid" onclick="switchTier('mid',this)" id="tab-mid">
+                🟡 Mid Analyst
+            </button>
+            <button class="tier-tab tier-tab-senior" onclick="switchTier('senior',this)" id="tab-senior">
+                🔵 Senior Analyst
+            </button>
+        </div>
+
+        <!-- Workspace -->
+        <div class="workspace">
+
+            <!-- Left: Operation list -->
+            <div class="ops-panel">
+                <div class="ops-header">
+                    <span id="opsLabel">Junior Operations</span>
+                    <span id="tierBadge" class="badge badge-junior">Phase 15</span>
+                </div>
+                <div class="op-list" id="opList"></div>
+            </div>
+
+            <!-- Right: Run panel -->
+            <div class="run-panel">
+                <h2 id="selectedOpName">Select an operation</h2>
+                <div class="run-route" id="selectedRoute">/api/tiers/…</div>
+
+                <label>Inline Dataset (JSON array of row objects)</label>
+                <textarea id="dataPayload"
+                    placeholder='[{"revenue": 150, "cost": 80, "region": "APAC"}, {"revenue": 90, "cost": 100, "region": "EU"}]'>[
+  {"revenue": 250, "cost": 100, "region": "APAC", "month": "Jan"},
+  {"revenue": 180, "cost": 90,  "region": "EU",   "month": "Jan"},
+  {"revenue": 310, "cost": 120, "region": "APAC", "month": "Feb"},
+  {"revenue": 200, "cost": 95,  "region": "EU",   "month": "Feb"},
+  {"revenue": 95,  "cost": 90,  "region": "APAC", "month": "Mar"},
+  {"revenue": 270, "cost": 110, "region": "EU",   "month": "Mar"}
+]</textarea>
+
+                <div id="extraParams"></div>
+
+                <div class="btn-row">
+                    <button class="btn btn-primary" id="runBtn" onclick="runOperation()" disabled>▶ Run</button>
+                    <button class="btn btn-secondary" onclick="loadCatalog()">⟳ Refresh Catalog</button>
+                </div>
+
+                <div id="resultArea" style="display:none">
+                    <div class="result-header">
+                        <strong>Result</strong>
+                        <div id="confBadge"></div>
+                    </div>
+                    <div class="result-box">
+                        <pre id="resultJson"></pre>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- API Explorer (collapsible) -->
+        <div class="api-explorer">
+            <div class="api-explorer-header" onclick="toggleExplorer()">
+                <span>📋 Full API Endpoint Catalog</span>
+                <span id="explorerToggle" style="font-size:.75rem;color:var(--muted)">▼ expand</span>
+            </div>
+            <div class="api-explorer-body" id="explorerBody"></div>
+        </div>
+    </main>
+
+    <script>
+        const API = '';
+        const TOKEN = () => localStorage.getItem('dipex_token') || '';
+
+        const TIERS = {
+            junior: {
+                label: 'Junior Operations',
+                phase: 'Phase 15',
+                badge: 'badge-junior',
+                ops: [
+                    { name: 'clean', route: '/api/tiers/junior/clean', desc: 'Basic cleaning: whitespace, null norm, dtype coerce', extra: [] },
+                    { name: 'dedup', route: '/api/tiers/junior/dedup', desc: 'Deduplicate rows (all columns)', extra: [] },
+                    { name: 'aggregate', route: '/api/tiers/junior/aggregate', desc: 'GROUP BY + aggregation', extra: ['group_by', 'agg_map'] },
+                    { name: 'pivot', route: '/api/tiers/junior/pivot', desc: 'Pivot table with aggfunc', extra: ['index', 'columns', 'values', 'aggfunc'] },
+                    { name: 'kpi', route: '/api/tiers/junior/kpi', desc: 'KPI tracking via eval expressions', extra: ['kpi_definitions'] },
+                    { name: 'sql', route: '/api/tiers/junior/sql', desc: 'DuckDB SQL query on in-memory data', extra: ['sql'] },
+                    { name: 'threshold-check', route: '/api/tiers/junior/threshold-check', desc: 'Flag rows outside [min, max] bounds per column', extra: ['thresholds'] },
+                ]
+            },
+            mid: {
+                label: 'Mid-Level Operations',
+                phase: 'Phase 16',
+                badge: 'badge-mid',
+                ops: [
+                    { name: 'eda', route: '/api/tiers/mid/eda', desc: 'Full automated EDA: distributions, correlations, outliers', extra: ['target_col'] },
+                    { name: 'statistical-analysis', route: '/api/tiers/mid/statistical-analysis', desc: 'Normality → t-test / Mann-Whitney → CI + Cohen\'s d', extra: ['group_col', 'value_col', 'alpha'] },
+                    { name: 'ab-test', route: '/api/tiers/mid/ab-test', desc: 'A/B test: uplift, power, MDE, recommendation', extra: ['group_col', 'metric_col', 'control_group', 'treatment_group'] },
+                    { name: 'sql', route: '/api/tiers/mid/sql', desc: 'Advanced SQL: CTEs, window functions on Gold copy', extra: ['sql'] },
+                    { name: 'business-insights', route: '/api/tiers/mid/business-insights', desc: 'Ranked business insights from correlations + anomalies', extra: ['target_col'] },
+                    { name: 'outliers', route: '/api/tiers/mid/outliers', desc: 'Outlier investigation: IQR or Z-score methods', extra: [] },
+                    { name: 'clustering', route: '/api/tiers/mid/clustering', desc: 'KMeans segmentation — adds cluster label column', extra: ['n_clusters', 'feature_cols'] },
+                    { name: 'time-series', route: '/api/tiers/mid/time-series', desc: 'Rolling stats, trend direction, anomaly flags', extra: ['date_col', 'value_col'] },
+                ]
+            },
+            senior: {
+                label: 'Senior Operations',
+                phase: 'Phase 17',
+                badge: 'badge-senior',
+                ops: [
+                    { name: 'hypothesis-test', route: '/api/tiers/senior/hypothesis-test', desc: 't-test between top-2 groups: p-value, α, reject/fail', extra: ['group_col', 'value_col', 'alpha'] },
+                    { name: 'cohort-analysis', route: '/api/tiers/senior/cohort-analysis', desc: 'Cohort-level mean metrics over time (retention)', extra: ['cohort_col', 'time_col', 'value_col'] },
+                    { name: 'feature-engineering', route: '/api/tiers/senior/feature-engineering', desc: 'Log/bin/interaction/polynomial transforms on Gold copy', extra: ['numeric_cols', 'log_cols'] },
+                    { name: 'model-train', route: '/api/tiers/senior/model-train', desc: 'Baseline model training + validation metrics', extra: ['target_col', 'feature_cols', 'test_size'] },
+                    { name: 'risk-scoring', route: '/api/tiers/senior/risk-scoring', desc: 'Composite risk score per row from weighted signals', extra: ['risk_signals'] },
+                ]
+            }
+        };
+
+        // Extra param defaults
+        const DEFAULTS = {
+            group_by: '["region"]',
+            agg_map: '{"revenue": "sum", "cost": "mean"}',
+            index: '["region"]',
+            columns: '"month"',
+            values: '"revenue"',
+            aggfunc: '"sum"',
+            kpi_definitions: '{"profit_margin": "revenue - cost", "roi": "(revenue - cost) / cost"}',
+            sql: '"SELECT region, SUM(revenue) as total_revenue FROM df GROUP BY region ORDER BY total_revenue DESC"',
+            thresholds: '{"revenue": [0, 1000000], "cost": [0, 500000]}',
+            target_col: '"revenue"',
+            group_col: '"region"',
+            value_col: '"revenue"',
+            alpha: '0.05',
+            control_group: '"EU"',
+            treatment_group: '"APAC"',
+            metric_col: '"revenue"',
+            n_clusters: '3',
+            feature_cols: '["revenue","cost"]',
+            date_col: '"month"',
+            numeric_cols: '["revenue","cost"]',
+            log_cols: '["revenue"]',
+            test_size: '0.2',
+            risk_signals: '{"revenue": 0.6, "cost": 0.4}',
+            cohort_col: '"region"',
+            time_col: '"month"',
+        };
+
+        let currentTier = 'junior';
+        let currentOp = null;
+
+        function switchTier(tier, btn) {
+            currentTier = tier;
+            currentOp = null;
+            document.querySelectorAll('.tier-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            renderOps();
+            document.getElementById('runBtn').disabled = true;
+            document.getElementById('selectedOpName').textContent = 'Select an operation';
+            document.getElementById('selectedRoute').textContent = '/api/tiers/…';
+            document.getElementById('resultArea').style.display = 'none';
+            document.getElementById('extraParams').innerHTML = '';
+            const meta = TIERS[tier];
+            document.getElementById('opsLabel').textContent = meta.label;
+            document.getElementById('tierBadge').className = 'badge ' + meta.badge;
+            document.getElementById('tierBadge').textContent = meta.phase;
+        }
+
+        function renderOps() {
+            const list = TIERS[currentTier].ops;
+            document.getElementById('opList').innerHTML = list.map((op, i) => `
+    <div class="op-item" id="op-item-${i}" onclick="selectOp(${i})">
+      <div>
+        <div class="op-name">${op.name}</div>
+        <div class="op-route">${op.route}</div>
+      </div>
+      <span style="color:var(--muted);font-size:.75rem">→</span>
+    </div>`).join('');
+        }
+
+        function selectOp(idx) {
+            const op = TIERS[currentTier].ops[idx];
+            currentOp = op;
+            document.querySelectorAll('.op-item').forEach(el => el.classList.remove('selected'));
+            document.getElementById('op-item-' + idx).classList.add('selected');
+            document.getElementById('selectedOpName').textContent = op.name;
+            document.getElementById('selectedRoute').textContent = 'POST ' + op.route;
+            document.getElementById('runBtn').disabled = false;
+            document.getElementById('resultArea').style.display = 'none';
+
+            // Render extra param inputs
+            const container = document.getElementById('extraParams');
+            container.innerHTML = op.extra.map(param => `
+    <label>${param}</label>
+    <input type="text" id="ep_${param}" value='${DEFAULTS[param] || ""}' placeholder="${param}"/>
+  `).join('');
+        }
+
+        async function runOperation() {
+            if (!currentOp) return;
+            let data;
+            try { data = JSON.parse(document.getElementById('dataPayload').value); }
+            catch (e) { alert('Invalid JSON in dataset. Fix and try again.\n\n' + e.message); return; }
+
+            const body = { data, snapshot_id: 'tier_dash_' + Date.now() };
+            currentOp.extra.forEach(param => {
+                const val = document.getElementById('ep_' + param)?.value?.trim();
+                if (val) {
+                    try { body[param] = JSON.parse(val); }
+                    catch { body[param] = val; }
+                }
+            });
+
+            const btn = document.getElementById('runBtn');
+            const sb = document.getElementById('statusBar');
+            btn.disabled = true;
+            sb.style.display = 'flex';
+            document.getElementById('statusMsg').textContent = `[${currentTier.toUpperCase()}] Running "${currentOp.name}"…`;
+            document.getElementById('resultArea').style.display = 'none';
+
+            try {
+                const r = await fetch(API + currentOp.route, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN() },
+                    body: JSON.stringify(body),
+                });
+                const resData = await r.json();
+                document.getElementById('resultJson').textContent = JSON.stringify(resData, null, 2);
+                document.getElementById('resultArea').style.display = 'block';
+
+                const conf = resData.confidence_score;
+                const badge = document.getElementById('confBadge');
+                if (conf == null) {
+                    badge.innerHTML = '<span class="conf-badge" style="color:var(--muted)">No confidence score</span>';
+                } else if (conf >= 0.85) {
+                    badge.innerHTML = `<span class="conf-badge conf-pass"><span class="dot dot-g"></span>${Math.round(conf * 100)}% Verified</span>`;
+                } else if (conf >= 0.70) {
+                    badge.innerHTML = `<span class="conf-badge conf-warn"><span class="dot dot-y"></span>${Math.round(conf * 100)}% Caution</span>`;
+                } else {
+                    badge.innerHTML = `<span class="conf-badge conf-fail"><span class="dot dot-r"></span>${Math.round(conf * 100)}% Low</span>`;
+                }
+            } catch (e) {
+                document.getElementById('resultJson').textContent = 'Error: ' + e.message + '\n\nIs the API running? Start with:\n  uvicorn api.app:app --reload\nThen visit /docs for the OpenAPI UI.';
+                document.getElementById('resultArea').style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                sb.style.display = 'none';
+            }
+        }
+
+        async function loadCatalog() {
+            try {
+                const r = await fetch(API + '/api/tiers/operations', {
+                    headers: { 'Authorization': 'Bearer ' + TOKEN() }
+                });
+                const catalog = await r.json();
+                if (catalog.junior) {
+                    document.getElementById('juniorCount').textContent = catalog.junior.length;
+                    document.getElementById('midCount').textContent = catalog.mid.length;
+                    document.getElementById('seniorCount').textContent = catalog.senior.length;
+                    document.getElementById('totalCount').textContent =
+                        catalog.junior.length + catalog.mid.length + catalog.senior.length;
+                }
+            } catch (e) { /* API offline — show defaults */ }
+        }
+
+        function toggleExplorer() {
+            const body = document.getElementById('explorerBody');
+            const toggle = document.getElementById('explorerToggle');
+            const open = body.classList.toggle('open');
+            toggle.textContent = open ? '▲ collapse' : '▼ expand';
+            if (open && !body.innerHTML.trim()) renderExplorer();
+        }
+
+        function renderExplorer() {
+            const body = document.getElementById('explorerBody');
+            const sections = [
+                { tier: 'junior', label: '🟢 Junior (Phase 15)' },
+                { tier: 'mid', label: '🟡 Mid (Phase 16)' },
+                { tier: 'senior', label: '🔵 Senior (Phase 17)' },
+            ];
+            body.innerHTML = sections.map(s => {
+                const ops = TIERS[s.tier].ops;
+                return `<div style="margin-bottom:1.25rem">
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.5rem">${s.label}</div>
+      ${ops.map(op => `
+        <div class="endpoint-row">
+          <span class="method method-post">POST</span>
+          <span class="ep-path">${op.route}</span>
+          <span class="ep-desc">${op.desc}</span>
+        </div>`).join('')}
+    </div>`;
+            }).join('') + `
+    <div>
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.5rem">🎛️ Catalog &amp; Control</div>
+      <div class="endpoint-row">
+        <span class="method method-get">GET</span>
+        <span class="ep-path">/api/tiers/operations</span>
+        <span class="ep-desc">Returns full endpoint catalog (all 3 tiers)</span>
+      </div>
+    </div>`;
+        }
+
+        // Init
+        renderOps();
+        loadCatalog();
+    </script>
+</body>
+
+</html>

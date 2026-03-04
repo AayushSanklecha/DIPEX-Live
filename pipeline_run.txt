@@ -1,0 +1,316 @@
+﻿python : 
+2026-02-23T19:09:13 
+[INFO] 
+dipex.orchestrator: 
+Pipeline Starting: ru
+n_id=094d879e-0246-43
+07-98ec-82366eb68cc3 
+ target=target
+At line:1 char:1
++ python 
+verify_pipeline.py 
+--target target 2>&1 
+| Out-File -FilePath 
+p ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (2026-02   
+ -23T19:0...  tar    
+get=target:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+2026-02-23T19:09:13 
+[INFO] 
+dipex.orchestrator: 
+Created synthetic 
+sample at data/upload
+s/094d879e-0246-4307-
+98ec-82366eb68cc3_sam
+ple.csv
+2026-02-23T19:09:13 
+[INFO] ingestion.batc
+h_loader: Loaded 
+CSV: data/uploads/094
+d879e-0246-4307-98ec-
+82366eb68cc3_sample.c
+sv  rows=20 cols=3
+2026-02-23T19:09:13 
+[INFO] 
+dipex.orchestrator: 
+Loaded 20 rows ╫ 3 
+columns
+2026-02-23T19:09:13 
+[INFO] 
+dipex.orchestrator: 
+Snapshot 
+fingerprint: 64fd9ad2
+0be4599eb72907e1d9649
+82dc96713a2d231f86348
+b0d1f44c287422
+2026-02-23T19:09:13 
+[INFO] 
+dipex.orchestrator: 
+=== STEP 2: Hard 
+Gate 1 ù 
+Deterministic 
+Validation ===
+2026-02-23T19:09:13 
+[INFO] validation.reg
+ulatory.regulatory_en
+gine: 
+RegulatoryEngine: 
+domain='generic' ù 
+no domain-specific 
+rules loaded.
+2026-02-23T19:09:13 
+[INFO] validation.har
+d_gate: Hard Gate 1 
+started for run_id=09
+4d879e-0246-4307-98ec
+-82366eb68cc3  
+shape=(20, 3)
+2026-02-23T19:09:13 
+[INFO] validation.har
+d_gate: Hard Gate 1 
+PASSED run_id=094d879
+e-0246-4307-98ec-8236
+6eb68cc3 ù 0 
+warning(s).
+2026-02-23T19:09:13 
+[INFO] 
+dipex.orchestrator: 
+Hard Gate 1 PASSED ù 
+all checks clear.
+2026-02-23T19:09:13 
+[INFO] 
+dipex.orchestrator: 
+=== STEP 3: Data 
+Profiling Engine ===
+2026-02-23T19:09:13 
+[INFO] profiling.prof
+ile_report: 
+ProfileReport: 
+starting profiling 
+for run_id=094d879e-0
+246-4307-98ec-82366eb
+68cc3  shape=(20, 3)
+2026-02-23T19:09:13 
+[INFO] 
+profiling.profiler: 
+Profiler: 3 columns 
+profiled, 2 analyst 
+flag(s) raised.
+2026-02-23T19:09:13 
+[INFO] profiling.corr
+elation_engine: 
+CorrelationEngine: 3 
+numeric pair(s), 0 
+categorical pair(s), 
+0 highlight(s).
+2026-02-23T19:09:13 
+[INFO] profiling.miss
+ingness_analyzer: 
+MissingnessAnalyzer: 
+overall_null_pct=0.00
+%  complete_rows=100.
+00%  flags=0
+2026-02-23T19:09:13 
+[INFO] profiling.prof
+ile_report: 
+ProfileReport: saved 
+to reports\094d879e-0
+246-4307-98ec-82366eb
+68cc3_profile.json
+2026-02-23T19:09:13 
+[INFO] profiling.prof
+ile_report: 
+ProfileReport: 
+complete ù 3 
+column(s), 2 flag(s) 
+raised.
+2026-02-23T19:09:13 
+[INFO] profiling.prof
+ile_report:   
+\u250c\u2500 Analyst 
+Flags (Step 3) \u2500
+\u2500\u2500\u2500\u2
+500\u2500\u2500\u2500
+\u2500\u2500\u2500\u2
+500\u2500\u2500
+2026-02-23T19:09:13 
+[INFO] profiling.prof
+ile_report:   \u2502 
+[NON_NORMAL_DISTRIBUT
+ION] a: Shapiro-Wilk 
+p=0.04176 (<0.05). 
+Parametric tests 
+assume normality ù 
+consider non à
+2026-02-23T19:09:13 
+[INFO] profiling.prof
+ile_report:   \u2502 
+[NON_NORMAL_DISTRIBUT
+ION] target: 
+Shapiro-Wilk p=8e-06 
+(<0.05). Parametric 
+tests assume 
+normality ù consider 
+non-p à
+2026-02-23T19:09:13 
+[INFO] profiling.prof
+ile_report:   \u2514\
+u2500\u2500\u2500\u25
+00\u2500\u2500\u2500\
+u2500\u2500\u2500\u25
+00\u2500\u2500\u2500\
+u2500\u2500\u2500\u25
+00\u2500\u2500\u2500\
+u2500\u2500\u2500\u25
+00\u2500\u2500\u2500\
+u2500\u2500\u2500\u25
+00\u2500\u2500\u2500\
+u2500\u2500\u2500\u25
+00\u2500
+2026-02-23T19:09:13 
+[INFO] 
+dipex.orchestrator: 
+Profiling complete: 
+3 column(s), 2 
+analyst flag(s).
+2026-02-23T19:09:13 
+[INFO] 
+dipex.orchestrator:  
+ [NON_NORMAL_DISTRIBU
+TION] a ù 
+Shapiro-Wilk 
+p=0.04176 (<0.05). 
+Parametric tests 
+assume normality ù 
+consider non
+2026-02-23T19:09:13 
+[INFO] 
+dipex.orchestrator:  
+ [NON_NORMAL_DISTRIBU
+TION] target ù 
+Shapiro-Wilk p=8e-06 
+(<0.05). Parametric 
+tests assume 
+normality ù consider 
+non-p
+2026-02-23T19:09:13 
+[INFO] 
+dipex.orchestrator: 
+=== STEP 4: Proposal 
+Layer (Hypothesis 
+Generation) ===
+2026-02-23T19:09:13 
+[INFO] proposal.propo
+sal_engine: 
+ProposalEngine: 
+generating 
+hypotheses for run_id
+=094d879e-0246-4307-9
+8ec-82366eb68cc3
+2026-02-23T19:09:14 
+[INFO] proposal.propo
+sal_engine: 
+ProposalEngine: 0 
+historical 
+precedent(s) 
+recalled.
+2026-02-23T19:09:14 
+[INFO] proposal.propo
+sal_engine: 
+ProposalEngine: 4 
+proposer(s) yielded 
+candidates.
+2026-02-23T19:09:14 
+[INFO] 
+dipex.orchestrator: 
+Proposal Layer 
+complete: 16 
+anomalies detected, 
+top feature signal: 
+'a'
+2026-02-23T19:09:14 
+[INFO] verifier.confi
+dence_aggregator: 
+Aggregated 
+confidence score: 
+100.00%
+2026-02-23T19:09:14 
+[INFO] 
+dipex.orchestrator: 
+Confidence score: 
+100.00%
+2026-02-23T19:09:14 
+[INFO] 
+dipex.orchestrator: 
+Narrative generated:
+## Insight Report ù 
+Run `094d879e-0246-43
+07-98ec-82366eb68cc3`
+
+**Action:** The 
+system used a 
+**RandomForest** 
+model to perform 
+**classification**.
+**Performance:** 
+accuracy = 0.2500  
+
+**Confidence:** 
+100.00%  (All 
+verifier gates 
+passed: `True`)
+
+### Verification 
+Details
+- \u2705 
+**Statistical:** 
+Accuracy 20/20 vs 
+random chance 50.00% 
+ù p-value: 0.0000
+
+### Conclusion
+This insight has 
+been verified for 
+statistical 
+significance and 
+domain compliance.
+2026-02-23T19:09:14 
+[INFO] 
+learning.rl_updater: 
+RL feedback ù run_id=
+094d879e-0246-4307-98
+ec-82366eb68cc3  
+model=RandomForest  
+task=classification  
+confidence=1.0000  
+outcome=STRONG_PASS  
+reward=1.000
+2026-02-23T19:09:14 
+[INFO] proposal.rl_st
+rategy: Q-update: 
+task=classification 
+alg=RandomForest 
+reward=1.000  Q: 
+1.000 \u2192 1.000
+2026-02-23T19:09:14 
+[INFO] 
+dipex.orchestrator: 
+RL update applied.
+2026-02-23T19:09:14 
+[INFO] 
+dipex.orchestrator: 
+Pipeline Completed 
+Successfully ù run_id
+=094d879e-0246-4307-9
+8ec-82366eb68cc3

@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\readers\__init__.py
+# hypothesis_version: 6.151.9
+
+['APIReader', 'DBReader', 'FileReader', 'StreamReader']

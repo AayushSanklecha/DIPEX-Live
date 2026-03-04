@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\learning\rl_safety.py
+# hypothesis_version: 6.151.9
+
+[-0.1, 200, 'active', 'audit_log', 'audit_trail', 'bandit_q_table', 'bronze_layer', 'checkpoint_', 'checkpoint_*.json', 'checksum', 'compliance_rules', 'confidence_weights', 'data/rl_checkpoints', 'data_contracts', 'dipex.rl_safety', 'episode', 'epsilon', 'exploration_rate', 'hard_gate_1', 'hard_gate_2', 'immutability_guard', 'jwt_auth', 'layer_write_guard', 'leakage_detection', 'null_threshold', 'pii_detector', 'proposal_weights', 'r', 'ranker_priors', 'rbac', 'regulatory_engine', 'retry_strategy', 'schema_validators', 'statistical_verifier', 'target', 'type_enforcement', 'utf-8', 'validation_rules', 'w', 'weights', 'window_size_policy']

@@ -1,0 +1,52 @@
+2026-03-03T22:58:25 [INFO] numexpr.utils: Note: NumExpr detected 12 cores but "NUMEXPR_MAX_THREADS" not set, so enforcing safe limit of 8.
+2026-03-03T22:58:25 [INFO] numexpr.utils: NumExpr defaulting to 8 threads.
+C:\Users\sankl\anaconda3\Lib\site-packages\sklearn\base.py:376: InconsistentVersionWarning: Trying to unpickle estimator LabelEncoder from version 1.6.1 when using version 1.5.1. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+2026-03-03T22:58:27 [INFO] dipex.ingestion.schema_infer: SmartSchemaInferer: ML model loaded from C:\Users\sankl\Desktop\dipex\ingestion\..\models\schema_classifier.pkl
+2026-03-03T22:58:27 [WARNING] dipex.ingestion.universal_intake: [AdaptiveLearner] Pre-flight warning: Recurring error 'DATA_FORMAT_ERROR' (110x): Try specifying fmt= explicitly or check file integrity
+2026-03-03T22:58:27 [INFO] dipex.ingestion.universal_intake: [57d2f995] Ingestion started — dataset=tips_json source_type=file mode=batch (learner_confidence=95%)
+2026-03-03T22:58:27 [INFO] dipex.ingestion.readers.file: Reading file 'samples/tips.json' as format='json'
+2026-03-03T22:58:27 [INFO] dipex.ingestion.data_layers: Bronze locked: dataset=tips_json snapshot=57d2f995-17d8-4bb5-b673-f67ed8fa7b60 shape=(244, 7) checksum=b3daca7db2e2…
+2026-03-03T22:58:27 [INFO] dipex.ingestion.universal_intake: [57d2f995] Bronze locked — dataset=tips_json checksum=b3daca7db2e2e858…
+C:\Users\sankl\Desktop\dipex\ingestion\normaliser.py:176: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  converted = pd.to_datetime(df[col], errors="coerce", utc=True)
+C:\Users\sankl\Desktop\dipex\ingestion\normaliser.py:176: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  converted = pd.to_datetime(df[col], errors="coerce", utc=True)
+C:\Users\sankl\Desktop\dipex\ingestion\normaliser.py:176: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  converted = pd.to_datetime(df[col], errors="coerce", utc=True)
+C:\Users\sankl\Desktop\dipex\ingestion\normaliser.py:176: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  converted = pd.to_datetime(df[col], errors="coerce", utc=True)
+2026-03-03T22:58:27 [INFO] dipex.ingestion.normaliser: [tips_json] Normalised: 244 rows × 7 cols. Types: {'total_bill': 'float64', 'tip': 'float64', 'sex': 'object', 'smoker': 'bool', 'day': 'object', 'time': 'object', 'size': 'int64'}
+2026-03-03T22:58:27 [WARNING] dipex.ingestion.schema_infer: SmartSchemaInferer ML inference failed for 'total_bill': Feature shape mismatch, expected: 24, got 20
+2026-03-03T22:58:27 [WARNING] dipex.ingestion.schema_infer: SmartSchemaInferer ML inference failed for 'tip': Feature shape mismatch, expected: 24, got 20
+2026-03-03T22:58:27 [WARNING] dipex.ingestion.schema_infer: SmartSchemaInferer ML inference failed for 'sex': Feature shape mismatch, expected: 24, got 20
+2026-03-03T22:58:27 [WARNING] dipex.ingestion.schema_infer: SmartSchemaInferer ML inference failed for 'smoker': Feature shape mismatch, expected: 24, got 20
+2026-03-03T22:58:27 [WARNING] dipex.ingestion.schema_infer: SmartSchemaInferer ML inference failed for 'day': Feature shape mismatch, expected: 24, got 20
+2026-03-03T22:58:27 [WARNING] dipex.ingestion.schema_infer: SmartSchemaInferer ML inference failed for 'time': Feature shape mismatch, expected: 24, got 20
+2026-03-03T22:58:27 [WARNING] dipex.ingestion.schema_infer: SmartSchemaInferer ML inference failed for 'size': Feature shape mismatch, expected: 24, got 20
+2026-03-03T22:58:27 [INFO] dipex.ingestion.schema_infer: SmartSchemaInferer: enriched 7 columns via ml.
+2026-03-03T22:58:27 [INFO] dipex.ingestion.data_layers: Silver promoted: dataset=tips_json snapshot=57d2f995-17d8-4bb5-b673-f67ed8fa7b60 shape=(244, 7) checksum=b6027a26acc0…
+2026-03-03T22:58:27 [INFO] dipex.ingestion.universal_intake: [57d2f995] Silver promoted — dataset=tips_json checksum=b6027a26acc0ce4b…
+2026-03-03T22:58:27 [WARNING] dipex.ingestion.quality_gate: [tips_json] Quality gate WARN (score=0.98): 2 warnings
+2026-03-03T22:58:27 [INFO] dipex.ingestion.universal_intake: [57d2f995] Ingestion complete — 244 rows, schema v1.0.6, quality=0.98, status=WARN, elapsed=161ms
+2026-03-03T22:58:27 [INFO] dipex.ingestion.adaptive_learner: [AdaptiveLearner] Recorded SUCCESS — dataset=tips_json quality=0.98 stage_fails=none
+2026-03-03T22:58:27 [INFO] dipex.main: Intake complete — dataset=tips_json rows=244 quality=0.98 status=WARN schema=v1.0.6
+2026-03-03T22:58:27 [INFO] dipex.ingestion.pipeline_bridge: [259ff25e] PipelineBridge started — dataset=tips_json rows=244 source=file
+2026-03-03T22:58:27 [INFO] dipex.ingestion.pipeline_bridge: [259ff25e] RL Orchestrator plan: profile=full preprocess=thorough model=balanced validation=full
+2026-03-03T22:58:27 [INFO] dipex.preprocessing.pipeline_builder: Building pipeline: 3 numeric, 3 categorical, 0 text columns.
+2026-03-03T22:58:27 [INFO] dipex.preprocessing.pipeline_builder: sklearn Pipeline built successfully.
+2026-03-03T22:58:27 [INFO] dipex.ingestion.pipeline_bridge: [RL] Feature selector kept 11/11 features
+2026-03-03T22:58:27 [INFO] dipex.ingestion.pipeline_bridge: Preprocessing: 7 → 11 features
+2026-03-03T22:58:27 [INFO] dipex.ingestion.pipeline_bridge: [259ff25e] Stage 'preprocessing' PASS (152ms)
+2026-03-03T22:58:27 [ERROR] dipex.main: Intake failed: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().
+Traceback (most recent call last):
+  File "C:\Users\sankl\Desktop\dipex\main.py", line 337, in main
+    bridge_result = bridge.run(
+                    ^^^^^^^^^^^
+  File "C:\Users\sankl\Desktop\dipex\ingestion\pipeline_bridge.py", line 229, in run
+    df = self._run_stage(result, "preprocessing", skip,
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sankl\anaconda3\Lib\site-packages\pandas\core\generic.py", line 1577, in __nonzero__
+    raise ValueError(
+ValueError: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all().

@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\verifier\statistical_verifier.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.05, 1.0, 5000, 'detail', 'empty_input', 'greater', 'metric', 'passed', 'regression', 'value']

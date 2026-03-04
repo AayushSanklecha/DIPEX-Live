@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\profiling\profile_report.py
+# hypothesis_version: 6.151.9
+
+['  │ [%s] %s: %s …', 'CORRELATED_NULLS', 'DRIFT_DETECTED', 'HEAVY_TAILS', 'HIGH_CARDINALITY', 'HIGH_SKEW', 'MAR_PATTERN_DETECTED', 'MNAR_SUSPECTED', 'STRONG_CORRELATION', 'analyst_flags', 'column', 'column_count', 'columns', 'correlation', 'dataset_id', 'dataset_shape', 'detail', 'drift', 'flag', 'flag_count', 'generated_at', 'highlights', 'missingness', 'report_dir', 'reports', 'row_count', 'rows', 'run_id', 'storage', 'unknown', 'utf-8', 'w']

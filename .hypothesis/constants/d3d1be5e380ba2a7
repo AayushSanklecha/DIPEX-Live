@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\proposal\proposers\ranker_proposer.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.01, 0.1, 1.0, 2.0, 'adjusted_score', 'column', 'error', 'high', 'impact', 'low', 'medium', 'prior_count', 'r', 'ranker_priors_state', 'score', 'storage', 'target_col', 'utf-8']

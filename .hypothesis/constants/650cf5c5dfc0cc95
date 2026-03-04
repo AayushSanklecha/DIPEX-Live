@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\analyst\documentation_generator.py
+# hypothesis_version: 6.151.9
+
+[0.0, 100, '# KPI Dictionary\n', ', ', '25%', '50%', '75%', 'auto-inferred', 'bronze', 'bronze_checksum', 'by', 'cardinality', 'categorical', 'category', 'change_type', 'column_count', 'dataset_id', 'description', 'dipex.documentation', 'dtype', 'formula', 'generated_at', 'gold', 'gold_artefact_id', 'gold_lineage_id', 'lineage', 'lineage_chain', 'markdown', 'max', 'mean', 'min', 'n_unique', 'name', 'none', 'not_provided', 'note', 'null_count', 'null_pct', 'nullable', 'number', 'object', 'operation', 'operations_applied', 'operator', 'outcome', 'owner', 'p25', 'p50', 'p75', 'parameters', 'performed_by', 'r', 'row_count', 'schema', 'silver', 'silver_id', 'source', 'status', 'std', 'system', 'timestamp', 'top_values', 'transform_applied', 'unknown', 'utf-8', 'version', 'w', 'what', 'when']

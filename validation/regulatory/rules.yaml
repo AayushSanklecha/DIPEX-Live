@@ -1,0 +1,130 @@
+# validation/regulatory/rules.yaml
+# ---------------------------------
+# Config-driven regulatory rule definitions for DIPEX Hard Gate 1.
+# Rules loaded by RegulatoryEngine.from_yaml_config().
+#
+# Changes here take effect on next run — NO redeployment required.
+#
+# rule_type values:
+#   positive_amount, aml_threshold, loan_ratio, repayment_consistency (domain: banking)
+#   revenue_recognition, capital_adequacy, net_position_limit, margin_call,
+#   sec_filing_bounds, double_entry_balance, fair_value_hierarchy           (domain: finance)
+#   phi_access, age_bounds, diagnosis_validity, treatment_cost_bounds,
+#   consent_validation, de_identification                                    (domain: healthcare)
+
+# ─── BANKING RULES ───────────────────────────────────────────────────────────
+banking:
+  - id: "bank_positive_amount"
+    rule_type: "positive_amount"
+    enabled: true
+    severity: "ERROR"
+    params:
+      amount_columns: ["transaction_amount", "loan_amount", "fee_amount"]
+      allow_zero: false
+
+  - id: "bank_aml_10k"
+    rule_type: "aml_threshold"
+    enabled: true
+    severity: "WARNING"
+    params:
+      amount_column: "transaction_amount"
+      threshold: 10000.0
+      currency_column: "currency"
+
+  - id: "bank_ltv"
+    rule_type: "loan_ratio"
+    enabled: true
+    severity: "ERROR"
+    params:
+      loan_col: "loan_amount"
+      value_col: "collateral_value"
+      max_ltv: 0.90
+
+  - id: "bank_repayment"
+    rule_type: "repayment_consistency"
+    enabled: true
+    severity: "ERROR"
+    params:
+      repayment_col: "repayment_amount"
+      balance_col: "outstanding_balance"
+
+# ─── FINANCE RULES ───────────────────────────────────────────────────────────
+finance:
+  - id: "fin_revenue_recognition"
+    rule_type: "revenue_recognition"
+    enabled: true
+    severity: "ERROR"
+    params:
+      revenue_columns: ["net_revenue", "gross_revenue", "segment_revenue"]
+      credit_memo_column: "is_credit_memo"
+
+  - id: "fin_capital_adequacy"
+    rule_type: "capital_adequacy"
+    enabled: true
+    severity: "CRITICAL"
+    params:
+      tier1_col: "tier1_capital"
+      rwa_col: "risk_weighted_assets"
+      min_car: 0.08
+
+  - id: "fin_position_limit"
+    rule_type: "net_position_limit"
+    enabled: true
+    severity: "ERROR"
+    params:
+      position_column: "net_position"
+      max_long: 1000000
+      max_short: 500000
+
+  - id: "fin_margin_call"
+    rule_type: "margin_call"
+    enabled: true
+    severity: "WARNING"
+    params:
+      margin_balance_col: "margin_balance"
+      maintenance_margin_col: "maintenance_margin"
+
+  - id: "fin_double_entry"
+    rule_type: "double_entry_balance"
+    enabled: true
+    severity: "ERROR"
+    params:
+      amount_col: "entry_amount"
+      transaction_id_col: "transaction_id"
+      tolerance: 0.01
+
+  - id: "fin_fair_value"
+    rule_type: "fair_value_hierarchy"
+    enabled: true
+    severity: "WARNING"
+    params:
+      level3_col: "level3_assets"
+      total_fair_value_col: "total_fair_value"
+      max_level3_ratio: 0.20
+
+# ─── HEALTHCARE RULES ────────────────────────────────────────────────────────
+healthcare:
+  - id: "hc_phi_access"
+    rule_type: "phi_access"
+    enabled: true
+    severity: "CRITICAL"
+    params:
+      phi_columns: ["patient_id", "ssn", "date_of_birth", "full_name",
+                    "address", "phone", "email", "insurance_id"]
+
+  - id: "hc_age_bounds"
+    rule_type: "age_bounds"
+    enabled: true
+    severity: "ERROR"
+    params:
+      age_column: "patient_age"
+      min_age: 0
+      max_age: 125
+
+  - id: "hc_treatment_cost"
+    rule_type: "treatment_cost_bounds"
+    enabled: true
+    severity: "WARNING"
+    params:
+      cost_column: "treatment_cost"
+      max_cost: 2000000.0

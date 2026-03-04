@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\validation\regulatory\regulatory_engine.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.01, 0.08, 0.2, 0.9, 130.0, 10000.0, 500000, 1000000, 'CRITICAL', 'ERROR', 'N/A', 'RegulatoryEngine', 'WARNING', 'age', 'age_column', 'allow_zero_amounts', 'allowed_phi_columns', 'aml_amount_column', 'aml_threshold', 'amount_col', 'amount_columns', 'balance_col', 'banking', 'capital_adequacy', 'credit_memo_column', 'currency_column', 'diagnosis_code', 'diagnosis_columns', 'domain', 'double_entry', 'fair_value', 'finance', 'generic', 'healthcare', 'level3_col', 'loan_col', 'loan_ratio', 'maintenance_col', 'margin', 'max_age', 'max_long', 'max_ltv', 'max_ratio', 'max_short', 'min_age', 'min_car', 'net_position', 'position_column', 'regulatory', 'repayment', 'repayment_col', 'revenue_columns', 'rwa_col', 'severity', 'tier1_col', 'tolerance', 'total_col', 'transaction_id_col', 'validation', 'value_col', 'vital_sign_bounds']

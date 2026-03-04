@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\stats\hypothesis_tests.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.05, 0.5, 0.8, 'FAIL_TO_REJECT_H0', 'NOT_SIGNIFICANT', 'REJECT_H0', 'SIGNIFICANT', 'after', 'alpha', 'before', 'chi-square', 'cohen_d', 'conclusion', 'cramers_v', 'dof', 'effect_size', 'effect_size_label', 'eta_squared', 'group_sizes', 'groups', 'interpretation', 'kruskal-wallis', 'large', 'mann-whitney-u', 'mean_a', 'mean_b', 'mean_diff', 'medium', 'n', 'n_a', 'n_b', 'n_groups', 'n_pairs', 'one-sample-t', 'one-way-ANOVA', 'p_value', 'paired-t', 'pearson-correlation', 'pearson_r', 'pop_mean', 'rank_biserial_r', 'sample_mean', 'significant', 'small', 'spearman-correlation', 'spearman_rho', 'statistic', 'test', 'two-sided', 'wilcoxon-signed-rank', 'x', 'y']

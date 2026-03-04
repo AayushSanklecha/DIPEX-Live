@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\api\routes\ingest.py
+# hypothesis_version: 6.151.9
+
+['/', '/api/ingest', 'UPLOADED', 'data/uploads', 'file_path', 'ingestion', 'next_step', 'original_filename', 'run_id', 'status', 'wb']

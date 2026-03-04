@@ -1,0 +1,7 @@
+﻿........................................................F............... [ 87%]
+..........                                                               [100%]
+================================== FAILURES ===================================
+C:\Users\sankl\Desktop\dipex\tests\test_streaming.py:278: AssertionError: ms timestamp not converted correctly: got 1000000000000.0, expected 1000000000.0
+=========================== short test summary info ===========================
+FAILED tests/test_streaming.py::TestWatermark::test_event_time_extraction_from_milliseconds
+1 failed, 81 passed in 9.84s

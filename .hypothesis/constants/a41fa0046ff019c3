@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\validation\null_validator.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.05, 0.1, 'CRITICAL', 'ERROR', 'NULL_VIOLATION', 'NullValidator', 'WARNING', 'column', 'column_thresholds', 'critical_fields', 'default', 'global_threshold', 'is_critical_field', 'message', 'null', 'null_count', 'null_pct', 'severity', 'threshold', 'type', 'validation', 'warn_threshold']

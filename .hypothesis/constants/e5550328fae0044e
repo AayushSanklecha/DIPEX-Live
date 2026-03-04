@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\validation\regulatory\healthcare_rules.py
+# hypothesis_version: 6.151.9
+
+[0.0, 25.0, 45.0, 130.0, 100, 200, 300, 'CRITICAL', 'DOB', 'ERROR', 'Email', 'SSN', 'age', 'age_range', 'diagnosis_code', 'diastolic_bp', 'healthcare', 'heart_rate', 'icd_code', 'max', 'min', 'object', 'phi_presence', 'spo2', 'string', 'systolic_bp', 'temperature', 'vital_signs']

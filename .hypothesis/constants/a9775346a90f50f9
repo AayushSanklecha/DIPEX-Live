@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\stats\permutation_tests.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.05, 1.0, 5000, 'FAIL_TO_REJECT_H0', 'NOT_SIGNIFICANT', 'REJECT_H0', 'SIGNIFICANT', 'adjusted_p', 'adjusted_p_values', 'all_methods_summary', 'alpha', 'bonferroni', 'conclusion', 'effect_size', 'fdr_bh', 'fdr_by', 'greater', 'groups', 'holm', 'interpretation', 'method', 'n_permutations', 'n_rejected', 'n_tests', 'observed_F', 'observed_r', 'observed_statistic', 'p_value', 'pearson', 'permutation_anova', 'permutation_custom', 'raw_p_values', 'rejected', 'significant', 'spearman', 'test', 'two-sided', 'x', 'y']

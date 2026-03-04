@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\stats\correlation.py
+# hypothesis_version: 6.151.9
+
+[0.05, 0.7, 0.9, 'LOW', 'MODERATE', 'SEVERE', 'UNKNOWN', 'abs_r', 'col_a', 'col_b', 'columns', 'correlation_matrix', 'error', 'feature', 'high_vif_features', 'interpretation', 'method', 'multicollinearity', 'n_observations', 'p_value', 'p_value_matrix', 'pearson', 'r', 'ranked', 'significant', 'spearman', 'strength', 'strong', 'strong_correlations', 'target', 'target_correlation', 'top_features', 'very_strong', 'vif', 'vif_scores']

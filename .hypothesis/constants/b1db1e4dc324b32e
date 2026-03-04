@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\analyst\visualization_engine.py
+# hypothesis_version: 6.151.9
+
+[0.5, 0.7, 1000, 10000, '#000000', '#0072B2', '#009E73', '#10b981', '#56B4E9', '#CC79A7', '#D55E00', '#E69F00', '#F0E442', '#ef4444', '#f59e0b', 'INFO', 'MISSING_X_LABEL', 'MISSING_Y_LABEL', 'PIE_TOO_MANY_SLICES', 'TRUNCATED_Y_AXIS', 'WARNING', '_', 'actual_end_date', 'actual_start_date', 'area', 'bar', 'bin_end', 'bin_start', 'box', 'categorical', 'categories', 'chart_type', 'color', 'confidence_badge', 'count', 'data', 'data_summary', 'datetime', 'dipex.visualization', 'end_date', 'flag', 'gold_artefact_id', 'heatmap', 'histogram', 'label', 'line', 'max', 'message', 'min', 'misleading_flags', 'n_categories', 'n_rows', 'numeric', 'operation', 'palette', 'pie', 'qa_passed', 'records', 'rejected', 'retry', 'scatter', 'score', 'severity', 'start_date', 'title', 'type', 'unit', 'unknown', 'verified', 'x', 'x_axis', 'y', 'y_axis']

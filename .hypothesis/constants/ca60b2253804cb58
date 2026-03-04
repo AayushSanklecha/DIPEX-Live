@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex\ingestion\layer_store.py
+# hypothesis_version: 6.151.9
+
+['%Y%m%dT%H%M%S', '.csv', '.parquet', '_', 'data', 'layer_store', 'silver', 'snapshot', 'snapshots']
