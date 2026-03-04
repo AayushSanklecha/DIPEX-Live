@@ -17,27 +17,8 @@ const TOKEN = {
 
 // ── Page Meta ────────────────────────────────────────────────────────
 const PAGE_META = {
-    overview: { title: 'Overview', subtitle: 'Platform health and KPI summary' },
-    pipeline: { title: 'Pipeline', subtitle: 'Upload, configure and run the DIPEX pipeline' },
-    ingest_all: { title: 'Multi-DB Ingest', subtitle: 'Aggregate from MongoDB, Redis, PostgreSQL, Neo4j, Kafka, DuckDB & Parquet' },
-    analytics: { title: 'Analytics', subtitle: 'Confidence scores, gate decisions, and insight narratives' },
-    statistics: { title: 'Statistics', subtitle: 'Descriptive stats, hypothesis testing, and regression' },
-    modeling: { title: 'Modeling', subtitle: 'ML training, champion selection, and model registry' },
-    sql: { title: 'SQL Console', subtitle: 'Query your datasets with DuckDB SQL' },
-    analyst_ops: { title: 'Analyst Intelligence', subtitle: 'Junior · Mid · Senior analyst operations on Gold artefacts' },
-    analyst_tiers: { title: 'Analyst Tier Automation', subtitle: 'Layered operations from Bronze to Gold via analyst tiers' },
-    rl_status: { title: 'RL Status', subtitle: 'Meta-RL policy weights, exploration rate, reward history' },
-    streaming: { title: 'Streaming Monitor', subtitle: 'Kafka consumer lag, window state, backpressure, watermark' },
-    lineage: { title: 'Data Lineage', subtitle: 'Trace any Gold artefact back through Silver and Bronze' },
-    drift: { title: 'Drift Monitor', subtitle: 'PSI · KL Divergence · Jensen-Shannon · Wasserstein' },
-    cohort: { title: 'Cohort Analysis', subtitle: 'Retention matrix, LTV curves, period-over-period' },
-    calibration: { title: 'Calibration', subtitle: 'Reliability diagram, ECE, Brier Score, Platt/Isotonic' },
-    reports: { title: 'Reports', subtitle: 'Generate and download executive reports' },
-    governance: { title: 'Governance', subtitle: 'Policy engine, data catalog, compliance evaluation' },
-    audit: { title: 'Audit Trail', subtitle: 'Tamper-evident, chronological system audit log' },
-    login: { title: 'Authentication', subtitle: 'JWT login, role-based access, token management' },
+    overview: { title: 'Dashboard', subtitle: 'One-click data pipeline and analytics' },
     api_docs: { title: 'API Docs', subtitle: 'Interactive Swagger UI — explore and test every endpoint' },
-    grafana: { title: 'Grafana', subtitle: 'Live monitoring dashboards — pipeline runs, drift, RL, Kafka' },
 };
 
 // ── Core: apiFetch ───────────────────────────────────────────────────
@@ -94,16 +75,8 @@ function showPage(pageId) {
 
 function onPageLoad(pageId) {
     const loaders = {
-        overview: () => { loadMetrics(); loadAudit(); },
-        rl_status: () => loadRLStatus(),
-        streaming: () => refreshStreaming(),
-        lineage: () => loadLineageDatasets(),
-        models: () => loadModelRegistry(),
-        analyst_ops: () => renderAnalystOps(),
-        calibration: () => renderCalibrationDemo(),
-        login: () => refreshAuthUI(),
+        overview: () => { loadMetrics(); loadSnapshots(); setupQuickDropZone(); },
         api_docs: () => lazyLoadIframe('api-docs-iframe', 'http://localhost:8000/docs'),
-        grafana: () => lazyLoadIframe('grafana-iframe', 'http://localhost:3001'),
     };
     (loaders[pageId] || (() => { }))();
 }
@@ -158,8 +131,6 @@ function refreshData() { onPageLoad(currentPage); showToast('Refreshed', 'info',
 // ══════════════════════════════════════════════════════════════════════
 // OVERVIEW
 // ══════════════════════════════════════════════════════════════════════
-let confChart = null, statusChart = null;
-
 async function loadMetrics() {
     try {
         const data = await apiFetch('/metrics');
@@ -172,74 +143,308 @@ async function loadMetrics() {
         el('kpi-pass-rate').textContent = passRate.toFixed(1) + '%';
         el('kpi-approved').textContent = data.approved_runs || totalRuns || '—';
         el('kpi-reports').textContent = data.reports_count || '—';
-        renderConfidenceChart();
-        renderStatusChart(data);
     } catch (e) {
         const el = (id) => document.getElementById(id);
         ['kpi-total-runs', 'kpi-pass-rate', 'kpi-approved', 'kpi-reports'].forEach(id =>
             (document.getElementById(id) || {}).textContent = '—');
-        renderConfidenceChart();
-        renderStatusChart({});
     }
 }
 
-function renderConfidenceChart() {
-    const ctx = document.getElementById('confidence-chart');
-    if (!ctx) return;
-    if (confChart) confChart.destroy();
-    const labels = Array.from({ length: 12 }, (_, i) => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][i]);
-    const data = [0.61, 0.65, 0.67, 0.70, 0.72, 0.74, 0.76, 0.78, 0.80, 0.82, 0.84, 0.87];
-    confChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Confidence Score',
-                data,
-                borderColor: '#6c63ff',
-                backgroundColor: 'rgba(108,99,255,0.08)',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#6c63ff',
-                pointRadius: 3,
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8b99b5', font: { size: 11 } } },
-                y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8b99b5', font: { size: 11 } }, min: 0.5, max: 1.0 }
-            }
-        }
-    });
+
+// ══════════════════════════════════════════════════════════════════════
+// QUICK ACTIONS (UNIFIED DASHBOARD)
+// ══════════════════════════════════════════════════════════════════════
+let quickSelectedFile = null;
+
+function quickUploadRun() {
+    document.getElementById('quick-run-section').style.display = 'block';
+    document.getElementById('quick-result-card').style.display = 'none';
+    document.getElementById('quick-run-section').scrollIntoView({ behavior: 'smooth' });
 }
 
-function renderStatusChart(data) {
-    const ctx = document.getElementById('status-chart');
-    if (!ctx) return;
-    if (statusChart) statusChart.destroy();
-    const passed = data.total_pipeline_runs ? (data.total_pipeline_runs - (data.retry_runs || 0)) : 34;
-    const retried = data.retry_runs || 5;
-    const failed = data.failed_runs || 2;
-    statusChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Passed', 'Retried', 'Failed'],
-            datasets: [{ data: [passed, retried, failed], backgroundColor: ['#00e870', '#ffb938', '#ff4757'], borderColor: 'transparent', hoverOffset: 6 }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false, cutout: '65%',
-            plugins: {
-                legend: { labels: { color: '#8b99b5', font: { size: 11 }, padding: 16 } }
-            }
+function closeQuickRun() {
+    document.getElementById('quick-run-section').style.display = 'none';
+}
+
+async function quickViewReports() {
+    try {
+        const data = await apiFetch('/api/results');
+        const runs = data.runs || [];
+        if (runs.length === 0) {
+            showToast('No pipeline runs found yet', 'info');
+            return;
         }
+        // Display runs in the result card
+        const resultCard = document.getElementById('quick-result-card');
+        const badge = document.getElementById('quick-badge');
+        const detailEl = document.getElementById('quick-result-detail');
+        const logEl = document.getElementById('quick-log');
+        
+        resultCard.style.display = 'block';
+        badge.className = 'badge badge-info';
+        badge.textContent = 'RECENT RUNS';
+        logEl.innerHTML = `<div class="log-line info">[DIPEX] Found ${runs.length} recent pipeline runs</div>`;
+        
+        const recentRuns = runs.slice(-10).reverse();
+        detailEl.innerHTML = `
+            <div style="margin-top:16px">
+                <h4 style="margin-bottom:12px">Recent Pipeline Runs (Click to view details)</h4>
+                <table class="data-table" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Run ID</th>
+                            <th>Dataset</th>
+                            <th>Gate</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recentRuns.map(r => `
+                            <tr>
+                                <td class="mono" style="font-size:0.7rem">${(r.run_id || '').slice(0, 16)}...</td>
+                                <td>${r.dataset_id || '—'}</td>
+                                <td><span class="badge ${r.gate_decision === 'PASS' ? 'badge-pass' : r.gate_decision === 'WARN' ? 'badge-warn' : 'badge-fail'}">${r.gate_decision || 'UNKNOWN'}</span></td>
+                                <td style="font-size:0.72rem">${r.timestamp ? new Date(r.timestamp).toLocaleString() : '—'}</td>
+                                <td><button class="btn-ghost btn-sm" onclick="viewRunDetails('${r.run_id}')">View</button></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        resultCard.scrollIntoView({ behavior: 'smooth' });
+    } catch (e) {
+        showToast('Failed to load reports: ' + e.message, 'error');
+    }
+}
+
+async function quickCheckHealth() {
+    try {
+        const data = await apiFetch('/health');
+        const status = data.status || 'unknown';
+        const statusClass = status === 'healthy' ? 'success' : status === 'degraded' ? 'warn' : 'error';
+        showToast(`System: ${status.toUpperCase()} | Uptime: ${data.uptime}s`, statusClass, 6000);
+    } catch (e) {
+        showToast('Health check failed: ' + e.message, 'error');
+    }
+}
+
+async function viewRunDetails(runId) {
+    try {
+        const data = await apiFetch(`/api/results/${runId}`);
+        const resultCard = document.getElementById('quick-result-card');
+        const badge = document.getElementById('quick-badge');
+        const detailEl = document.getElementById('quick-result-detail');
+        const logEl = document.getElementById('quick-log');
+        
+        resultCard.style.display = 'block';
+        badge.className = 'badge badge-info';
+        badge.textContent = 'PIPELINE RUN STATS';
+        logEl.innerHTML = `<div class="log-line info">[Analytics] Viewing run: ${runId.slice(0, 16)}...</div>`;
+        
+        const status = data.status || 'UNKNOWN';
+        const statusClass = status === 'COMPLETED' ? 'badge-pass' : status === 'FAILED' ? 'badge-fail' : 'badge-info';
+        const gateClass = data.gate_decision === 'PASS' ? 'badge-pass' : data.gate_decision === 'FAIL' ? 'badge-fail' : 'badge-info';
+        
+        detailEl.innerHTML = `
+            <div style="margin-top:20px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                    <h3 style="color: var(--text-primary);margin:0">Pipeline Results</h3>
+                    <button onclick="location.reload()" class="btn-primary" style="padding:8px 16px">
+                        ← Back to Home
+                    </button>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px">
+                    <div style="background:var(--bg-subtle);padding:16px;border-radius:8px;border:1px solid var(--border)">
+                        <div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:6px">Status</div>
+                        <div class="badge ${statusClass}" style="font-size:1rem">${status}</div>
+                    </div>
+                    <div style="background:var(--bg-subtle);padding:16px;border-radius:8px;border:1px solid var(--border)">
+                        <div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:6px">Gate Decision</div>
+                        <div class="badge ${gateClass}" style="font-size:1rem">${data.gate_decision || 'N/A'}</div>
+                    </div>
+                    <div style="background:var(--bg-subtle);padding:16px;border-radius:8px;border:1px solid var(--border)">
+                        <div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:6px">Quality Score</div>
+                        <div style="font-size:1.5rem;font-weight:600;color:var(--accent)">${typeof data.quality_score === 'number' ? (data.quality_score * 100).toFixed(1) + '%' : 'N/A'}</div>
+                    </div>
+                    <div style="background:var(--bg-subtle);padding:16px;border-radius:8px;border:1px solid var(--border)">
+                        <div style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:6px">Dataset</div>
+                        <div style="font-size:1.1rem;font-weight:600">${data.row_count || 0} × ${data.col_count || 0}</div>
+                        <div style="color:var(--text-secondary);font-size:0.75rem;margin-top:2px">rows × columns</div>
+                    </div>
+                </div>
+
+                ${data.has_report ? `
+                    <div style="background:var(--bg-subtle);padding:20px;border-radius:8px;border:1px solid var(--border);margin-bottom:20px;text-align:center">
+                        <h4 style="margin:0 0 12px 0;color:var(--text-primary)">Executive Report Generated</h4>
+                        <button onclick="window.location.href='${data.report_url}'" class="btn-primary" style="padding:12px 24px;font-size:1rem">
+                            📊 View Full Report
+                        </button>
+                    </div>
+                ` : ''}
+
+                <div style="background:var(--bg-subtle);padding:16px;border-radius:8px;border:1px solid var(--border)">
+                    <h4 style="margin:0 0 12px 0;color:var(--text-primary)">Run Metadata</h4>
+                    <div style="display:grid;gap:8px;font-size:0.9rem">
+                        <div><span style="color:var(--text-secondary)">Run ID:</span> <code>${runId}</code></div>
+                        <div><span style="color:var(--text-secondary)">Dataset ID:</span> ${data.dataset_id || 'N/A'}</div>
+                        <div><span style="color:var(--text-secondary)">Timestamp:</span> ${data.timestamp || 'N/A'}</div>
+                        ${data.snapshot_id ? `<div><span style="color:var(--text-secondary)">Snapshot ID:</span> ${data.snapshot_id}</div>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        resultCard.scrollIntoView({ behavior: 'smooth' });
+        showToast('Run details loaded', 'success');
+    } catch (e) {
+        showToast('Failed to load run details: ' + e.message, 'error');
+    }
+}
+
+async function viewSnapshotDetails(snapshotId, datasetId) {
+    const resultCard = document.getElementById('quick-result-card');
+    const badge = document.getElementById('quick-badge');
+    const detailEl = document.getElementById('quick-result-detail');
+    const logEl = document.getElementById('quick-log');
+    
+    resultCard.style.display = 'block';
+    badge.className = 'badge badge-info';
+    badge.textContent = 'SNAPSHOT';
+    logEl.innerHTML = `<div class="log-line info">[DIPEX] Viewing snapshot: ${snapshotId.slice(0, 16)}...</div>`;
+    
+    detailEl.innerHTML = `
+        <div style="margin-top:16px">
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px">
+                <div class="status-msg info">Dataset: ${datasetId}</div>
+                <div class="status-msg info">Snapshot: ${snapshotId.slice(0, 32)}</div>
+            </div>
+            <div class="status-msg info">
+                Click "View Reports" button above to see all pipeline runs and detailed statistics.
+            </div>
+        </div>
+    `;
+    resultCard.scrollIntoView({ behavior: 'smooth' });
+    showToast('Snapshot selected', 'info');
+}
+
+async function quickViewAudit() {
+    try {
+        const data = await apiFetch('/api/audit/');
+        const entries = Array.isArray(data) ? data : (data.entries || []);
+        const summary = `Total entries: ${entries.length} | Latest: ${entries[0]?.event || 'None'}`;
+        showToast(summary, 'info', 6000);
+    } catch (e) {
+        showToast('Audit log unavailable: ' + e.message, 'warn');
+    }
+}
+
+function setupQuickDropZone() {
+    const zone = document.getElementById('quick-drop-zone');
+    const input = document.getElementById('quick-file-input');
+    if (!zone || !input) return;
+
+    zone.addEventListener('click', () => input.click());
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+        e.preventDefault(); zone.classList.remove('drag-over');
+        if (e.dataTransfer.files[0]) selectQuickFile(e.dataTransfer.files[0]);
     });
+    input.addEventListener('change', () => { if (input.files[0]) selectQuickFile(input.files[0]); });
+}
+
+function selectQuickFile(file) {
+    quickSelectedFile = file;
+    const el = document.getElementById('quick-upload-status');
+    el.className = 'status-msg success';
+    el.textContent = `✓ File selected: ${file.name}`;
+    el.style.display = 'block';
+    showToast('File selected', 'success');
+}
+
+async function runQuickPipeline() {
+    const sourceKind = (document.getElementById('quick-source-kind') || {}).value || 'file';
+    const sourceInput = (document.getElementById('quick-source-input') || {}).value?.trim() || '';
+
+    const resultCard = document.getElementById('quick-result-card');
+    const logEl = document.getElementById('quick-log');
+    const badge = document.getElementById('quick-badge');
+    const detailEl = document.getElementById('quick-result-detail');
+
+    if (sourceKind === 'file' && !quickSelectedFile) {
+        showToast('Select a file first', 'warn');
+        return;
+    }
+    if (sourceKind !== 'file' && !sourceInput) {
+        showToast('Enter source input for selected source type', 'warn');
+        return;
+    }
+
+    resultCard.style.display = 'block';
+    badge.className = 'badge badge-running';
+    badge.textContent = 'RUNNING';
+    logEl.innerHTML = '<div class="log-line info">[DIPEX] Starting pipeline...</div>';
+    detailEl.innerHTML = '';
+    resultCard.scrollIntoView({ behavior: 'smooth' });
+
+    const addLog = (msg, type = '') => {
+        logEl.innerHTML += `<div class="log-line ${type}">${msg}</div>`;
+        logEl.scrollTop = logEl.scrollHeight;
+    };
+
+    try {
+        const form = new FormData();
+        form.append('source_kind', sourceKind);
+        form.append('source_input', sourceInput);
+        if (sourceKind === 'file' && quickSelectedFile) {
+            form.append('file', quickSelectedFile);
+        }
+
+        const headers = {};
+        if (TOKEN.access) headers['Authorization'] = 'Bearer ' + TOKEN.access;
+
+        const res = await fetch(API_BASE + '/api/pipeline/simple-run', {
+            method: 'POST',
+            headers,
+            body: form,
+        });
+
+        if (!res.ok) {
+            let msg = `HTTP ${res.status}`;
+            try {
+                const err = await res.json();
+                msg = err.detail?.error || err.detail || err.message || msg;
+            } catch { }
+            throw new Error(msg);
+        }
+
+        const result = await res.json();
+        badge.className = 'badge badge-pass';
+        badge.textContent = 'DONE';
+        addLog('[DIPEX] Run complete.', 'success');
+        (result.stages || []).forEach(s => {
+            addLog(`[${s.status}] ${s.stage} (${Math.round(s.elapsed_ms || 0)} ms)`, s.status === 'FAIL' ? 'error' : '');
+        });
+
+        detailEl.innerHTML = renderSimpleFinalResult(result);
+        showToast('Pipeline completed successfully', 'success');
+        loadMetrics();
+        loadSnapshots();
+    } catch (e) {
+        badge.className = 'badge badge-fail';
+        badge.textContent = 'ERROR';
+        addLog('[ERROR] ' + e.message, 'error');
+        showToast('Pipeline failed: ' + e.message, 'error');
+    }
 }
 
 // ══════════════════════════════════════════════════════════════════════
-// PIPELINE
+// PIPELINE (LEGACY - KEPT FOR COMPATIBILITY)
 // ══════════════════════════════════════════════════════════════════════
+let selectedPipelineFile = null;
+
 function setupDropZone() {
     const zone = document.getElementById('drop-zone');
     const input = document.getElementById('file-input');
@@ -256,40 +461,36 @@ function setupDropZone() {
 }
 
 async function uploadFile(file) {
-    setStatus('upload-status', `Uploading ${file.name}…`, 'info');
-    const form = new FormData();
-    form.append('file', file);
-    try {
-        const headers = {};
-        if (TOKEN.access) headers['Authorization'] = 'Bearer ' + TOKEN.access;
-        const res = await fetch(API_BASE + '/ingest/file', { method: 'POST', headers, body: form });
-        const data = await res.json();
-        const runId = data.snapshot_id || data.run_id || '';
-        document.getElementById('run-id').value = runId;
-        setStatus('upload-status', `✓ Uploaded — Snapshot: ${runId}`, 'success');
-        showToast('File uploaded successfully', 'success');
-        loadSnapshots();
-    } catch (e) {
-        setStatus('upload-status', `Error: ${e.message}`, 'error');
-        showToast('Upload failed: ' + e.message, 'error');
-    }
+    selectedPipelineFile = file;
+    setStatus('upload-status', `✓ File selected: ${file.name}`, 'success');
+    showToast('File selected', 'success');
 }
 
-async function runPipeline() {
-    const runId = document.getElementById('run-id').value.trim();
-    const target = document.getElementById('target-col').value.trim() || 'target';
+async function runSimplePipeline() {
+    const sourceKind = (document.getElementById('source-kind') || {}).value || 'file';
+    const sourceInput = (document.getElementById('source-input') || {}).value?.trim() || '';
+    const datasetId = (document.getElementById('pipeline-dataset-id') || {}).value?.trim() || '';
+    const target = (document.getElementById('target-col') || {}).value?.trim() || '';
+
     const card = document.getElementById('pipeline-log-card');
     const logEl = document.getElementById('pipeline-log');
     const badge = document.getElementById('pipeline-badge');
     const resCard = document.getElementById('pipeline-result-card');
 
-    if (!runId) { showToast('Upload a file first to get a Run ID', 'warn'); return; }
+    if (sourceKind === 'file' && !selectedPipelineFile) {
+        showToast('Select a file first', 'warn');
+        return;
+    }
+    if (sourceKind !== 'file' && !sourceInput) {
+        showToast('Enter source input for selected source type', 'warn');
+        return;
+    }
 
     card.style.display = 'block';
     resCard.style.display = 'none';
     badge.className = 'badge badge-running';
     badge.textContent = 'RUNNING';
-    logEl.innerHTML = '<div class="log-line info">[DIPEX] Starting pipeline run…</div>';
+    logEl.innerHTML = '<div class="log-line info">[DIPEX] Starting full pipeline…</div>';
 
     const addLog = (msg, type = '') => {
         logEl.innerHTML += `<div class="log-line ${type}">${msg}</div>`;
@@ -297,19 +498,45 @@ async function runPipeline() {
     };
 
     try {
-        const result = await apiFetch('/api/run', {
+        const form = new FormData();
+        form.append('source_kind', sourceKind);
+        form.append('source_input', sourceInput);
+        form.append('dataset_id', datasetId);
+        form.append('target_col', target);
+        if (sourceKind === 'file' && selectedPipelineFile) {
+            form.append('file', selectedPipelineFile);
+        }
+
+        const headers = {};
+        if (TOKEN.access) headers['Authorization'] = 'Bearer ' + TOKEN.access;
+
+        const res = await fetch(API_BASE + '/api/pipeline/simple-run', {
             method: 'POST',
-            body: JSON.stringify({ run_id: runId, target_column: target })
+            headers,
+            body: form,
         });
+
+        if (!res.ok) {
+            let msg = `HTTP ${res.status}`;
+            try {
+                const err = await res.json();
+                msg = err.detail?.error || err.detail || err.message || msg;
+            } catch { }
+            throw new Error(msg);
+        }
+
+        const result = await res.json();
         badge.className = 'badge badge-pass';
         badge.textContent = 'DONE';
         addLog('[DIPEX] Run complete.', 'success');
-        const logs = result.logs || result.pipeline_logs || [];
-        logs.forEach(l => addLog(l));
+        (result.stages || []).forEach(s => {
+            addLog(`[${s.status}] ${s.stage} (${Math.round(s.elapsed_ms || 0)} ms)`, s.status === 'FAIL' ? 'error' : '');
+        });
+
         resCard.style.display = 'block';
-        const conf = result.confidence_score || result.final_confidence || null;
-        document.getElementById('pipeline-result').innerHTML = renderResultCard(result, conf);
+        document.getElementById('pipeline-result').innerHTML = renderSimpleFinalResult(result);
         showToast('Pipeline completed successfully', 'success');
+        loadSnapshots();
     } catch (e) {
         badge.className = 'badge badge-fail';
         badge.textContent = 'ERROR';
@@ -318,24 +545,29 @@ async function runPipeline() {
     }
 }
 
-async function runPreprocess() {
-    const runId = document.getElementById('run-id').value.trim();
-    if (!runId) { showToast('Enter a Run ID first', 'warn'); return; }
-    try {
-        showToast('Preprocessing…', 'info');
-        await apiFetch('/api/preprocess', { method: 'POST', body: JSON.stringify({ run_id: runId }) });
-        showToast('Preprocessing complete', 'success');
-    } catch (e) { showToast('Error: ' + e.message, 'error'); }
-}
+function renderSimpleFinalResult(result) {
+    const finalResult = result.final_result || {};
+    const quality = typeof finalResult.quality_score === 'number'
+        ? `${(finalResult.quality_score * 100).toFixed(1)}%`
+        : 'N/A';
+    const gate = finalResult.gate_decision || 'UNKNOWN';
+    const gateClass = gate === 'PASS' ? 'badge-pass' : gate === 'WARN' ? 'badge-warn' : 'badge-fail';
 
-function renderResultCard(result, conf) {
-    const score = conf ? (conf * 100).toFixed(1) + '%' : 'N/A';
-    const cls = conf >= 0.85 ? 'badge-pass' : conf >= 0.70 ? 'badge-warn' : 'badge-fail';
-    return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-    <span>Confidence Score:</span>
-    <span class="badge ${cls}">${score}</span>
-  </div>
-  <div class="json-result"><pre>${JSON.stringify(result, null, 2)}</pre></div>`;
+    return `
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px">
+        <div class="status-msg info">Run ID: ${result.run_id || '—'}</div>
+        <div class="status-msg info">Dataset: ${result.dataset_id || '—'}</div>
+        <div class="status-msg info">Source: ${result.source_kind || '—'}</div>
+        <div class="status-msg info">Snapshot: ${result.snapshot_id || '—'}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span>Final Gate:</span>
+        <span class="badge ${gateClass}">${gate}</span>
+        <span style="margin-left:8px">Quality:</span>
+        <span class="badge badge-info">${quality}</span>
+      </div>
+      <div class="json-result"><pre>${JSON.stringify(finalResult, null, 2)}</pre></div>
+    `;
 }
 
 async function loadSnapshots() {
@@ -344,7 +576,7 @@ async function loadSnapshots() {
         const rows = (Array.isArray(data) ? data : (data.snapshots || [])).slice(0, 20);
         const tbody = document.getElementById('snapshots-body');
         if (!tbody) return;
-        tbody.innerHTML = rows.length ? rows.map(s => `<tr>
+        tbody.innerHTML = rows.length ? rows.map(s => `<tr style="cursor:pointer" onclick="viewSnapshotDetails('${s.snapshot_id}', '${s.dataset_id}')" title="Click to view details">
       <td>${s.dataset_id || '—'}</td>
       <td class="mono">${(s.snapshot_id || '').slice(0, 16)}…</td>
       <td>${s.row_count || '—'}</td>
@@ -354,6 +586,7 @@ async function loadSnapshots() {
     </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">No snapshots yet</td></tr>';
     } catch { /* silent */ }
 }
+
 // ══════════════════════════════════════════════════════════════════════
 // MULTI-DB INGEST
 // ══════════════════════════════════════════════════════════════════════

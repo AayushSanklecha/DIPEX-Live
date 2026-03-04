@@ -10,7 +10,7 @@ import uuid
 from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel, Field
 
-from verify_pipeline import orchestrate_pipeline
+from simple_pipeline import orchestrate_pipeline
 
 router = APIRouter(prefix="/api/run", tags=["pipeline"])
 logger = logging.getLogger(__name__)

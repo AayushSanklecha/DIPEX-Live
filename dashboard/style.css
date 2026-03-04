@@ -691,6 +691,12 @@ select.form-input { cursor: pointer; }
 }
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-primary); }
+.data-table tr[onclick]:hover td,
+.data-table tr[style*="cursor:pointer"]:hover td { 
+  background: rgba(108,99,255,0.08); 
+  color: var(--text-primary);
+  cursor: pointer;
+}
 .data-table .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--accent); }
 
 /* ── Drop Zone ─────────────────────────────────────────────────────── */

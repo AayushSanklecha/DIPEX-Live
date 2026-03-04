@@ -194,7 +194,7 @@ Examples:
 
     elif args.command == "run":
         import uuid
-        from verify_pipeline import orchestrate_pipeline
+        from simple_pipeline import orchestrate_pipeline
         run_id = str(uuid.uuid4())
         # Copy source file into expected location
         if args.source and os.path.exists(args.source):

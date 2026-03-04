@@ -20,6 +20,9 @@ logger = logging.getLogger("dipex.api.report")
 
 REPORT_DIR = "reports"
 
+# Also register routes at /api/reports for compatibility
+api_router = APIRouter(prefix="/api/reports", tags=["Reporting"])
+
 
 class ReportRequest(BaseModel):
     run_id: str
@@ -127,8 +130,26 @@ async def list_reports():
 
 @router.get("/{run_id}")
 async def download_report(run_id: str):
-    """Download (serve) the executive HTML report for a run_id."""
+    """Display the executive HTML report for a run_id in browser."""
     path = os.path.join(REPORT_DIR, f"{run_id}_executive_report.html")
     if not os.path.exists(path):
         raise HTTPException(404, detail=f"Report for run_id '{run_id}' not found. Generate it first via POST /report/executive.")
-    return FileResponse(path, media_type="text/html", filename=f"{run_id}_executive_report.html")
+    
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
+    
+    return HTMLResponse(content=content)
+
+
+# Compatibility endpoint at /api/reports/{run_id}
+@api_router.get("/{run_id}")
+async def download_report_api(run_id: str):
+    """Display the executive HTML report for a run_id in browser (API compatibility endpoint)."""
+    path = os.path.join(REPORT_DIR, f"{run_id}_executive_report.html")
+    if not os.path.exists(path):
+        raise HTTPException(404, detail=f"Report for run_id '{run_id}' not found.")
+    
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
+    
+    return HTMLResponse(content=content)
