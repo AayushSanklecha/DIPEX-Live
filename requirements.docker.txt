@@ -70,9 +70,6 @@ SimpleWebSocketServer==0.1.2
 six==1.16.0
 sympy==1.14.0
 threadpoolctl==3.5.0
-torch==2.8.0
-torchaudio==2.8.0
-torchvision==0.23.0
 tqdm==4.67.1
 twine==6.1.0
 typing==3.7.4.3
@@ -121,10 +118,7 @@ pyarrow>=14.0.0
 optuna>=3.6.0
 
 # ── LLM / Embeddings ──────────────────────────────────────────────────────────
-sentence-transformers>=2.7.0
-datasets>=2.19.0
 huggingface-hub>=0.22.0
-chromadb>=0.5.0
 
 # ── Monitoring ────────────────────────────────────────────────────────────────
 prometheus-client>=0.20.0

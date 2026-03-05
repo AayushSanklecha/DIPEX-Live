@@ -6,39 +6,79 @@ DIPEX is an end-to-end data intelligence platform that ingests, validates, analy
 
 ---
 
-## Architecture Overview
+## Architecture Overview — 5 Layers
 
 ```
-Raw Data ──► Bronze (Immutable) ──► Hard Gate 1 ──► Silver (Frozen)
-                                                          │
-                Retry Engine ◄── Hard Gate 2 ◄── Profiling + Governance + Stats + ML
-                      │                                   │
-                      │                           Confidence Vector
-                      │                                   │
-                      └─────────────────────────── Gold Output (if ≥ threshold)
-                                                          │
-                                                   Approved Storage
+┌─────────────────────────────────────────────────────────────────┐
+│                     DATA SOURCE LAYER                           │
+│           CSV │ Excel │ Database │ API │ Kafka Streams          │
+│                   datasource/router.py                          │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                  DATA PROCESSING LAYER                          │
+│  ─ Data Ingestion         ingestion/universal_intake.py         │
+│  ─ Normalization          ingestion/normaliser.py               │
+│  ─ Data Profiling         profiling/profiler.py                 │
+│  ─ Streaming Window       ingestion/streaming_window.py  (NEW)  │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│             QA, GOVERNANCE & CONTROL LAYER                      │
+│  ─ Deterministic Validation   validation/hard_gate.py           │
+│  ─ Independent QA Verifiers   verifier/confidence_vector.py     │
+│  ─ Regulatory & Business Rules validation/regulatory/           │
+│  ─ Confidence Scoring         verifier/confidence_vector.py     │
+│  ─ Audit Logs                 audit/audit.jsonl                 │
+│                   qa_control/controller.py  (NEW)               │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              AI & ANALYTICS SERVICE LAYER                       │
+│  ─ Automated EDA          eda/auto_eda.py              (NEW)    │
+│  ─ Feature Engineering    feature_engineering/engineer.py (NEW) │
+│  ─ Insight Ranking        proposal/insight_ranker.py            │
+│  ─ Retry & Strategy       pipeline_bridge._retry_engine_loop()  │
+│  ─ LLM Summarization      reporting_service/llm_provider.py     │
+│                   analytics/orchestrator.py  (NEW)              │
+└────────────────────────────┬────────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   PRESENTATION LAYER                            │
+│  ─ Dashboards    dashboard/index.html                           │
+│  ─ Reports       reporting_service/executive_report.py          │
+│  ─ APIs          api/routes/ (12 route modules)                 │
+│  ─ Exports       api/routes/exports.py  (NEW)                   │
+│                  /api/export/{csv|json|parquet|report}          │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-**13-Stage Pipeline** (in `ingestion/pipeline_bridge.py`):
+**Pipeline Stages** (`ingestion/pipeline_bridge.py`):
 
-| Stage | Name | Outcome if Fail |
-|---|---|---|
-| 1 | Preprocessing | Stop, log |
-| 2 | **Hard Gate 1** | Abort pipeline, no RL update |
-| 3 | Profiling | Warn, continue |
-| 4 | Governance | Warn, continue |
-| 5 | Statistics | Warn, continue |
-| 6 | ML Modeling | Stop, log |
-| 7 | **Hard Gate 2** | Trigger Retry Engine |
-| 8 | Confidence Vector | Trigger Retry Engine |
-| 9 | **Retry Engine** | Escalate to audit log |
-| 10 | Experience Memory | Warn |
-| 11 | RL Update | Sandbox safe, warn |
-| 12 | Executive Report | Fallback to rule-based |
-| 13 | Audit Trail | Warn |
+| Stage | Name | Layer | Outcome if Fail |
+|---|---|---|---|
+| 0 | **Streaming Window** | Data Processing | Skip (non-streaming), warn |
+| 1 | Preprocessing | Data Processing | Stop, log |
+| 2 | **Hard Gate 1** | QA/Control | Abort pipeline |
+| 3 | Profiling | Data Processing | Warn, continue |
+| 4 | **AI & Analytics** | AI & Analytics Svc | Warn, continue |
+| 5 | Governance | QA/Control | Warn, continue |
+| 5 | Statistical Analysis | QA/Control | Warn, continue |
+| 6 | ML Modeling | AI & Analytics Svc | Stop, log |
+| 7 | **Hard Gate 2** | QA/Control | Trigger Retry Engine |
+| 8 | Confidence Vector | QA/Control | Trigger Retry Engine |
+| 9 | **Retry Engine** | AI & Analytics Svc | Escalate to audit |
+| 10 | Experience Memory | AI & Analytics Svc | Warn |
+| 11 | RL Update | AI & Analytics Svc | Sandbox safe, warn |
+| 12 | Executive Report | Presentation | Fallback to rule-based |
+| 13 | Audit Trail | QA/Control | Warn |
 
 ---
+
 
 ## Quick Start
 

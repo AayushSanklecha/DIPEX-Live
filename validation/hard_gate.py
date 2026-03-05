@@ -32,6 +32,12 @@ from validation.range_validator import RangeValidator, RangeViolation
 from validation.integrity_checker import IntegrityChecker
 from validation.regulatory.regulatory_engine import RegulatoryEngine
 
+try:
+    from validation.shap_explainer import explain_gate_failure as _shap_explain
+    _SHAP_AVAILABLE = True
+except Exception:
+    _SHAP_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 # Severities that trigger a hard-reject decision
@@ -53,12 +59,13 @@ class GateResult:
     warnings: List[Dict[str, Any]]         # All WARNING violations
     total_violations: int
     total_warnings: int
+    shap_explanation: Optional[Dict[str, Any]] = None  # SHAP column risk (REJECT only)
     evaluated_at: str = field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
+        d = {
             "run_id": self.run_id,
             "decision": self.decision,
             "reason": self.reason,
@@ -69,6 +76,9 @@ class GateResult:
             "warnings": self.warnings,
             "evaluated_at": self.evaluated_at,
         }
+        if self.shap_explanation:
+            d["shap_explanation"] = self.shap_explanation
+        return d
 
 
 # ---------------------------------------------------------------------------
@@ -182,6 +192,20 @@ class HardGate:
             decision = "PASS"
             logger.info("Hard Gate 1 PASSED run_id=%s — %d warning(s).", run_id, len(raw_warnings))
 
+        # ── SHAP explanation on REJECT ─────────────────────────────────
+        shap_explanation = None
+        if has_blocking and _SHAP_AVAILABLE:
+            try:
+                shap_explanation = _shap_explain(
+                    df, run_id=run_id, top_n=5, failures=raw_failures
+                )
+                logger.info(
+                    "[SHAP] Gate failure explained: %s",
+                    shap_explanation.get("explanation", "")[:120],
+                )
+            except Exception as exc:
+                logger.warning("[SHAP] explain_gate_failure failed: %s", exc)
+
         return GateResult(
             run_id=run_id,
             decision=decision,
@@ -191,6 +215,7 @@ class HardGate:
             warnings=raw_warnings,
             total_violations=len(raw_failures),
             total_warnings=len(raw_warnings),
+            shap_explanation=shap_explanation,
         )
 
     # ------------------------------------------------------------------

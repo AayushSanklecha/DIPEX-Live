@@ -1,0 +1,220 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────
+# DIPEX — Full Stack Docker Compose
+#
+# Services:
+#   dipex-api   → FastAPI application (port 8000)
+#   postgres    → PostgreSQL 15 (port 5432)
+#   mongo       → MongoDB 7 (port 27017)
+#   zookeeper   → Kafka coordinator (internal only)
+#   kafka       → Apache Kafka broker (port 9092)
+#   kafka-ui    → Kafka web UI (port 8080)
+#   dashboard   → Static file server for frontend (port 3000)
+#
+# Usage:
+#   docker compose up -d           → start all
+#   docker compose up dipex-api    → start only the API
+#   docker compose logs -f         → follow logs
+#   docker compose down -v         → stop + delete volumes
+# ─────────────────────────────────────────────────────────────────
+
+networks:
+  dipex-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongo_data:
+  kafka_data:
+  zookeeper_data:
+
+
+services:
+
+  # ─────────────────────────────────────────────────────────────
+  # PostgreSQL 15
+  # ─────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: dipex-postgres
+    restart: unless-stopped
+    networks:
+      - dipex-net
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_postgres.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dipex}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dipex_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-dipex}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dipex}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────────────────────────
+  # MongoDB 7
+  # ─────────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: dipex-mongo
+    restart: unless-stopped
+    networks:
+      - dipex-net
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-dipex}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS:-dipex_secret}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-dipex}
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ─────────────────────────────────────────────────────────────
+  # Zookeeper (required by Kafka)
+  # ─────────────────────────────────────────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: dipex-zookeeper
+    restart: unless-stopped
+    networks:
+      - dipex-net
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: nc -z localhost 2181 || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────────────────────────
+  # Apache Kafka
+  # ─────────────────────────────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: dipex-kafka
+    restart: unless-stopped
+    networks:
+      - dipex-net
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      # Default topics to create on boot
+      KAFKA_CREATE_TOPICS: "raw_events:3:1,dipex_pipeline:3:1,dipex_results:3:1"
+    healthcheck:
+      test: kafka-topics --bootstrap-server localhost:9092 --list
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ─────────────────────────────────────────────────────────────
+  # Kafka UI (Provectus)
+  # ─────────────────────────────────────────────────────────────
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: dipex-kafka-ui
+    restart: unless-stopped
+    networks:
+      - dipex-net
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: dipex-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+
+  # ─────────────────────────────────────────────────────────────
+  # DIPEX API
+  # ─────────────────────────────────────────────────────────────
+  dipex-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dipex-api:latest
+    container_name: dipex-api
+    restart: unless-stopped
+    networks:
+      - dipex-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./audit:/app/audit
+      - ./reports:/app/reports
+    env_file:
+      - .env
+    environment:
+      # Override localhost addresses to use Docker service names
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_BROKERS: kafka:29092
+      POSTGRES_URI: postgresql://${POSTGRES_USER:-dipex}:${POSTGRES_PASSWORD:-dipex_secret}@postgres:5432/${POSTGRES_DB:-dipex}
+      MONGO_URI: mongodb://${MONGO_USER:-dipex}:${MONGO_PASS:-dipex_secret}@mongo:27017/${MONGO_DB:-dipex}?authSource=admin
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${POSTGRES_DB:-dipex}
+      DB_USER: ${POSTGRES_USER:-dipex}
+      DB_PASS: ${POSTGRES_PASSWORD:-dipex_secret}
+      MONGO_HOST: mongo
+      MONGO_DB: ${MONGO_DB:-dipex}
+      MONGO_USER: ${MONGO_USER:-dipex}
+      MONGO_PASS: ${MONGO_PASS:-dipex_secret}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+  # ─────────────────────────────────────────────────────────────
+  # Dashboard (nginx static server)
+  # ─────────────────────────────────────────────────────────────
+  dashboard:
+    image: nginx:alpine
+    container_name: dipex-dashboard
+    restart: unless-stopped
+    networks:
+      - dipex-net
+    ports:
+      - "3000:80"
+    volumes:
+      - ./dashboard:/usr/share/nginx/html:ro
+      - ./scripts/nginx.conf:/etc/nginx/conf.d/default.conf:ro

@@ -68,6 +68,7 @@ class PipelineResult:
     gate2_decision: str = "PENDING"    # PASS | REJECT | NOT_RUN
     confidence_vector: Optional[Dict] = None
     retry_count: int = 0
+    analytics_result: Optional[Dict] = None   # AI & Analytics Layer output
 
     @property
     def is_success(self) -> bool:
@@ -225,6 +226,25 @@ class PipelineBridge:
                     )
             return fn(df, *fn_args[1:])
 
+        # ── Stage 0: Streaming Window Engine ─────────────────────────────────
+        # Activated for Kafka / stream sources — partitions df into windows.
+        # For non-streaming sources this stage is a no-op (skipped).
+        source_type = getattr(snapshot, "source_type", "").lower()
+        if source_type in ("kafka", "stream", "streaming") and "streaming_window" not in skip:
+            window_out = self._run_stage(
+                result, "streaming_window", skip,
+                self._stage_streaming_window, df,
+            )
+            # Use first window batch if windows were produced, else keep original df
+            if isinstance(window_out, list) and window_out:
+                df = window_out[0].data
+                logger.info(
+                    "[%s] StreamingWindowEngine: using window 1/%d rows=%d",
+                    self.run_id[:8], len(window_out), len(df),
+                )
+        elif "streaming_window" not in skip:
+            result.stages.append(StageResult("streaming_window", "SKIP", 0.0))
+
         # ── Stage 1: Preprocessing ────────────────────────────────────────────
         prep_out = self._run_stage(result, "preprocessing", skip,
                              self._stage_preprocess, df, target_col)
@@ -255,9 +275,17 @@ class PipelineBridge:
         if isinstance(profile_result, dict):
             drift_psi = profile_result.get("psi_score")
 
-        # ── Stage 4: Proposal Layer ───────────────────────────────────────────
-        proposal_result = self._run_stage(result, "proposal", skip,
-                                          self._stage_proposal, df, target_col)
+        # ── Stage 4: AI & Analytics Service Layer (AutoEDA + FE + Insights + LLM) ───
+        analytics_out = self._run_stage(
+            result, "analytics", skip,
+            self._stage_analytics, df, target_col,
+        )
+        if isinstance(analytics_out, dict):
+            result.analytics_result = analytics_out
+            # Promote enriched df if feature engineering ran
+            enriched = analytics_out.get("_enriched_df")
+            if enriched is not None and not enriched.empty:
+                df = enriched
 
         # ── Stage 5: Governance ───────────────────────────────────────────────
         self._run_stage(result, "governance", skip, self._stage_governance, df)
@@ -675,6 +703,81 @@ class PipelineBridge:
         # RLUpdater has been removed per architecture simplification
 
     # ── New Stage Implementations ──────────────────────────────────────────────
+
+    def _stage_streaming_window(self, df: pd.DataFrame) -> list:
+        """
+        Stage 0 — Streaming Window Engine (Layer 2: Data Processing Layer).
+
+        Activated for Kafka / stream source types only.
+        Partitions the incoming DataFrame into tumbling / sliding / session windows
+        using the StreamingWindowEngine. Returns a list of WindowBatch objects.
+        The pipeline uses the first batch for downstream stages; full batch
+        iteration is available for multi-window processing use cases.
+        """
+        from ingestion.streaming_window import StreamingWindowEngine
+        engine = StreamingWindowEngine.from_config(self.config)
+        batches = engine.process(df)
+        logger.info(
+            "[%s] StreamingWindowEngine: %d rows → %d window batches (strategy=%s)",
+            self.run_id[:8], len(df), len(batches),
+            type(engine.strategy).__name__,
+        )
+        return batches
+
+    def _stage_analytics(
+        self,
+        df: pd.DataFrame,
+        target_col: Optional[str],
+    ) -> Dict[str, Any]:
+        """
+        Stage 4 — AI & Analytics Service Layer.
+
+        Sequences the full analytics stack via AnalyticsOrchestrator:
+          A. Automated EDA      (distributions, correlations, outliers, insights)
+          B. Feature Engineering (lag, interactions, freq-encoding, binning + RL prune)
+          C. Insight Ranking    (proposal/insight_ranker.py)
+          D. LLM Summarization  (reporting_service/llm_provider.py)
+
+        The enriched DataFrame is promoted back to the main pipeline via
+        the `_enriched_df` key so downstream stages benefit from new features.
+        Falls back to the legacy ProposalEngine if AnalyticsOrchestrator fails.
+        """
+        try:
+            from analytics.orchestrator import AnalyticsOrchestrator
+            orch = AnalyticsOrchestrator(config=self.config)
+            analytics_result = orch.run(
+                df=df,
+                target_col=target_col,
+                run_id=self.run_id,
+            )
+            # Package result as a plain dict (PipelineResult.analytics_result)
+            out = analytics_result.to_dict(include_df=False)
+            # Carry the enriched df under a private key for the bridge to consume
+            if analytics_result.enriched_df is not None:
+                out["_enriched_df"] = analytics_result.enriched_df
+            logger.info(
+                "[%s] Analytics: %d insights, llm=%d chars",
+                self.run_id[:8],
+                len(analytics_result.insights),
+                len(analytics_result.llm_summary),
+            )
+            return out
+        except ImportError:
+            pass  # AnalyticsOrchestrator not yet installed — fall back
+
+        # Fallback: legacy ProposalEngine
+        try:
+            from proposal.proposal_engine import ProposalEngine
+            engine = ProposalEngine(self.config)
+            proposals = engine.generate_proposals(
+                df, run_id=self.run_id, target_col=target_col
+            )
+            return proposals if isinstance(proposals, dict) else {}
+        except ImportError:
+            raise RuntimeError(
+                "Analytics stage failed: neither AnalyticsOrchestrator "
+                "nor ProposalEngine is available."
+            )
 
     def _stage_verify(self, df: pd.DataFrame, model_metrics: Dict,
                       run_id: str) -> bool:

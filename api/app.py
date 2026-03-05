@@ -14,6 +14,13 @@ Features:
 
 from __future__ import annotations
 
+# Load .env FIRST — before any other module reads os.environ
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not installed; fall back to system env vars
+
 import json
 import os
 import time
@@ -27,7 +34,7 @@ from fastapi.staticfiles import StaticFiles
 from api.metrics import get_metrics_response
 from api.routes import (
     audit, ingest, ingest_v2, pipeline_run, preprocess,
-    report, results, run, stats, analyst, cohort
+    report, results, run, stats, analyst, cohort, exports
 )
 
 # ── Startup timestamp ─────────────────────────────────────────────────────────
@@ -35,11 +42,12 @@ _START_TIME: float = time.time()
 
 # ── Application ───────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="Simplified Analytics Platform",
+    title="DIPEX — Data Intelligence Platform for Expert Analysis",
     description=(
-        "Upload → Clean → EDA → Anomaly Detection → Visualize → Report"
+        "5-Layer Architecture: "
+        "Data Source → Data Processing → QA/Governance → AI Analytics → Presentation"
     ),
-    version="1.0.0",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -73,25 +81,28 @@ app.include_router(ingest_v2.router)
 # Simplified pipeline endpoint
 app.include_router(pipeline_run.router)
 
+# PRESENTATION LAYER — Exports (CSV / JSON / Parquet / Report download)
+app.include_router(exports.router)
+
 # ── System endpoints ──────────────────────────────────────────────────────────
 
 @app.get("/", tags=["System"])
 async def root():
     """API root — lists workflow steps."""
     return {
-        "name":    "Simplified Analytics Platform",
-        "version": "1.0.0",
+        "name":    "DIPEX — Data Intelligence Platform for Expert Analysis",
+        "version": "2.0.0",
         "status":  "operational",
-        "workflow": [
-            "1. Upload dataset",
-            "2. Clean data (preprocessing)",
-            "3. Run EDA automatically",
-            "4. Detect anomalies",
-            "5. Generate charts/dashboards",
-            "6. Generate simple report",
+        "architecture": [
+            "Layer 1 — Data Source Layer (CSV | Excel | Database | API | Kafka)",
+            "Layer 2 — Data Processing Layer (Ingestion | Normalization | Profiling | Streaming)",
+            "Layer 3 — QA, Governance & Control Layer (Validation | Verifiers | Rules | Confidence | Audit)",
+            "Layer 4 — AI & Analytics Service Layer (AutoEDA | FeatureEng | Insight Ranking | Retry | LLM)",
+            "Layer 5 — Presentation Layer (Dashboards | Reports | APIs | Exports)",
         ],
         "docs":      "/docs",
         "dashboard": "/dashboard",
+        "exports":   "/api/export/list",
     }
 
 

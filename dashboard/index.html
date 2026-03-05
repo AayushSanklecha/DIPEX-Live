@@ -1,238 +1,314 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Analytics Platform — Simple Workflow</title>
-  <meta name="description"
-    content="Simple Analytics Platform — Upload → Clean → EDA → Anomalies → Visualize → Report">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <title>DIPEX — Data Intelligence Platform</title>
+  <meta name="description" content="DIPEX — Power BI-styled analytics dashboard for the Data Intelligence Platform">
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+  <div class="pbi-shell">
 
-  <div class="app-shell">
-
-    <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-brand">
-        <div class="brand-logo">📊</div>
-        <div class="brand-text">
-          <div class="brand-name">Analytics</div>
-          <div class="brand-sub">Simple Workflow</div>
+    <!-- ═══ TOP RIBBON ═══ -->
+    <header class="pbi-ribbon">
+      <div class="ribbon-left">
+        <div class="ribbon-logo">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="1" y="10" width="4" height="11" rx="1" fill="#F2C811"/>
+            <rect x="7" y="6"  width="4" height="15" rx="1" fill="#F2C811" opacity=".8"/>
+            <rect x="13" y="1" width="4" height="20" rx="1" fill="#F2C811" opacity=".6"/>
+            <rect x="19" y="4" width="2" height="17" rx="1" fill="#F2C811" opacity=".4"/>
+          </svg>
+          <span class="ribbon-brand">DIPEX</span>
+          <span class="ribbon-divider">|</span>
+          <span class="ribbon-subtitle">Data Intelligence Platform</span>
         </div>
       </div>
-
-      <nav class="sidebar-nav">
-        <div class="nav-section-label">Main</div>
-        <button class="nav-item active" onclick="showPage('overview')" id="nav-overview">
-          <span class="nav-icon">◈</span><span class="nav-label">Dashboard</span>
+      <div class="ribbon-tabs">
+        <button class="rtab active" id="rtab-dashboard" onclick="switchTab('dashboard')">
+          <span class="rtab-icon">⊞</span> Dashboard
         </button>
-        <button class="nav-item" onclick="showPage('pipeline')" id="nav-pipeline">
-          <span class="nav-icon">▶</span><span class="nav-label">Run Pipeline</span>
+        <button class="rtab" id="rtab-report" onclick="switchTab('report')">
+          <span class="rtab-icon">📋</span> Report
         </button>
-        <button class="nav-item" onclick="showPage('reports')" id="nav-reports">
-          <span class="nav-icon">📊</span><span class="nav-label">Reports</span>
-        </button>
-
-        <div class="nav-section-label" style="margin-top:20px">Developer</div>
-        <button class="nav-item" onclick="showPage('api_docs')" id="nav-api_docs">
-          <span class="nav-icon">⎇</span><span class="nav-label">API Docs</span>
-        </button>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div class="api-status">
-          <div class="status-dot" id="api-status-dot"></div>
-          <span id="api-status-text">Checking…</span>
-        </div>
-        <div class="sidebar-user" id="sidebar-user-info">Guest Mode</div>
-        <div class="version-tag">v1.0.0 · DIPEX</div>
       </div>
-    </aside>
-
-    <!-- ═══════════════════ MAIN ═══════════════════ -->
-    <div class="main-content">
-
-      <!-- Topbar -->
-      <header class="topbar">
-        <div class="topbar-left">
-          <h1 class="page-title" id="page-title">Dashboard</h1>
-          <span class="page-subtitle" id="page-subtitle">One-click data pipeline and analytics</span>
+      <div class="ribbon-right">
+        <div class="ribbon-status">
+          <div class="status-pip" id="api-pip"></div>
+          <span id="api-status-label">Connecting…</span>
         </div>
-        <div class="topbar-right">
-          <button class="btn-ghost btn-sm" onclick="refreshData()">↻ Refresh</button>
-          <div class="topbar-time" id="current-time"></div>
+        <div class="ribbon-time" id="ribbon-time"></div>
+        <button class="ribbon-refresh" onclick="refreshAll()" title="Refresh all data">↻</button>
+      </div>
+    </header>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div class="pbi-body">
+
+      <!-- ═══════════════════════════════════════════════
+           TAB: DASHBOARD (Power BI Canvas)
+      ═══════════════════════════════════════════════ -->
+      <div class="pbi-tab active" id="tab-dashboard">
+
+        <!-- Filter bar (slicer row) -->
+        <div class="slicer-bar">
+          <div class="slicer-group">
+            <label class="slicer-label">Decision Filter</label>
+            <div class="slicer-pills" id="decision-slicer">
+              <button class="slicer-pill active" data-filter="ALL" onclick="applyFilter(this,'ALL')">All</button>
+              <button class="slicer-pill pass"   data-filter="PASS" onclick="applyFilter(this,'PASS')">✓ Pass</button>
+              <button class="slicer-pill warn"   data-filter="WARN" onclick="applyFilter(this,'WARN')">⚠ Warn</button>
+              <button class="slicer-pill fail"   data-filter="FAIL" onclick="applyFilter(this,'FAIL')">✗ Fail</button>
+            </div>
+          </div>
+          <div class="slicer-group">
+            <label class="slicer-label">Source Type</label>
+            <select class="slicer-select" id="source-slicer" onchange="applySourceFilter(this.value)">
+              <option value="ALL">All Sources</option>
+              <option value="file">File</option>
+              <option value="api">API</option>
+              <option value="kafka">Kafka</option>
+              <option value="db">Database</option>
+            </select>
+          </div>
+          <div class="slicer-group" style="margin-left:auto">
+            <button class="btn-run" onclick="showPage('run_pipeline')">
+              <span>▶</span> Run Pipeline
+            </button>
+          </div>
         </div>
-      </header>
 
-      <!-- Page content area -->
-      <div class="page-container">
+        <!-- KPI Tiles Row -->
+        <div class="kpi-row">
+          <div class="kpi-tile" id="tile-runs">
+            <div class="kpi-icon-wrap indigo">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            </div>
+            <div class="kpi-data">
+              <div class="kpi-num" id="kpi-runs">—</div>
+              <div class="kpi-name">Total Runs</div>
+              <div class="kpi-delta" id="kpi-runs-delta"></div>
+            </div>
+            <div class="kpi-sparkline"><canvas id="spark-runs" height="40"></canvas></div>
+          </div>
+          <div class="kpi-tile" id="tile-pass">
+            <div class="kpi-icon-wrap green">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="kpi-data">
+              <div class="kpi-num" id="kpi-pass">—</div>
+              <div class="kpi-name">Pass Rate</div>
+              <div class="kpi-delta pass" id="kpi-pass-delta"></div>
+            </div>
+            <div class="kpi-sparkline"><canvas id="spark-pass" height="40"></canvas></div>
+          </div>
+          <div class="kpi-tile" id="tile-conf">
+            <div class="kpi-icon-wrap yellow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="kpi-data">
+              <div class="kpi-num" id="kpi-conf">—</div>
+              <div class="kpi-name">Avg Confidence</div>
+              <div class="kpi-delta" id="kpi-conf-delta"></div>
+            </div>
+            <div class="kpi-sparkline"><canvas id="spark-conf" height="40"></canvas></div>
+          </div>
+          <div class="kpi-tile" id="tile-reports">
+            <div class="kpi-icon-wrap blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <div class="kpi-data">
+              <div class="kpi-num" id="kpi-rpts">—</div>
+              <div class="kpi-name">Reports Ready</div>
+              <div class="kpi-delta" id="kpi-rpts-delta"></div>
+            </div>
+            <div class="kpi-sparkline"><canvas id="spark-rpts" height="40"></canvas></div>
+          </div>
+        </div>
 
-        <!-- ══════════════════════════════════════════════
-           PAGE: OVERVIEW
-      ══════════════════════════════════════════════ -->
-        <div class="page active" id="page-overview">
-          <!-- Quick Actions -->
-          <div class="card mb-4" id="overview-quick-actions" style="display:none;"></div>
-
-          <!-- Stats Overview -->
-          <div class="kpi-grid mb-4">
-            <div class="kpi-card blue">
-              <div class="kpi-icon blue">⟳</div>
-              <div class="kpi-body">
-                <div class="kpi-value" id="kpi-total-runs">—</div>
-                <div class="kpi-label">Total Runs</div>
-              </div>
+        <!-- Chart Grid -->
+        <div class="chart-grid">
+          <!-- Gate Decision Donut -->
+          <div class="chart-card" id="cc-donut">
+            <div class="chart-header">
+              <span class="chart-title">Gate Decision Distribution</span>
+              <span class="chart-badge">QA Layer</span>
             </div>
-            <div class="kpi-card cyan">
-              <div class="kpi-icon cyan">✓</div>
-              <div class="kpi-body">
-                <div class="kpi-value" id="kpi-pass-rate">—</div>
-                <div class="kpi-label">Pass Rate</div>
-              </div>
-            </div>
-            <div class="kpi-card green">
-              <div class="kpi-icon green">⬡</div>
-              <div class="kpi-body">
-                <div class="kpi-value" id="kpi-approved">—</div>
-                <div class="kpi-label">Approved</div>
-              </div>
-            </div>
-            <div class="kpi-card amber">
-              <div class="kpi-icon amber">⚡</div>
-              <div class="kpi-body">
-                <div class="kpi-value" id="kpi-reports">—</div>
-                <div class="kpi-label">Reports</div>
+            <div class="chart-body donut-wrap">
+              <canvas id="chart-donut"></canvas>
+              <div class="donut-center" id="donut-center-label">
+                <div class="donut-pct" id="donut-pass-pct">—</div>
+                <div class="donut-sub">Pass</div>
               </div>
             </div>
           </div>
 
-          <!-- Recent Snapshots -->
-          <div class="card">
-            <div class="card-header">Recent Pipeline Runs
-              <button class="btn-ghost btn-sm" onclick="loadSnapshots()">↻ Refresh</button>
+          <!-- Confidence Trend Line -->
+          <div class="chart-card wide" id="cc-trend">
+            <div class="chart-header">
+              <span class="chart-title">Confidence Score Trend</span>
+              <span class="chart-badge">AI Analytics</span>
             </div>
-            <div class="card-body" style="padding:0">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>Dataset</th>
-                    <th>Snapshot ID</th>
-                    <th>Rows</th>
-                    <th>Quality</th>
-                    <th>Status</th>
-                    <th>Time</th>
-                  </tr>
-                </thead>
-                <tbody id="snapshots-body"></tbody>
-              </table>
+            <div class="chart-body">
+              <canvas id="chart-trend"></canvas>
+            </div>
+          </div>
+
+          <!-- Source Type Bar -->
+          <div class="chart-card" id="cc-source">
+            <div class="chart-header">
+              <span class="chart-title">Runs by Source Type</span>
+              <span class="chart-badge">Data Source Layer</span>
+            </div>
+            <div class="chart-body">
+              <canvas id="chart-source"></canvas>
+            </div>
+          </div>
+
+          <!-- Stage Performance Horizontal Bar -->
+          <div class="chart-card wide" id="cc-stages">
+            <div class="chart-header">
+              <span class="chart-title">Pipeline Stage Performance</span>
+              <span class="chart-badge">Processing Layer</span>
+            </div>
+            <div class="chart-body">
+              <canvas id="chart-stages"></canvas>
             </div>
           </div>
         </div>
 
-        <!-- ══════════════════════════════════════════════
-           PAGE: PIPELINE
-      ══════════════════════════════════════════════ -->
-        <div class="page" id="page-pipeline">
-          <!-- Upload & Run Section -->
-          <div class="card mb-4" id="quick-run-section">
-            <div class="card-header">Upload & Run Pipeline</div>
-            <div class="card-body">
-              <div class="grid-2" style="gap:16px;margin-bottom:16px">
+        <!-- Recent Runs Table -->
+        <div class="pbi-table-card">
+          <div class="table-header">
+            <span class="table-title">Recent Pipeline Runs</span>
+            <div class="table-actions">
+              <input class="table-search" id="run-search" placeholder="Search run ID or dataset…" oninput="filterTable(this.value)">
+              <button class="btn-icon" onclick="loadRuns()" title="Refresh">↻</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="pbi-table" id="runs-table">
+              <thead>
+                <tr>
+                  <th>Run ID</th>
+                  <th>Dataset</th>
+                  <th>Source</th>
+                  <th>Rows</th>
+                  <th>Gate 1</th>
+                  <th>Gate 2</th>
+                  <th>Confidence</th>
+                  <th>Decision</th>
+                  <th>Timestamp</th>
+                  <th>Report</th>
+                </tr>
+              </thead>
+              <tbody id="runs-tbody">
+                <tr><td colspan="10" class="empty-row">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Run Pipeline Modal / Inline Panel -->
+        <div class="run-panel hidden" id="run-panel">
+          <div class="run-panel-inner">
+            <div class="run-panel-header">
+              <span>▶ Run Pipeline</span>
+              <button class="btn-icon" onclick="hideRunPanel()">✕</button>
+            </div>
+            <div class="form-row">
+              <label class="form-label">File (CSV / Excel / JSON)</label>
+              <div class="drop-zone" id="run-drop-zone">
+                <input type="file" id="run-file-input" accept=".csv,.xlsx,.xls,.json,.parquet" hidden>
+                <div class="dz-icon">↑</div>
+                <div class="dz-text">Drop file here or <span class="dz-link" onclick="document.getElementById('run-file-input').click()">browse</span></div>
+                <div class="dz-selected hidden" id="run-file-name"></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <label class="form-label">Target Column (optional)</label>
+              <input class="form-input" id="run-target" placeholder="e.g. churn, label, target">
+            </div>
+            <button class="btn-run-full" id="run-btn" onclick="executePipeline()">▶ Run Full Pipeline</button>
+            <div class="run-log hidden" id="run-log"></div>
+            <div class="run-result hidden" id="run-result"></div>
+          </div>
+        </div>
+
+      </div><!-- /tab-dashboard -->
+
+      <!-- ═══════════════════════════════════════════════
+           TAB: REPORT
+      ═══════════════════════════════════════════════ -->
+      <div class="pbi-tab" id="tab-report">
+        <div class="report-container">
+
+          <!-- Report Header -->
+          <div class="report-hero">
+            <div class="report-hero-left">
+              <div class="report-title-block">
+                <div class="report-icon">📋</div>
                 <div>
-                  <label class="form-label">Source Type</label>
-                  <select class="form-input" id="quick-source-kind">
-                    <option value="file" selected>File (CSV/Excel/JSON)</option>
-                    <option value="database">Database (SQL)</option>
-                    <option value="graph_db">Graph DB (Neo4j)</option>
-                    <option value="api">API Endpoint</option>
-                    <option value="live">Live Stream (Kafka)</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="form-label">Source Input (for DB/API/Live)</label>
-                  <input type="text" class="form-input" id="quick-source-input" placeholder="Connection URI / URL / Topic">
+                  <h2 class="report-heading">Executive Reports</h2>
+                  <p class="report-sub">Download auto-generated HTML reports for completed pipeline runs</p>
                 </div>
               </div>
-              <div class="drop-zone" id="quick-drop-zone" style="margin-bottom:16px">
-                <input type="file" id="quick-file-input" accept=".csv,.xlsx,.xls,.json,.parquet,.xml" hidden>
-                <div class="drop-zone-icon">↑</div>
-                <div class="drop-zone-text">Drop file or click to select</div>
-                <button class="btn-sm btn-primary" style="margin-top:8px" onclick="document.getElementById('quick-file-input').click()">Select File</button>
+            </div>
+            <button class="btn-run" onclick="loadReports()">↻ Refresh</button>
+          </div>
+
+          <!-- Report Stats -->
+          <div class="report-stats-row">
+            <div class="rstat">
+              <div class="rstat-num" id="rstat-total">—</div>
+              <div class="rstat-label">Reports Available</div>
+            </div>
+            <div class="rstat-div"></div>
+            <div class="rstat">
+              <div class="rstat-num" id="rstat-latest">—</div>
+              <div class="rstat-label">Latest Run</div>
+            </div>
+            <div class="rstat-div"></div>
+            <div class="rstat">
+              <div class="rstat-num" id="rstat-size">—</div>
+              <div class="rstat-label">Total Size</div>
+            </div>
+          </div>
+
+          <!-- Report List -->
+          <div class="report-list" id="report-list">
+            <div class="report-empty" id="report-empty">
+              <div class="report-empty-icon">📭</div>
+              <div class="report-empty-msg">No reports yet. Run the pipeline first.</div>
+              <button class="btn-run" onclick="switchTab('dashboard')">Go to Dashboard</button>
+            </div>
+          </div>
+
+          <!-- Report Viewer (inline iframe) -->
+          <div class="report-viewer hidden" id="report-viewer">
+            <div class="viewer-header">
+              <span class="viewer-title" id="viewer-title">Report</span>
+              <div class="viewer-actions">
+                <a class="btn-dl" id="viewer-dl-btn" download>⤓ Download</a>
+                <button class="btn-icon" onclick="closeViewer()">✕ Close</button>
               </div>
-              <div id="quick-upload-status" class="status-msg hidden"></div>
-              <button class="btn-primary full-width" onclick="runQuickPipeline()" style="margin-top:12px">▶ Run Full Pipeline</button>
             </div>
+            <iframe id="report-iframe" class="report-iframe" title="Pipeline Report"></iframe>
           </div>
 
-          <!-- Pipeline Result -->
-          <div class="card mb-4" id="quick-result-card" style="display:none">
-            <div class="card-header">Pipeline Result
-              <span class="badge badge-running" id="quick-badge">RUNNING</span>
-            </div>
-            <div class="card-body">
-              <div class="log-console" id="quick-log" style="max-height:200px;margin-bottom:16px"></div>
-              <div id="quick-result-detail"></div>
-            </div>
-          </div>
         </div>
+      </div><!-- /tab-report -->
 
-        <!-- ══════════════════════════════════════════════
-           PAGE: REPORTS
-      ══════════════════════════════════════════════ -->
-        <div class="page" id="page-reports">
-          <div class="card mb-4" id="reports-list-card">
-            <div class="card-header">Pipeline Reports
-              <button class="btn-ghost btn-sm" onclick="quickViewReports()">↻ Refresh</button>
-            </div>
-            <div class="card-body">
-              <div id="reports-list-detail"></div>
-            </div>
-          </div>
+    </div><!-- /pbi-body -->
 
-          <!-- Pipeline Individual Result -->
-          <div class="card mb-4" id="report-detail-card" style="display:none">
-            <div class="card-header">Report Detail
-              <span class="badge badge-running" id="report-detail-badge">LOADING</span>
-              <button class="btn-ghost btn-sm" onclick="backToReportsList()">← Back</button>
-            </div>
-            <div class="card-body">
-              <div class="log-console" id="report-detail-log" style="max-height:100px;margin-bottom:16px"></div>
-              <div id="report-detail-content"></div>
-            </div>
-          </div>
-        </div>
-        <!-- ══════════════════════════════════════════════
-           PAGE: API DOCS
-      ══════════════════════════════════════════════ -->
-        <div class="page" id="page-api_docs" style="height:100%;flex-direction:column">
-          <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-            <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
-              API Docs — Swagger UI
-              <a href="http://localhost:8000/docs" target="_blank" class="btn-ghost btn-sm"
-                style="text-decoration:none">↗ Open in new tab</a>
-            </div>
-            <div style="flex:1;position:relative">
-              <iframe id="api-docs-iframe" src="about:blank"
-                style="width:100%;height:100%;min-height:calc(100vh - 180px);border:none;border-radius:0 0 8px 8px;background:#fff"
-                loading="lazy" title="DIPEX API Docs"></iframe>
-            </div>
-          </div>
-        </div>
-      </div><!-- /page-container -->
-    </div><!-- /main-content -->
-  </div><!-- /app-shell -->
+  </div><!-- /pbi-shell -->
 
-  <!-- Toast container -->
-  <div class="toast-container" id="toast-container"></div>
+  <div class="toast-ctr" id="toast-ctr"></div>
 
   <script src="app.js"></script>
 </body>
-
 </html>
