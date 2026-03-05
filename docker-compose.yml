@@ -205,10 +205,13 @@ services:
       retries: 3
 
   # ─────────────────────────────────────────────────────────────
-  # Dashboard (nginx static server)
+  # Dashboard (React SPA)
   # ─────────────────────────────────────────────────────────────
   dashboard:
-    image: nginx:alpine
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: dipex-dashboard:latest
     container_name: dipex-dashboard
     restart: unless-stopped
     networks:
@@ -216,5 +219,4 @@ services:
     ports:
       - "3000:80"
     volumes:
-      - ./dashboard:/usr/share/nginx/html:ro
       - ./scripts/nginx.conf:/etc/nginx/conf.d/default.conf:ro
