@@ -64,6 +64,16 @@ def orchestrate_pipeline(run_id: str, target_col: str = None) -> bool:
         with open(target_path, "r", encoding="utf-8") as f:
             snap_data = json.load(f)
             
+        # Load actual data if available
+        parquet_path = Path(f"data/snapshots/{snapshot_id}_issf.parquet")
+        import pandas as pd
+        if parquet_path.exists():
+            df_snap = pd.read_parquet(parquet_path)
+            logger.info(f"Loaded {len(df_snap)} rows from {parquet_path.name}")
+        else:
+            df_snap = None
+            logger.warning(f"No parquet found at {parquet_path}")
+
         snap = ISSFSnapshot(
             dataset_id=snap_data.get("dataset_id", "unknown"),
             schema_version=snap_data.get("schema_version", "1.0"),
@@ -74,7 +84,7 @@ def orchestrate_pipeline(run_id: str, target_col: str = None) -> bool:
             row_count=snap_data.get("row_count", 0),
             quality_score=snap_data.get("quality_score", 1.0),
             validation_status=snap_data.get("validation_status", "PASS"),
-            data=None, # In a real load this would be pd.read_parquet
+            data=df_snap,
             error_logs=[],
             extra_meta={}
         )

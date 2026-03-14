@@ -22,19 +22,38 @@ except ImportError:
     pass  # python-dotenv not installed; fall back to system env vars
 
 import json
+import math
 import os
 import time
 from datetime import datetime, timezone
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from typing import Any
+
+class NaNHandlingJSONResponse(JSONResponse):
+    def render(self, content: Any) -> bytes:
+        # FastAPI's default JSONResponse does not allow NaNs, or rather Python's json
+        # allows it by default but it generates invalid strict JSON (e.g. `NaN`).
+        # Or it raises ValueError if allow_nan=False. The Starlette JSONResponse 
+        # doesn't handle allow_nan easily. We'll use json.dumps with handling.
+        text = json.dumps(
+            content,
+            ensure_ascii=False,
+            allow_nan=True,
+            indent=None,
+            separators=(",", ":"),
+        )
+        # Convert non-compliant floats to null
+        text = text.replace("NaN", "null").replace("Infinity", "null").replace("-Infinity", "null")
+        return text.encode("utf-8")
 
 from api.metrics import get_metrics_response
 from api.routes import (
     audit, ingest, ingest_v2, pipeline_run, preprocess,
-    report, results, run, stats, analyst, cohort, exports
+    report, results, run, stats, analyst, cohort, exports, explorer
 )
 
 # ── Startup timestamp ─────────────────────────────────────────────────────────
@@ -50,16 +69,44 @@ app = FastAPI(
     version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    default_response_class=NaNHandlingJSONResponse,
 )
 
 # ── Middleware ────────────────────────────────────────────────────────────────
+# NOTE: allow_credentials=True is incompatible with allow_origins=["*"] per CORS spec.
+# Browser will reject the response if both are set. Use explicit origins list instead.
+_CORS_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:8080",
+    "http://localhost:8000",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*", "http://localhost:5173"],
+    allow_origins=_CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
     allow_credentials=True,
 )
+
+# ── Upload size limit ─────────────────────────────────────────────────────────
+# This guard exists only to prevent truly runaway requests from exhausting memory.
+# Kafka / DB / API source kinds send only a small JSON config (< 10 KB) so they
+# will never hit this limit. File uploads can be large datasets — set to 5 GB.
+# Uvicorn itself has no hard limit by default, so this is the only safeguard.
+_MAX_UPLOAD_BYTES = 5 * 1024 * 1024 * 1024  # 5 GB
+
+@app.middleware("http")
+async def limit_upload_size(request, call_next):
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > _MAX_UPLOAD_BYTES:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=413,
+            content={"detail": f"Request body too large. Maximum allowed is {_MAX_UPLOAD_BYTES // (1024**3)} GB."},
+        )
+    return await call_next(request)
 
 # ── Routes (No Authentication Required) ───────────────────────────────────────
 
@@ -84,6 +131,9 @@ app.include_router(pipeline_run.router)
 # PRESENTATION LAYER — Exports (CSV / JSON / Parquet / Report download)
 app.include_router(exports.router)
 
+# DATA EXPLORER — Raw database preview
+app.include_router(explorer.router)
+
 # ── System endpoints ──────────────────────────────────────────────────────────
 
 @app.get("/", tags=["System"])
@@ -106,30 +156,35 @@ async def root():
     }
 
 
-@app.get("/health", tags=["System"])
-async def health():
-    """Health check."""
-    uptime_seconds = round(time.time() - _START_TIME, 2)
 
-    # DuckDB check
-    db_ok = False
-    try:
-        import duckdb
-        con = duckdb.connect(":memory:")
-        con.execute("SELECT 1").fetchone()
-        con.close()
-        db_ok = True
-    except Exception:
-        db_ok = False
+@app.get("/health", tags=["System"], include_in_schema=False)
+async def health_check():
+    """Liveness/readiness probe — used by Docker, load-balancers, and automated tests."""
+    import os
+    from datetime import datetime, timezone
 
-    status = "healthy" if db_ok else "degraded"
+    # Check model registry dir
+    model_registry_ok = os.path.isdir(os.environ.get("MODEL_REGISTRY_PATH", "data/model_registry"))
+
+    # Check audit + data dirs (lightweight proxy for db_ok in dev/test)
+    db_ok = os.path.isdir("audit") or os.path.isdir("data")
+
+    uptime = round(time.time() - _START_TIME, 2)
+
+    # Determine overall status
+    if db_ok:
+        status = "healthy"
+    else:
+        status = "degraded"
 
     return {
-        "status":    status,
-        "version":   "1.0.0",
-        "uptime":    uptime_seconds,
-        "db_ok":     db_ok,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "status":            status,
+        "version":           "2.0.0",
+        "uptime":            uptime,
+        "db_ok":             db_ok,
+        "model_registry_ok": model_registry_ok,
+        "timestamp":         datetime.now(timezone.utc).isoformat(),
+        "service":           "dipex-api",
     }
 
 

@@ -61,7 +61,7 @@ class KafkaConnector(BaseConnector):
         self._lag_stats: Dict[str, int] = {}
 
     def _get_brokers(self) -> str:
-        return os.environ.get("KAFKA_BROKERS", self.config.get("bootstrap_servers", "localhost:9092"))
+        return os.environ.get("KAFKA_BROKERS", self.config.get("bootstrap_servers", "kafka:29092"))
 
     def _get_consumer(self):
         """Create consumer — tries confluent-kafka first, falls back to kafka-python."""

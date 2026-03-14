@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\validation\zero_value_detector.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.1, 0.5, 1.0, 'CRITICAL', 'ERROR', 'WARNING', 'ZERO_VIOLATION', 'ZeroValueDetector', 'all_zeros', 'column', 'column_stats', 'columns_checked', 'columns_skipped', 'mandatory_nonzero', 'mandatory_zero', 'message', 'min_unique_for_check', 'n_unique', 'num_violations', 'run_id', 'severity', 'skip_binary_columns', 'suspicious_zeros', 'threshold', 'total_count', 'total_nonzero', 'type', 'validation', 'violation_type', 'violations', 'zero', 'zero_count', 'zero_error_threshold', 'zero_pct', 'zero_warn_threshold']

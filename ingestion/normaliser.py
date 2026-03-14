@@ -90,6 +90,9 @@ class Normaliser:
         # 2. Null unification
         df = self._unify_nulls(df)
 
+        # 2.5. Handle complex/unhashable types (Lists, Dicts)
+        df = self._stringify_complex_columns(df)
+
         # 3. Type coercion
         if self.infer_types:
             df = self._coerce_types(df)
@@ -139,14 +142,43 @@ class Normaliser:
     @staticmethod
     def _unify_nulls(df: pd.DataFrame) -> pd.DataFrame:
         """Replace all null sentinels with pd.NA."""
+        def _is_null_sentinel(v):
+            if v is None: return True
+            if isinstance(v, (list, dict, set, np.ndarray, pd.Series)): return False
+            if pd.isna(v): return True
+            # Don't try to stringify lists/dicts here
+            try:
+                s = str(v).strip().lower()
+                return s in _NULL_STRINGS
+            except Exception:
+                return False
+
         for col in df.select_dtypes(include=["object"]).columns:
-            df[col] = df[col].apply(
-                lambda v: pd.NA if (
-                    v is None
-                    or (isinstance(v, float) and np.isnan(v))
-                    or str(v).strip().lower() in _NULL_STRINGS
-                ) else v
-            )
+            df[col] = df[col].apply(lambda v: pd.NA if _is_null_sentinel(v) else v)
+        return df
+
+    @staticmethod
+    def _stringify_complex_columns(df: pd.DataFrame) -> pd.DataFrame:
+        """Convert columns containing lists/dicts to JSON strings so they are hashable."""
+        for col in df.select_dtypes(include=["object"]).columns:
+            # Check if any element is unhashable
+            has_complex = False
+            sample = df[col].dropna().head(10)
+            for v in sample:
+                if isinstance(v, (list, dict, set)):
+                    has_complex = True
+                    break
+            
+            if has_complex:
+                try:
+                    import json
+                    # We use JSON stringification for lists/dicts
+                    df[col] = df[col].apply(
+                        lambda v: json.dumps(v) if isinstance(v, (list, dict, set)) else v
+                    )
+                except Exception:
+                    # Fallback to plain string
+                    df[col] = df[col].astype(str).replace("nan", pd.NA).replace("None", pd.NA)
         return df
 
     # ── Step 3: Type coercion ─────────────────────────────────────────────────
@@ -158,13 +190,14 @@ class Normaliser:
         Uses pd.to_numeric / pd.to_datetime with errors='coerce'.
         """
         for col in df.select_dtypes(include=["object"]).columns:
-            non_null = df[col].dropna()
+            series = df[col]
+            non_null = series.dropna()
             if len(non_null) == 0:
                 continue
 
             # Try numeric
             try:
-                converted = pd.to_numeric(df[col], errors="coerce")
+                converted = pd.to_numeric(series, errors="coerce")
                 if converted.notna().sum() >= 0.9 * non_null.count():
                     df[col] = converted
                     continue
@@ -173,7 +206,7 @@ class Normaliser:
 
             # Try datetime
             try:
-                converted = pd.to_datetime(df[col], errors="coerce", utc=True)
+                converted = pd.to_datetime(series, errors="coerce", utc=True)
                 if converted.notna().sum() >= 0.85 * non_null.count():
                     df[col] = converted
                     continue
@@ -181,11 +214,19 @@ class Normaliser:
                 pass
 
             # Try boolean
-            bool_map = {"true": True, "false": False, "yes": True, "no": False,
-                        "1": True, "0": False, "t": True, "f": False}
-            sample = non_null.str.lower().unique()
-            if set(sample).issubset(set(bool_map.keys())):
-                df[col] = non_null.str.lower().map(bool_map)
+            try:
+                bool_map = {"true": True, "false": False, "yes": True, "no": False,
+                            "1": True, "0": False, "t": True, "f": False}
+                # Safe unique check for bools
+                def _to_lower_safe(v):
+                    if isinstance(v, str): return v.lower()
+                    return str(v).lower()
+                
+                unique_vals = non_null.apply(_to_lower_safe).unique()
+                if len(unique_vals) > 0 and set(unique_vals).issubset(set(bool_map.keys())):
+                    df[col] = non_null.apply(_to_lower_safe).map(bool_map)
+            except Exception:
+                pass
 
         return df
 
@@ -214,7 +255,16 @@ class Normaliser:
             null_count = int(series.isna().sum())
             null_rate  = null_count / n if n > 0 else 0.0
             non_null   = series.dropna()
-            unique_count = int(series.nunique(dropna=True))
+            
+            try:
+                unique_count = int(series.nunique(dropna=True))
+            except Exception:
+                # Robust fallback for unhashable types if they leaked through
+                try:
+                    unique_count = int(series.astype(str).nunique(dropna=True))
+                except Exception:
+                    unique_count = 0
+
             is_pk = (
                 unique_count == n
                 and null_count == 0

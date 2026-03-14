@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\preprocessing\robust_triage.py
+# hypothesis_version: 6.151.9
+
+[0.15, 0.5, 0.9, 2.0, 5.0, 100, 200, 'RobustTriage', '__MISSING__', 'auto_log_transform', 'coerce', 'column', 'columns_coerced', 'columns_dropped', 'columns_hash_encoded', 'constant_value', 'hash_buckets', 'high_null', 'high_zero_threshold', 'imbalance_info', 'imbalance_ratio', 'is_imbalanced', 'loss_rate', 'majority_class', 'majority_count', 'manual_map', 'method', 'minority_class', 'minority_count', 'mixed_type_coerce', 'n_classes', 'new_column', 'new_nulls_introduced', 'none', 'null_pct', 'object', 'original_column', 'original_unique', 'preprocessing', 'reason', 'recommended_strategy', 'run_id', 'skew_threshold', 'skewness', 'target_col', 'threshold', 'triage', 'unique_values', 'warnings', 'zero_flagged_columns', 'zero_pct', 'zero_variance']

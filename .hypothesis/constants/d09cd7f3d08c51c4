@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\proposal\proposal_engine.py
+# hypothesis_version: 6.151.9
+
+['CANDIDATES_COLLECTED', '_ml_confidence', 'aggregation', 'anomaly', 'automl', 'bandit', 'candidates', 'encoding', 'error', 'n_columns', 'pipeline', 'proposer_type', 'ranker', 'run_id', 'sample_size', 'status', 'target_col', 'target_column', 'transformation', 'unknown', 'window']

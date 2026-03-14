@@ -31,6 +31,7 @@ from validation.null_validator import NullValidator, NullViolation
 from validation.range_validator import RangeValidator, RangeViolation
 from validation.integrity_checker import IntegrityChecker
 from validation.regulatory.regulatory_engine import RegulatoryEngine
+from validation.zero_value_detector import ZeroValueDetector, ZeroViolation
 
 try:
     from validation.shap_explainer import explain_gate_failure as _shap_explain
@@ -103,6 +104,7 @@ class HardGate:
         range_validator: RangeValidator,
         integrity_checker: IntegrityChecker,
         regulatory_engine: RegulatoryEngine,
+        zero_value_detector: Optional["ZeroValueDetector"] = None,
         schema_info: Optional[Dict[str, Any]] = None,
     ) -> None:
         self._schema_validator   = schema_validator
@@ -110,20 +112,27 @@ class HardGate:
         self._range_validator    = range_validator
         self._integrity_checker  = integrity_checker
         self._regulatory_engine  = regulatory_engine
+        self._zero_detector      = zero_value_detector
         self._schema_info        = schema_info or {}
+        self._strict_mode        = True
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "HardGate":
         """Factory — constructs a fully wired HardGate from the project config."""
         schema_info = config.get("validation", {}).get("schema", {})
-        return cls(
-            schema_validator  = SchemaValidator(config),
-            null_validator    = NullValidator.from_config(config),
-            range_validator   = RangeValidator.from_config(config),
-            integrity_checker = IntegrityChecker(config),
-            regulatory_engine = RegulatoryEngine.from_config(config),
-            schema_info       = schema_info,
+        strict_mode = config.get("validation", {}).get("strict_mode", False)
+        
+        gate = cls(
+            schema_validator   = SchemaValidator(config),
+            null_validator     = NullValidator.from_config(config),
+            range_validator    = RangeValidator.from_config(config),
+            integrity_checker  = IntegrityChecker(config),
+            regulatory_engine  = RegulatoryEngine.from_config(config),
+            zero_value_detector= ZeroValueDetector.from_config(config),
+            schema_info        = schema_info,
         )
+        gate._strict_mode = strict_mode
+        return gate
 
     # ------------------------------------------------------------------
     # Public API
@@ -170,6 +179,39 @@ class HardGate:
         for v in reg_violations:
             bucket = raw_failures if v.severity in _BLOCKING_SEVERITIES else raw_warnings
             bucket.append(v.to_dict())
+
+        # ── 6. Zero-Value Detection ───────────────────────────────────
+        if self._zero_detector is not None:
+            zero_report = self._zero_detector.validate(df, run_id=run_id)
+            for v in zero_report.violations:
+                bucket = raw_failures if v.severity in _BLOCKING_SEVERITIES else raw_warnings
+                bucket.append(v.to_dict())
+            if zero_report.violations:
+                logger.info(
+                    "[ZeroDetector] %d zero-value violation(s) found for run_id=%s.",
+                    len(zero_report.violations), run_id,
+                )
+
+        # ── 7. Adaptive Degradation (Non-Strict Mode) ─────────────────
+        if not self._strict_mode and raw_failures:
+            # Drop columns that caused blocking errors so we can proceed
+            bad_cols = {f.get("column") for f in raw_failures if f.get("column")}
+            existing_bad_cols = list(bad_cols.intersection(df.columns))
+            
+            if existing_bad_cols:
+                df.drop(columns=existing_bad_cols, inplace=True)
+                msg_degrade = f"Adaptive mode: dropped {len(existing_bad_cols)} failing columns {existing_bad_cols}"
+                logger.warning(msg_degrade)
+                raw_warnings.append({
+                    "column": "DATASET",
+                    "severity": "WARNING",
+                    "type": "ADAPTIVE_DEGRADATION",
+                    "message": msg_degrade
+                })
+            
+            # Demote failures to warnings since we handled them by dropping
+            raw_warnings.extend(raw_failures)
+            raw_failures = []
 
         # ── Decision ──────────────────────────────────────────────────
         has_blocking = len(raw_failures) > 0

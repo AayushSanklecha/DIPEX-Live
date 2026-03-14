@@ -15,7 +15,7 @@ WORKDIR /app
 # Install Python dependencies first (layer caching)
 # Install Python dependencies — torch excluded (not needed at runtime, saves ~900MB)
 COPY requirements.docker.txt .
-RUN pip install --no-cache-dir -r requirements.docker.txt
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.docker.txt
 
 
 # Copy project

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Play, FileText, Database, Moon, Sun } from 'lucide-react';
+import { LayoutDashboard, Play, FileText, Database, Moon, Sun, BookOpen } from 'lucide-react';
 import './Shell.css';
 
 const Shell = () => {
@@ -50,6 +50,12 @@ const Shell = () => {
                         <NavLink to="/reports" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
                             <FileText className="nav-icon" />
                             <span>View Reports</span>
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/docs" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
+                            <BookOpen className="nav-icon" />
+                            <span>API Docs</span>
                         </NavLink>
                     </li>
                 </ul>

@@ -93,11 +93,15 @@ class PipelineBuilder:
 
         # ── Numeric transformer ───────────────────────────────────────────────
         if numeric_cols:
-            impute_strategy = self.cfg.get("cleaning", {}).get("imputation_strategy", "mean")
+            impute_strategy = self.cfg.get("cleaning", {})
+            if isinstance(impute_strategy, bool): impute_strategy = {}
+            impute_strategy = impute_strategy.get("imputation_strategy", "mean") if isinstance(impute_strategy, dict) else "mean"
             if impute_strategy not in ("mean", "median", "most_frequent", "constant"):
                 impute_strategy = "mean"
 
-            scaler_name = self.cfg.get("feature_engineering", {}).get("scaler", "standard")
+            fe_cfg = self.cfg.get("feature_engineering", {})
+            if isinstance(fe_cfg, bool): fe_cfg = {}
+            scaler_name = fe_cfg.get("scaler", "standard") if isinstance(fe_cfg, dict) else "standard"
             scaler = {
                 "standard": StandardScaler(),
                 "minmax":   MinMaxScaler(),
@@ -113,21 +117,42 @@ class PipelineBuilder:
 
         # ── Categorical transformer ───────────────────────────────────────────
         if categorical_cols:
-            encoder_name = self.cfg.get("feature_engineering", {}).get("encoder", "onehot")
-            if encoder_name == "ordinal":
-                encoder = OrdinalEncoder(
-                    handle_unknown="use_encoded_value", unknown_value=-1
-                )
-            else:  # default onehot
-                encoder = OneHotEncoder(
-                    handle_unknown="ignore", sparse_output=False
-                )
+            fe_cfg = self.cfg.get("feature_engineering", {})
+            if isinstance(fe_cfg, bool): fe_cfg = {}
+            encoder_name = fe_cfg.get("encoder", "onehot") if isinstance(fe_cfg, dict) else "onehot"
 
-            cat_pipe = Pipeline([
-                ("imputer", SimpleImputer(strategy="most_frequent")),
-                ("encoder", encoder),
-            ])
-            transformers.append(("categorical", cat_pipe, categorical_cols))
+            # Filter out extremely high-cardinality categoricals which would
+            # explode OHE output size and slow everything down significantly
+            _MAX_OHE_CARDINALITY = 50
+            safe_cat_cols = []
+            for c in categorical_cols:
+                n_uniq = df[c].nunique(dropna=True)
+                if n_uniq <= _MAX_OHE_CARDINALITY:
+                    safe_cat_cols.append(c)
+                else:
+                    logger.debug(
+                        "[Builder] Dropping cat col '%s' (%d unique > %d OHE limit)",
+                        c, n_uniq, _MAX_OHE_CARDINALITY,
+                    )
+            categorical_cols = safe_cat_cols
+
+            if categorical_cols:
+                if encoder_name == "ordinal":
+                    encoder = OrdinalEncoder(
+                        handle_unknown="use_encoded_value", unknown_value=-1
+                    )
+                else:  # default onehot
+                    encoder = OneHotEncoder(
+                        handle_unknown="ignore",
+                        sparse_output=False,
+                        max_categories=_MAX_OHE_CARDINALITY,
+                    )
+
+                cat_pipe = Pipeline([
+                    ("imputer", SimpleImputer(strategy="most_frequent")),
+                    ("encoder", encoder),
+                ])
+                transformers.append(("categorical", cat_pipe, categorical_cols))
 
         # ── Text transformer ──────────────────────────────────────────────────
         for tcol in text_cols:

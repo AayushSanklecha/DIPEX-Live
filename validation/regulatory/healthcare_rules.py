@@ -4,10 +4,12 @@ validation/regulatory/healthcare_rules.py
 Healthcare domain regulatory rules.
 
 Rules implemented:
-  1. AgeRangeRule           — patient age within physiological bounds [0, 130]
-  2. VitalSignsRule         — HR, SBP, DBP, SpO2, temperature within clinical ranges
-  3. DiagnosisCodeFormatRule — ICD-10-CM code format validation
-  4. PHIPresenceRule        — detects raw PII patterns (SSN, DOB) in unexpected columns
+  1. AgeRangeRule            — patient age within physiological bounds [0, 130]
+  2. VitalSignsRule          — HR, SBP, DBP, SpO2, temperature within clinical ranges
+  3. DiagnosisCodeFormatRule  — ICD-10-CM code format validation
+  4. PHIPresenceRule          — detects raw PII patterns (SSN, DOB, Email) in text columns
+  5. ConsentValidationRule    — HIPAA §164.508 / GDPR Art. 7: explicit consent required for PHI
+  6. DeIdentificationRule     — HIPAA Safe Harbor: de-identified columns must not contain PHI
 """
 
 import logging
@@ -24,8 +26,8 @@ logger = logging.getLogger(__name__)
 _ICD10_PATTERN = re.compile(r"^[A-Z]\d{2}(\.[A-Z0-9]{1,4})?$", re.IGNORECASE)
 
 # Common PHI patterns for detection
-_SSN_PATTERN  = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
-_DOB_PATTERN  = re.compile(r"\b\d{2}[/-]\d{2}[/-]\d{4}\b")
+_SSN_PATTERN   = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
+_DOB_PATTERN   = re.compile(r"\b\d{2}[/-]\d{2}[/-]\d{4}\b")
 _EMAIL_PATTERN = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
 
 
@@ -103,7 +105,6 @@ class VitalSignsRule(BaseRegulatoryRule):
     }
 
     def __init__(self, column_bounds: Optional[Dict[str, Dict[str, float]]] = None) -> None:
-        # Caller can override specific columns; defaults fill the rest
         self.column_bounds: Dict[str, Dict[str, float]] = {
             **self._DEFAULT_BOUNDS,
             **(column_bounds or {}),
@@ -214,7 +215,6 @@ class PHIPresenceRule(BaseRegulatoryRule):
     def evaluate(self, df: pd.DataFrame) -> List[RegulatoryViolation]:
         violations: List[RegulatoryViolation] = []
 
-        # Default to all object-type columns if none specified
         check_cols = self.text_columns or list(
             df.select_dtypes(include=["object", "string"]).columns
         )
@@ -249,6 +249,138 @@ class PHIPresenceRule(BaseRegulatoryRule):
                             f"Apply HIPAA Safe Harbor de-identification to '{col}'. "
                             f"Remove or hash all {phi_type} patterns. "
                             "Do not ingest identifiable patient data into the ML pipeline."
+                        ),
+                    ))
+
+        return violations
+
+
+class ConsentValidationRule(BaseRegulatoryRule):
+    """
+    HIPAA §164.508 / GDPR Art. 7 — Conditions for consent.
+
+    Validates that every row containing Protected Health Information (PHI) has
+    an explicit consent flag set to True. Processing PHI without patient consent
+    is a violation of both HIPAA and GDPR.
+    """
+    name = "consent_validation"
+    domain = "healthcare"
+
+    def __init__(
+        self,
+        consent_column: str = "consent_given",
+        phi_columns: Optional[List[str]] = None,
+    ) -> None:
+        self.consent_column = consent_column
+        self.phi_columns = phi_columns or ["patient_id", "ssn", "date_of_birth", "full_name"]
+
+    def evaluate(self, df: pd.DataFrame) -> List[RegulatoryViolation]:
+        phi_present = [c for c in self.phi_columns if c in df.columns]
+        if not phi_present:
+            return []
+
+        if self.consent_column not in df.columns:
+            return [RegulatoryViolation(
+                rule_name=self.name,
+                domain=self.domain,
+                severity="ERROR",
+                column=self.consent_column,
+                offending_count=len(df),
+                message=(
+                    f"[HIPAA §164.508 / GDPR Art. 7] Consent column "
+                    f"'{self.consent_column}' is absent from the dataset. "
+                    f"PHI columns {phi_present} are present — cannot verify consent."
+                ),
+                remediation=(
+                    f"Add boolean column '{self.consent_column}' and populate from "
+                    "your consent management system before ingestion."
+                ),
+            )]
+
+        has_phi = df[phi_present].notna().any(axis=1)
+        no_consent = ~df[self.consent_column].astype(bool)
+        bad = (has_phi & no_consent).sum()
+
+        if bad == 0:
+            return []
+
+        return [RegulatoryViolation(
+            rule_name=self.name,
+            domain=self.domain,
+            severity="ERROR",
+            column=self.consent_column,
+            offending_count=int(bad),
+            message=(
+                f"[HIPAA §164.508 / GDPR Art. 7] {bad} record(s) contain PHI in "
+                f"{phi_present} but '{self.consent_column}' is False or null. "
+                "Processing PHI without consent is a regulatory violation."
+            ),
+            remediation=(
+                "Filter records without valid consent before ML ingestion. "
+                "Ensure consent management platform captures explicit opt-in. "
+                "Document the lawful basis for processing in your Privacy Notice."
+            ),
+        )]
+
+
+class DeIdentificationRule(BaseRegulatoryRule):
+    """
+    HIPAA Safe Harbor (45 CFR §164.514(b)) — De-identification of PHI.
+
+    Verifies that columns claimed to be de-identified do NOT contain raw PHI
+    patterns (SSN, email, phone numbers). A column is considered claimed
+    de-identified if it has 'deidentified', 'anon', or 'masked' in its name.
+
+    CRITICAL severity — any raw PHI in a de-identified column means the
+    de-identification process failed and the pipeline must halt.
+    """
+    name = "de_identification"
+    domain = "healthcare"
+
+    _PHI_PATTERNS = [
+        (re.compile(r"\b\d{3}-\d{2}-\d{4}\b"), "SSN"),
+        (re.compile(r"\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b"), "Email"),
+        (re.compile(r"\b(?:\+?1[\s\-.]?)?\(?\d{3}\)?[\s\-.]?\d{3}[\s\-.]?\d{4}\b"), "Phone"),
+    ]
+    _DEID_KEYWORDS = ("deidentified", "deident", "anon", "masked", "pseudonym", "redacted")
+
+    def __init__(self, claimed_deid_columns: Optional[List[str]] = None) -> None:
+        self.claimed_deid_columns = claimed_deid_columns
+
+    def evaluate(self, df: pd.DataFrame) -> List[RegulatoryViolation]:
+        if self.claimed_deid_columns is not None:
+            check_cols = [c for c in self.claimed_deid_columns if c in df.columns]
+        else:
+            check_cols = [
+                c for c in df.columns
+                if any(kw in c.lower() for kw in self._DEID_KEYWORDS)
+            ]
+
+        if not check_cols:
+            return []
+
+        violations: List[RegulatoryViolation] = []
+        for col in check_cols:
+            series = df[col].dropna().astype(str)
+            for pattern, phi_type in self._PHI_PATTERNS:
+                hits = series[series.str.contains(pattern, regex=True)]
+                if not hits.empty:
+                    violations.append(RegulatoryViolation(
+                        rule_name=self.name,
+                        domain=self.domain,
+                        severity="CRITICAL",
+                        column=col,
+                        offending_count=len(hits),
+                        message=(
+                            f"[HIPAA Safe Harbor] Column '{col}' is claimed as "
+                            f"de-identified but contains {len(hits)} raw {phi_type} "
+                            "pattern(s). De-identification has FAILED for this column."
+                        ),
+                        remediation=(
+                            f"Re-run the de-identification pipeline on '{col}'. "
+                            f"Apply HIPAA Safe Harbor method: remove or hash all "
+                            f"{phi_type} identifiers. Validate with a regex scan before "
+                            "re-ingestion."
                         ),
                     ))
 

@@ -4,16 +4,24 @@ validation/range_validator.py
 Domain-aware range validation for Hard Gate 1.
 
 Covers three classes of rule:
-  1. Bound rules      — standard min/max per column
+  1. Bound rules      — standard min/max per column (from config.yaml)
   2. Positivity rules — columns that must always be ≥ 0 (financial/physical)
   3. Logical rules    — cross-column inequalities (col_a ≤ col_b, etc.)
+  4. Auto-inferred IQR bounds — kicks in for ANY numeric column with no
+     explicit config rule, using (Q1 - 3×IQR, Q3 + 3×IQR) soft bounds.
+     This ensures generic/unknown datasets still get range coverage.
+
+Fix 2: Auto-infer IQR-based soft bounds for numeric columns with no config rule.
+Fix 4: SoftValidator is fitted once per validate() call (not once per rule),
+       avoiding N identical IsolationForest fits on the same DataFrame.
 """
 
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
+import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -100,20 +108,15 @@ class RangeValidator:
     Configuration example (from config.yaml):
       validation:
         range:
+          auto_infer_bounds: true   # default true — IQR soft-bounds for uncovered cols
           bounds:
             - column: age
               min_value: 0
               max_value: 130
               severity: ERROR
-            - column: interest_rate
-              min_value: 0.0
-              max_value: 1.0
-              severity: WARNING
           positivity:
             - column: loan_amount
               strict: true
-            - column: account_balance
-              strict: false
           logical:
             - left_col: loan_amount
               operator: "<="
@@ -126,10 +129,12 @@ class RangeValidator:
         bound_rules: Optional[List[BoundRule]] = None,
         positivity_rules: Optional[List[PositivityRule]] = None,
         logical_rules: Optional[List[LogicalRule]] = None,
+        auto_infer_bounds: bool = True,
     ) -> None:
         self.bound_rules: List[BoundRule] = bound_rules or []
         self.positivity_rules: List[PositivityRule] = positivity_rules or []
         self.logical_rules: List[LogicalRule] = logical_rules or []
+        self.auto_infer_bounds: bool = auto_infer_bounds
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "RangeValidator":
@@ -168,18 +173,45 @@ class RangeValidator:
             for r in range_cfg.get("logical", [])
         ]
 
+        auto_infer = bool(range_cfg.get("auto_infer_bounds", True))
+
         return cls(
             bound_rules=bound_rules,
             positivity_rules=positivity_rules,
             logical_rules=logical_rules,
+            auto_infer_bounds=auto_infer,
         )
 
     def validate(self, df: pd.DataFrame) -> List[RangeViolation]:
-        """Runs all registered range rules against the DataFrame."""
+        """Runs all registered range rules against the DataFrame.
+
+        Fix 4: SoftValidator is fitted ONCE here, then reused for all column
+        checks — avoids N identical IsolationForest fits on the same DataFrame.
+        """
         violations: List[RangeViolation] = []
-        self._check_bounds(df, violations)
-        self._check_positivity(df, violations)
+
+        # Fix 4: Fit SoftValidator ONCE per validate() call
+        _sv = None
+        try:
+            from validation.soft_validator import SoftValidator
+            _sv = SoftValidator()
+            num_cols = df.select_dtypes(include="number").columns.tolist()
+            if len(num_cols) >= 2 and _sv._available:
+                X_all = df[num_cols].fillna(df[num_cols].median())
+                _sv._fit(X_all.values)
+                logger.debug("SoftValidator: fitted on %d rows x %d cols (once)", len(df), len(num_cols))
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("SoftValidator unavailable: %s", exc)
+            _sv = None
+
+        self._check_bounds(df, violations, _sv)
+        self._check_positivity(df, violations, _sv)
         self._check_logical(df, violations)
+
+        # Fix 2: Auto-infer IQR bounds for numeric columns not covered by any rule
+        if self.auto_infer_bounds:
+            self._check_auto_iqr(df, violations, _sv)
+
         return violations
 
     # ------------------------------------------------------------------
@@ -187,15 +219,9 @@ class RangeValidator:
     # ------------------------------------------------------------------
 
     def _check_bounds(
-        self, df: pd.DataFrame, violations: List[RangeViolation]
+        self, df: pd.DataFrame, violations: List[RangeViolation],
+        _sv: Any,
     ) -> None:
-        # [ML] Soft validator — separates hard anomalies from valid novelties
-        try:
-            from validation.soft_validator import SoftValidator
-            _sv: SoftValidator = SoftValidator()
-        except Exception:  # noqa: BLE001
-            _sv = None  # type: ignore[assignment]
-
         for rule in self.bound_rules:
             col = rule.column
             if col not in df.columns:
@@ -208,72 +234,54 @@ class RangeValidator:
             if series.empty:
                 continue
 
-            if rule.min_value is not None:
-                breach_mask = (series < rule.min_value).reindex(df.index, fill_value=False)
-                breach = int(breach_mask.sum())
-                if breach > 0:
-                    if _sv is not None:
-                        cls = _sv.classify_violations(df, col, breach_mask)
-                        hard, soft = cls["hard_count"], cls["soft_count"]
-                    else:
-                        hard, soft = breach, 0
-                    if hard > 0:
-                        violations.append(RangeViolation(
-                            rule_type="BOUND_VIOLATION",
-                            severity=rule.severity.value, column=col,
-                            offending_count=hard,
-                            message=(
-                                f"[ML:HARD] Column '{col}': {hard} value(s) below minimum "
-                                f"{rule.min_value} (anomaly-confirmed errors). "
-                                f"Min observed: {series.min():.4g}. {rule.description}"
-                            ),
-                        ))
-                    if soft > 0:
-                        violations.append(RangeViolation(
-                            rule_type="BOUND_VIOLATION",
-                            severity="WARNING", column=col,
-                            offending_count=soft,
-                            message=(
-                                f"[ML:SOFT] Column '{col}': {soft} value(s) below minimum "
-                                f"{rule.min_value} (soft anomaly — possible valid novelty). "
-                                f"Min observed: {series.min():.4g}. {rule.description}"
-                            ),
-                        ))
+            for bound_val, is_min in ((rule.min_value, True), (rule.max_value, False)):
+                if bound_val is None:
+                    continue
+                if is_min:
+                    breach_mask = (series < bound_val).reindex(df.index, fill_value=False)
+                    direction = "below minimum"
+                    obs_str = f"Min observed: {series.min():.4g}"
+                else:
+                    breach_mask = (series > bound_val).reindex(df.index, fill_value=False)
+                    direction = "above maximum"
+                    obs_str = f"Max observed: {series.max():.4g}"
 
-            if rule.max_value is not None:
-                breach_mask = (series > rule.max_value).reindex(df.index, fill_value=False)
                 breach = int(breach_mask.sum())
-                if breach > 0:
-                    if _sv is not None:
-                        cls = _sv.classify_violations(df, col, breach_mask)
-                        hard, soft = cls["hard_count"], cls["soft_count"]
-                    else:
-                        hard, soft = breach, 0
-                    if hard > 0:
-                        violations.append(RangeViolation(
-                            rule_type="BOUND_VIOLATION",
-                            severity=rule.severity.value, column=col,
-                            offending_count=hard,
-                            message=(
-                                f"[ML:HARD] Column '{col}': {hard} value(s) above maximum "
-                                f"{rule.max_value} (anomaly-confirmed errors). "
-                                f"Max observed: {series.max():.4g}. {rule.description}"
-                            ),
-                        ))
-                    if soft > 0:
-                        violations.append(RangeViolation(
-                            rule_type="BOUND_VIOLATION",
-                            severity="WARNING", column=col,
-                            offending_count=soft,
-                            message=(
-                                f"[ML:SOFT] Column '{col}': {soft} value(s) above maximum "
-                                f"{rule.max_value} (soft anomaly — possible valid novelty). "
-                                f"Max observed: {series.max():.4g}. {rule.description}"
-                            ),
-                        ))
+                if breach == 0:
+                    continue
+
+                if _sv is not None and _sv._fitted:
+                    cls_result = _sv.classify_violations(df, col, breach_mask)
+                    hard, soft = cls_result["hard_count"], cls_result["soft_count"]
+                else:
+                    hard, soft = breach, 0
+
+                if hard > 0:
+                    violations.append(RangeViolation(
+                        rule_type="BOUND_VIOLATION",
+                        severity=rule.severity.value, column=col,
+                        offending_count=hard,
+                        message=(
+                            f"[ML:HARD] Column '{col}': {hard} value(s) {direction} "
+                            f"{bound_val} (anomaly-confirmed errors). "
+                            f"{obs_str}. {rule.description}"
+                        ),
+                    ))
+                if soft > 0:
+                    violations.append(RangeViolation(
+                        rule_type="BOUND_VIOLATION",
+                        severity="WARNING", column=col,
+                        offending_count=soft,
+                        message=(
+                            f"[ML:SOFT] Column '{col}': {soft} value(s) {direction} "
+                            f"{bound_val} (soft anomaly — possible valid novelty). "
+                            f"{obs_str}. {rule.description}"
+                        ),
+                    ))
 
     def _check_positivity(
-        self, df: pd.DataFrame, violations: List[RangeViolation]
+        self, df: pd.DataFrame, violations: List[RangeViolation],
+        _sv: Any,
     ) -> None:
         for rule in self.positivity_rules:
             col = rule.column
@@ -335,3 +343,61 @@ class RangeValidator:
                         f"{bad} row(s) break this constraint. {rule.description}"
                     ),
                 ))
+
+    def _check_auto_iqr(
+        self, df: pd.DataFrame, violations: List[RangeViolation],
+        _sv: Any,
+    ) -> None:
+        """Fix 2: For numeric columns NOT covered by any config BoundRule,
+        compute IQR-based soft bounds (Q1 - 3×IQR, Q3 + 3×IQR) and flag
+        extreme outliers as WARNING. Uses SoftValidator to downgrade
+        confirmed-valid novelties further to explicit soft notes.
+        """
+        covered: Set[str] = {r.column for r in self.bound_rules}
+        positivity_covered: Set[str] = {r.column for r in self.positivity_rules}
+
+        for col in df.select_dtypes(include="number").columns:
+            if col in covered:
+                continue  # already has explicit config rule
+
+            series = df[col].dropna()
+            if len(series) < 20:
+                continue  # too few rows for IQR to be meaningful
+
+            q1, q3 = float(series.quantile(0.25)), float(series.quantile(0.75))
+            iqr = q3 - q1
+            if iqr == 0:
+                continue  # constant or near-constant column
+
+            lower = q1 - 3.0 * iqr
+            upper = q3 + 3.0 * iqr
+
+            breach_mask = ((series < lower) | (series > upper)).reindex(df.index, fill_value=False)
+            breach = int(breach_mask.sum())
+            if breach == 0:
+                continue
+
+            if _sv is not None and _sv._fitted:
+                cls_result = _sv.classify_violations(df, col, breach_mask)
+                hard, soft = cls_result["hard_count"], cls_result["soft_count"]
+            else:
+                hard, soft = breach, 0
+
+            if hard > 0:
+                violations.append(RangeViolation(
+                    rule_type="AUTO_IQR_OUTLIER",
+                    severity="WARNING",
+                    column=col,
+                    offending_count=hard,
+                    message=(
+                        f"[AUTO-IQR] Column '{col}': {hard} extreme outlier(s) "
+                        f"outside ±3×IQR bounds [{lower:.4g}, {upper:.4g}]. "
+                        f"Range: {series.min():.4g}–{series.max():.4g}. "
+                        "Add a config BoundRule to promote this to ERROR."
+                    ),
+                ))
+            if soft > 0:
+                logger.debug(
+                    "[AUTO-IQR] Column '%s': %d soft novelties beyond IQR bounds (valid per IsolationForest).",
+                    col, soft,
+                )

@@ -168,8 +168,15 @@ class MissingnessAnalyzer:
             return pd.DataFrame()
 
         null_indicator = null_matrix[has_some_nulls].astype(float)
+        
+        MAX_NULL_SAMPLES = 10000
+        if len(null_indicator) > MAX_NULL_SAMPLES:
+            sample_indicator = null_indicator.sample(n=MAX_NULL_SAMPLES, random_state=42)
+        else:
+            sample_indicator = null_indicator
+
         try:
-            corr = null_indicator.corr(method="pearson")
+            corr = sample_indicator.corr(method="pearson")
         except Exception as exc:
             logger.warning("Null correlation computation failed: %s", exc)
             corr = pd.DataFrame()

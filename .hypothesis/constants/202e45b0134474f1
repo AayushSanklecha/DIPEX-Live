@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\preprocessing\pipeline_builder.py
+# hypothesis_version: 6.151.9
+
+[200, 'PipelineBuilder', 'categorical', 'category', 'cleaning', 'constant', 'drop', 'encoder', 'feature_engineering', 'ignore', 'imputation_strategy', 'imputer', 'mean', 'median', 'minmax', 'most_frequent', 'none', 'numeric', 'object', 'onehot', 'ordinal', 'passthrough', 'preprocessing', 'preprocessor', 'robust', 'scaler', 'standard', 'tfidf', 'use_encoded_value']

@@ -4,10 +4,12 @@ validation/regulatory/banking_rules.py
 Banking and financial domain regulatory rules.
 
 Rules implemented:
-  1. PositiveAmountRule      — monetary amount columns must be > 0
-  2. AMLThresholdRule        — flags transactions at/above the AML reporting limit
-  3. LoanRatioRule           — loan-to-value ratio must remain within safe bounds
-  4. RepaymentConsistencyRule — repayment amount must not exceed outstanding balance
+  1. PositiveAmountRule              — monetary amount columns must be > 0
+  2. AMLThresholdRule                — flags transactions at/above the AML reporting limit
+  3. LoanRatioRule                   — loan-to-value ratio must remain within safe bounds
+  4. RepaymentConsistencyRule        — repayment amount must not exceed outstanding balance
+  5. SuspiciousTransactionPatternRule — velocity spike detection (FATF Rec. 20)
+  6. CurrencyConcentrationRule       — BCBS239 concentration risk by currency
 """
 
 import logging
@@ -203,5 +205,132 @@ class RepaymentConsistencyRule(BaseRegulatoryRule):
             remediation=(
                 "Reconcile repayment records against the core banking "
                 "system. Check for sign-convention errors or double-posting."
+            ),
+        )]
+
+
+class SuspiciousTransactionPatternRule(BaseRegulatoryRule):
+    """
+    FATF Recommendation 20 — Reporting of suspicious transactions.
+
+    Detects velocity spikes: accounts/entities with an unusually high number
+    of transactions within a single day (or time period), which may indicate
+    structuring (smurfing), layering, or automated fraud patterns.
+
+    Regulatory basis: FATF Recommendation 20, USA PATRIOT Act §326, BSA.
+    """
+    name = "suspicious_transaction_pattern"
+    domain = "banking"
+
+    def __init__(
+        self,
+        transaction_id_column: str = "account_id",
+        timestamp_column: Optional[str] = "transaction_date",
+        max_transactions_per_day: int = 50,
+    ) -> None:
+        self.transaction_id_column = transaction_id_column
+        self.timestamp_column = timestamp_column
+        self.max_transactions_per_day = max_transactions_per_day
+
+    def evaluate(self, df: pd.DataFrame) -> List[RegulatoryViolation]:
+        if self._col_missing(self.transaction_id_column, df):
+            return []
+
+        try:
+            if self.timestamp_column and self.timestamp_column in df.columns:
+                df_copy = df[[self.transaction_id_column, self.timestamp_column]].copy()
+                df_copy["_date"] = pd.to_datetime(
+                    df_copy[self.timestamp_column], errors="coerce"
+                ).dt.date
+                counts = (
+                    df_copy.groupby([self.transaction_id_column, "_date"])
+                    .size()
+                    .reset_index(name="_count")
+                )
+                flagged_groups = counts[counts["_count"] > self.max_transactions_per_day]
+                flagged_count = int(flagged_groups[self.transaction_id_column].nunique())
+            else:
+                counts = df[self.transaction_id_column].value_counts()
+                flagged_count = int((counts > self.max_transactions_per_day).sum())
+
+            if flagged_count == 0:
+                return []
+
+            return [RegulatoryViolation(
+                rule_name=self.name,
+                domain=self.domain,
+                severity="WARNING",
+                column=self.transaction_id_column,
+                offending_count=flagged_count,
+                message=(
+                    f"[FATF Rec. 20] {flagged_count} account(s) exceed the velocity "
+                    f"threshold of {self.max_transactions_per_day} transactions per day. "
+                    "May indicate structuring, layering, or automated fraud activity."
+                ),
+                remediation=(
+                    "Escalate flagged accounts to AML compliance team for manual review. "
+                    "File SAR if structuring pattern is confirmed. "
+                    "Review transaction limits and alert thresholds in the core banking system."
+                ),
+            )]
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("SuspiciousTransactionPatternRule evaluation error: %s", exc)
+            return []
+
+
+class CurrencyConcentrationRule(BaseRegulatoryRule):
+    """
+    BCBS 239 — Risk data aggregation: concentration risk by currency.
+
+    If a single currency dominates > max_concentration_pct of the dataset,
+    the portfolio has excessive currency concentration risk, which reduces
+    the reliability of risk aggregation reports.
+
+    Regulatory basis: BCBS 239 Principle 6 (Adaptability), Basel III Pillar 2.
+    """
+    name = "currency_concentration"
+    domain = "banking"
+
+    def __init__(
+        self,
+        currency_column: str = "currency",
+        max_concentration_pct: float = 0.90,
+    ) -> None:
+        self.currency_column = currency_column
+        self.max_concentration_pct = max_concentration_pct
+
+    def evaluate(self, df: pd.DataFrame) -> List[RegulatoryViolation]:
+        if self._col_missing(self.currency_column, df):
+            return []
+
+        if df[self.currency_column].isna().all():
+            return []
+
+        counts = df[self.currency_column].dropna().value_counts(normalize=True)
+        if counts.empty:
+            return []
+
+        top_currency = counts.index[0]
+        top_pct = float(counts.iloc[0])
+
+        if top_pct <= self.max_concentration_pct:
+            return []
+
+        return [RegulatoryViolation(
+            rule_name=self.name,
+            domain=self.domain,
+            severity="WARNING",
+            column=self.currency_column,
+            offending_count=int((df[self.currency_column] == top_currency).sum()),
+            message=(
+                f"[BCBS239] Currency '{top_currency}' accounts for {top_pct:.1%} of "
+                f"transactions, exceeding the concentration limit of "
+                f"{self.max_concentration_pct:.0%}. "
+                "High currency concentration reduces risk aggregation reliability."
+            ),
+            remediation=(
+                "Diversify the dataset across multiple currencies, or ensure the "
+                "concentration is intentional and documented in the risk framework. "
+                "Update BCBS 239 risk data aggregation reports accordingly."
             ),
         )]

@@ -128,25 +128,28 @@ def _compute_shap_importances(
 
 # ── Lazy model loaders (skip silently if package not installed) ───────────────
 
-def _classifiers() -> List[Tuple[str, Any]]:
+def _classifiers(class_weight: Optional[str] = None) -> List[Tuple[str, Any]]:
     models: List[Tuple[str, Any]] = []
 
     try:
         from sklearn.linear_model import LogisticRegression
         models.append(("LogisticRegression",
-                        LogisticRegression(max_iter=500, random_state=42, n_jobs=-1)))
+                        LogisticRegression(max_iter=500, random_state=42, n_jobs=-1,
+                                           class_weight=class_weight)))
     except Exception:
         pass
 
     try:
         from sklearn.ensemble import RandomForestClassifier
         models.append(("RandomForest",
-                        RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)))
+                        RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1,
+                                               class_weight=class_weight)))
     except Exception:
         pass
 
     try:
         from xgboost import XGBClassifier
+        # XGBoost uses scale_pos_weight instead of class_weight
         models.append(("XGBoost",
                         XGBClassifier(n_estimators=100, random_state=42,
                                       use_label_encoder=False,
@@ -156,9 +159,12 @@ def _classifiers() -> List[Tuple[str, Any]]:
 
     try:
         from lightgbm import LGBMClassifier
+        # LightGBM: is_unbalance=True when balanced is requested
+        is_unbalance = class_weight == "balanced"
         models.append(("LightGBM",
                         LGBMClassifier(n_estimators=100, random_state=42,
-                                       verbose=-1, n_jobs=-1)))
+                                       verbose=-1, n_jobs=-1,
+                                       is_unbalance=is_unbalance)))
     except Exception:
         pass
 
@@ -225,11 +231,29 @@ class AutoMLProposal:
             )
 
         # ── Prepare features ──────────────────────────────────────────────────
-        X = df.drop(columns=[target_col]).select_dtypes(include=[np.number]).fillna(0)
+        X = df.drop(columns=[target_col]).copy()
         y = df[target_col].copy()
 
+        # Ensure all columns are numeric for the Sklearn models
+        numeric_features = X.select_dtypes(include=[np.number]).columns.tolist()
+        categorical_features = X.select_dtypes(exclude=[np.number]).columns.tolist()
+
+        # Residual missing values (most should be handled by AutoCorrector already)
+        for col in numeric_features:
+            if X[col].isna().any():
+                X[col] = X[col].fillna(X[col].median())
+        for col in categorical_features:
+            if X[col].isna().any():
+                X[col] = X[col].fillna("MISSING")
+
+        # Encode categoricals so models like RandomForest/LogisticRegression can train
+        if categorical_features:
+            from sklearn.preprocessing import OrdinalEncoder
+            oe = OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)
+            X[categorical_features] = oe.fit_transform(X[categorical_features])
+
         if X.empty or len(X.columns) == 0:
-            raise ValueError("No numeric feature columns available for AutoML.")
+            raise ValueError("No feature columns available for AutoML after preprocessing.")
 
         if len(df) < _MIN_SAMPLES:
             raise ValueError(
@@ -255,10 +279,43 @@ class AutoMLProposal:
         else:
             primary_metric = "r2"
 
-        cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42) if is_classification \
-             else KFold(n_splits=3, shuffle=True, random_state=42)
+        # ── Cross-Validation Splits ───────────────────────────────────────────
+        try:
+            from preprocessing.temporal_splitter import TemporalSplitter
+            splitter = TemporalSplitter(config={"preprocessing": {"temporal": {"n_splits": 3}}})
+            cv = splitter.get_sklearn_cv(df, target_col=target_col)
+        except Exception:
+            cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42) if is_classification \
+                 else KFold(n_splits=3, shuffle=True, random_state=42)
 
-        candidates = _classifiers() if is_classification else _regressors()
+
+        # ── Class imbalance detection ─────────────────────────────────────────
+        # Use triage imbalance info if available (set by RobustTriage on df.attrs),
+        # otherwise compute the ratio directly from y.
+        class_weight_mode: Optional[str] = None
+        if is_classification:
+            imbalance_info = df.attrs.get("triage_imbalance", {}) if hasattr(df, "attrs") else {}
+            if imbalance_info.get("is_imbalanced"):
+                class_weight_mode = "balanced"
+                logger.info(
+                    "[AutoML] Imbalance detected from triage (ratio=%.1f) — "
+                    "using class_weight='balanced'.",
+                    imbalance_info.get("imbalance_ratio", 0),
+                )
+            else:
+                counts = y.value_counts()
+                if len(counts) >= 2:
+                    ratio = int(counts.iloc[0]) / max(int(counts.iloc[-1]), 1)
+                    if ratio >= 5.0:
+                        class_weight_mode = "balanced"
+                        logger.info(
+                            "[AutoML] Imbalance detected directly (ratio=%.1f) — "
+                            "using class_weight='balanced'.", ratio
+                        )
+
+        candidates = _classifiers(class_weight=class_weight_mode) if is_classification \
+                     else _regressors()
+
         if not candidates:
             # Absolute last resort
             return self._fallback(X, y, task, list(X.columns))
@@ -321,6 +378,24 @@ class AutoMLProposal:
             best_name, primary_metric, best_score, len(X.columns),
         )
 
+        # ── Hyperparameter Tuning on winning model ────────────────────────────
+        tuning_info: Dict[str, Any] = {"tuned_params": {}, "tuning_method": "none",
+                                       "tuned_score": None}
+        try:
+            winner_base = dict(candidates)[best_name]
+            tuning_info = self._tune_hyperparams(
+                best_name, winner_base, X, y, cv, primary_metric, is_classification
+            )
+            if tuning_info.get("tuned_score") and tuning_info["tuned_score"] > best_score:
+                logger.info(
+                    "[AutoML] Tuning improved %s from %.4f → %.4f via %s",
+                    best_name, best_score, tuning_info["tuned_score"],
+                    tuning_info["tuning_method"],
+                )
+                best_score = tuning_info["tuned_score"]
+        except Exception as exc:
+            logger.warning("[AutoML] Hyperparameter tuning failed (non-fatal): %s", exc)
+
         # ── SHAP feature importances on the winning model ─────────────────────
         shap_info: Dict[str, Any] = {"shap_top_features": [], "shap_method": "none"}
         try:
@@ -345,9 +420,158 @@ class AutoMLProposal:
             "all_results":        {k: v for k, v in all_results.items() if v is not None},
             "shap_top_features":  shap_info["shap_top_features"],
             "shap_method":        shap_info["shap_method"],
+            "tuned_params":       tuning_info.get("tuned_params", {}),
+            "tuning_method":      tuning_info.get("tuning_method", "none"),
+            "tuned_score":        tuning_info.get("tuned_score"),
             "status":             "PROPOSED",
             **secondary,
         }
+
+    # ── Hyperparameter tuning ─────────────────────────────────────────────────
+
+    @staticmethod
+    def _tune_hyperparams(
+        model_name: str,
+        model: Any,
+        X: pd.DataFrame,
+        y: pd.Series,
+        cv: Any,
+        scoring: str,
+        is_classification: bool,
+        time_budget_seconds: int = 60,
+        n_trials: int = 20,
+    ) -> Dict[str, Any]:
+        """
+        Tune the winning model's hyperparameters.
+
+        Priority:
+          1. Optuna (TPE sampler, time-bounded) — best quality
+          2. RandomizedSearchCV (30 iterations)  — solid fallback
+          3. No-op                               — if both unavailable
+
+        Returns dict with: tuned_params, tuning_method, tuned_score
+        """
+        # ── Parameter grids per model ─────────────────────────────────────────
+        _param_grids: Dict[str, Dict[str, List]] = {
+            "RandomForest": {
+                "n_estimators": [50, 100, 200, 300],
+                "max_depth": [None, 5, 10, 20],
+                "min_samples_split": [2, 5, 10],
+                "min_samples_leaf": [1, 2, 4],
+                "max_features": ["sqrt", "log2"],
+            },
+            "XGBoost": {
+                "n_estimators": [50, 100, 200],
+                "max_depth": [3, 5, 7, 9],
+                "learning_rate": [0.01, 0.05, 0.1, 0.2],
+                "subsample": [0.7, 0.8, 1.0],
+                "colsample_bytree": [0.7, 0.8, 1.0],
+            },
+            "LightGBM": {
+                "n_estimators": [50, 100, 200],
+                "max_depth": [-1, 5, 10, 20],
+                "learning_rate": [0.01, 0.05, 0.1, 0.2],
+                "num_leaves": [15, 31, 63],
+                "subsample": [0.7, 0.8, 1.0],
+            },
+            "LogisticRegression": {
+                "C": [0.001, 0.01, 0.1, 1.0, 10.0, 100.0],
+                "solver": ["lbfgs", "liblinear"],
+                "max_iter": [200, 500, 1000],
+            },
+            "Ridge": {
+                "alpha": [0.001, 0.01, 0.1, 1.0, 10.0, 100.0],
+            },
+        }
+
+        param_grid = _param_grids.get(model_name)
+        if not param_grid:
+            return {"tuned_params": {}, "tuning_method": "none", "tuned_score": None}
+
+        # ── Try Optuna ────────────────────────────────────────────────────────
+        try:
+            import optuna  # type: ignore
+            import time as _time
+            optuna.logging.set_verbosity(optuna.logging.WARNING)
+
+            def _objective(trial: Any) -> float:
+                params: Dict[str, Any] = {}
+                for param, choices in param_grid.items():
+                    params[param] = trial.suggest_categorical(param, choices)
+                try:
+                    cloned = model.__class__(**{**model.get_params(), **params})
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        scores = cross_val_score(cloned, X, y, cv=cv,
+                                                scoring=scoring, n_jobs=1)
+                    return float(scores.mean())
+                except Exception:
+                    return -999.0
+
+            deadline = _time.time() + time_budget_seconds
+            study = optuna.create_study(direction="maximize")
+
+            for _ in range(n_trials):
+                if _time.time() > deadline:
+                    break
+                try:
+                    study.optimize(_objective, n_trials=1, show_progress_bar=False)
+                except Exception:
+                    break
+
+            best_trial = study.best_trial
+            tuned_params = best_trial.params
+            tuned_score = round(float(best_trial.value), 4) if best_trial.value > -900 else None
+
+            logger.info(
+                "[AutoML][Optuna] %s tuning: best_score=%s params=%s",
+                model_name, tuned_score, tuned_params
+            )
+            return {
+                "tuned_params": tuned_params,
+                "tuning_method": "optuna_tpe",
+                "tuned_score": tuned_score,
+            }
+
+        except ImportError:
+            pass  # fall through to RandomizedSearchCV
+        except Exception as exc:
+            logger.warning("[AutoML][Optuna] failed: %s", exc)
+
+        # ── Fallback: RandomizedSearchCV ──────────────────────────────────────
+        try:
+            from sklearn.model_selection import RandomizedSearchCV
+
+            rscv = RandomizedSearchCV(
+                estimator=model,
+                param_distributions=param_grid,
+                n_iter=10, # Keep it fast
+                cv=cv,
+                scoring=scoring,
+                n_jobs=-1,
+                random_state=42,
+                refit=False,
+            )
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                rscv.fit(X, y)
+
+            tuned_params = rscv.best_params_
+            tuned_score = round(float(rscv.best_score_), 4)
+
+            logger.info(
+                "[AutoML][RandomizedSearch] %s tuning: best_score=%.4f params=%s",
+                model_name, tuned_score, tuned_params
+            )
+            return {
+                "tuned_params": tuned_params,
+                "tuning_method": "randomized_search_cv",
+                "tuned_score": tuned_score,
+            }
+
+        except Exception as exc:
+            logger.warning("[AutoML][RandomizedSearch] failed: %s", exc)
+            return {"tuned_params": {}, "tuning_method": "none", "tuned_score": None}
 
     # ── Fallback ──────────────────────────────────────────────────────────────
 

@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\preprocessing\anomaly_scorer.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.05, 0.2, 100, 'AnomalyScorer', 'ERROR', 'OK', 'SKIPPED', 'WARNING', '[AnomalyScorer] %s', 'anomaly_flag', 'anomaly_pct', 'anomaly_score', 'anomaly_scoring', 'auto', 'contamination', 'enabled', 'error_threshold', 'exception', 'features_used', 'ignore', 'isolation_forest', 'max_samples', 'message', 'method', 'n_anomalous', 'n_estimators', 'n_rows', 'none', 'output_flag_col', 'output_score_col', 'preprocessing', 'random_state', 'run_id', 'severity', 'warning_threshold']

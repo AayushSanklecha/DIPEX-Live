@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\validation\governance\governor.py
+# hypothesis_version: 6.151.9
+
+['dataset_id', 'flag', 'flagged', 'governance', 'governance_inactive', 'off', 'passed', 'pii_detection', 'pii_hits', 'policy', 'policy_applied', 'reason', 'redact', 'redacted', 'reject', 'rejected', 'skipped', 'status', 'total_redactions', 'unknown', 'validation']

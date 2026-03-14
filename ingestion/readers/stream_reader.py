@@ -43,7 +43,7 @@ logger = logging.getLogger("dipex.ingestion.readers.stream")
 
 @dataclass
 class KafkaSourceConfig:
-    brokers: str = "localhost:9092"
+    brokers: str = "kafka:29092"
     topic: str = ""
     group_id: str = "dipex-consumer"
     auto_offset_reset: str = "earliest"
@@ -251,10 +251,13 @@ class StreamReader:
                 self._check_lag(consumer, config.topic, config)
 
                 # Emit window?
-                should_emit = (
+                time_up = (
                     window.should_close() if isinstance(window, TumblingWindow)
                     else window.should_emit()
                 )
+                capacity_reached = messages_consumed >= config.max_messages
+                should_emit = time_up or capacity_reached
+
                 if should_emit:
                     if isinstance(window, TumblingWindow):
                         records, w_start, w_end, late = window.close()
@@ -263,20 +266,25 @@ class StreamReader:
 
                     if records:
                         df = pd.json_normalize(records)
-                        elapsed = (time.perf_counter() - t0) * 1000
-                        yield StreamReadResult(
-                            data=df, row_count=len(df),
-                            window_start=datetime.fromtimestamp(w_start, tz=timezone.utc).isoformat(),
-                            window_end=datetime.fromtimestamp(w_end, tz=timezone.utc).isoformat(),
-                            late_dropped=late, consumer_lag=0,
-                            read_time_ms=round(elapsed, 2),
-                        )
-                        windows_emitted += 1
-                        t0 = time.perf_counter()
-                        logger.info(
-                            "Window %d emitted: %d records, %d late dropped",
-                            windows_emitted, len(records), late,
-                        )
+                    else:
+                        df = pd.DataFrame()
+
+                    elapsed = (time.perf_counter() - t0) * 1000
+                    yield StreamReadResult(
+                        data=df, row_count=len(df),
+                        window_start=datetime.fromtimestamp(w_start, tz=timezone.utc).isoformat(),
+                        window_end=datetime.fromtimestamp(w_end, tz=timezone.utc).isoformat(),
+                        late_dropped=late, consumer_lag=0,
+                        read_time_ms=round(elapsed, 2),
+                    )
+                    windows_emitted += 1
+                    t0 = time.perf_counter()
+                    logger.info(
+                        "Window %d emitted: %d records, %d late dropped",
+                        windows_emitted, len(records), late
+                    )
+                    if capacity_reached:
+                        break  # Stop consuming, we hit max_messages
 
         except KeyboardInterrupt:
             logger.info("Kafka consumer interrupted by user.")

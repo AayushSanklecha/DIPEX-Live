@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\api\routes\ingest.py
+# hypothesis_version: 6.151.9
+
+[400, 500, '.json', '/', '/api/ingest', '/direct', '/fetch', 'PROCESSED', 'UPLOADED', 'columns', 'data/uploads', 'dataset_id', 'direct_upload', 'file_path', 'ingestion', 'is_compliant', 'next_step', 'original_filename', 'rows', 'rows_extracted', 'run_id', 'schema', 'source_type', 'status', 'wb']

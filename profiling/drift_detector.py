@@ -214,6 +214,9 @@ class DriftDetector:
         _SCALER_A  = os.path.join(
             os.path.dirname(__file__), "..", "models", "drift_scaler.pkl"
         )
+        _PCA_PATH  = os.path.join(
+            os.path.dirname(__file__), "..", "models", "drift_pca.pkl"
+        )
 
         # ── Resolve shared numeric columns ────────────────────────────────────
         if shared_cols is None:
@@ -239,44 +242,58 @@ class DriftDetector:
         curr_X = current_df[shared_cols].fillna(0)
 
         try:
-            # ── Tier 1: Load Colab artifact ───────────────────────────────────
+            # ── Tier 1: Load pre-trained artifact (PCA + autoencoder) ─────────
+            #
+            #  Design: the artifact is distribution-agnostic because we use a
+            #  LOCAL StandardScaler fitted on the baseline batch (not the saved
+            #  scaler) for data normalisation.  The saved scaler only carries
+            #  the n_features_in_ metadata (= N_DRIFT_FEATURES = 15) so we
+            #  know how wide to pad/truncate the runtime data before projecting
+            #  through the pre-trained PCA → autoencoder.
+            #
+            #  This means the artifact works on ANY dataset regardless of which
+            #  columns are present — no column-name alignment needed.
+            # ─────────────────────────────────────────────────────────────────
             if os.path.exists(_ARTIFACT) and os.path.exists(_SCALER_A):
                 import joblib  # type: ignore
-                ae     = joblib.load(_ARTIFACT)
-                scaler = joblib.load(_SCALER_A)
-                method = "colab_artifact"
-                logger.debug("DriftDetector: loaded Colab autoencoder artifact.")
+                ae            = joblib.load(_ARTIFACT)
+                meta_scaler   = joblib.load(_SCALER_A)   # metadata only
+                pca           = joblib.load(_PCA_PATH) if os.path.exists(_PCA_PATH) else None
+                method        = "pretrained_pca_ae" if pca is not None else "pretrained_ae"
+                logger.debug("DriftDetector: loaded pre-trained artifact (method=%s).", method)
 
-                # ── Feature alignment (Colab scaler may have different columns) ──
-                # Safely handle shape mismatch between runtime df and training set.
-                artifact_cols: Optional[List[str]] = getattr(scaler, "feature_names_in_", None)
-                if artifact_cols is not None:
-                    artifact_cols = list(artifact_cols)
-                    # Align base_X and curr_X to scaler's expected columns
-                    def _align(df_local: pd.DataFrame) -> np.ndarray:
-                        aligned = pd.DataFrame(index=df_local.index)
-                        for c in artifact_cols:           # type: ignore[union-attr]
-                            aligned[c] = df_local[c] if c in df_local.columns else 0.0
-                        return aligned.values.astype(np.float64)
-                    base_X_arr = _align(base_X)
-                    curr_X_arr = _align(curr_X)
-                else:
-                    # Scaler trained without pandas — use raw array, zero-pad if needed
-                    n_scaler  = scaler.n_features_in_ if hasattr(scaler, "n_features_in_") else base_X.shape[1]
-                    def _pad(arr: np.ndarray, target_cols: int) -> np.ndarray:
-                        if arr.shape[1] == target_cols:
-                            return arr
-                        if arr.shape[1] > target_cols:
-                            return arr[:, :target_cols]
-                        pad = np.zeros((arr.shape[0], target_cols - arr.shape[1]))
-                        return np.hstack([arr, pad])
-                    base_X_arr = _pad(base_X.values.astype(np.float64), n_scaler)
-                    curr_X_arr = _pad(curr_X.values.astype(np.float64), n_scaler)
+                # ── Pad / truncate to the training width ──────────────────────
+                n_target = (
+                    meta_scaler.n_features_in_
+                    if hasattr(meta_scaler, "n_features_in_")
+                    else base_X.shape[1]
+                )
+
+                def _pad_cols(arr: np.ndarray, target: int) -> np.ndarray:
+                    if arr.shape[1] == target:
+                        return arr
+                    if arr.shape[1] > target:
+                        return arr[:, :target]
+                    return np.hstack([arr, np.zeros((arr.shape[0], target - arr.shape[1]))])
+
+                base_X_arr = _pad_cols(base_X.values.astype(np.float64), n_target)
+                curr_X_arr = _pad_cols(curr_X.values.astype(np.float64), n_target)
+
+                # ── LOCAL StandardScaler fitted on baseline only ───────────────
+                local_sc = StandardScaler()
+                base_X_arr = local_sc.fit_transform(base_X_arr)
+                curr_X_arr = local_sc.transform(curr_X_arr)
+
+                # ── Project through pre-trained PCA (if available) ────────────
+                if pca is not None:
+                    base_X_arr = pca.transform(base_X_arr)
+                    curr_X_arr = pca.transform(curr_X_arr)
+
             else:
-                # ── Tier 2: Fit in-memory fallback ────────────────────────────
+                # ── Tier 2: In-memory fit (no artifact) ───────────────────────
                 dim    = len(shared_cols)
                 h      = (max(dim // 2, 2), max(dim // 4, 1), max(dim // 2, 2))
-                scaler = StandardScaler()
+                local_sc = StandardScaler()
                 ae     = MLPRegressor(
                     hidden_layer_sizes=h,
                     activation="relu",
@@ -285,24 +302,22 @@ class DriftDetector:
                     random_state=42,
                     warm_start=False,
                 )
-                base_X_arr = base_X.values.astype(np.float64)
-                curr_X_arr = curr_X.values.astype(np.float64)
-                X_scaled   = scaler.fit_transform(base_X_arr)
-                ae.fit(X_scaled, X_scaled)
+                base_X_arr = local_sc.fit_transform(base_X.values.astype(np.float64))
+                curr_X_arr = local_sc.transform(curr_X.values.astype(np.float64))
+                ae.fit(base_X_arr, base_X_arr)
                 method = "in_memory_fit"
                 logger.info(
-                    "DriftDetector: no Colab artifact found — fit in-memory autoencoder "
-                    "on %d rows × %d features.", len(base_X), dim
+                    "DriftDetector: no pre-trained artifact found — fit in-memory "
+                    "autoencoder on %d rows × %d features.", len(base_X), dim
                 )
 
             # ── Score baseline to set 95th-pct threshold ──────────────────────
-            Xb       = scaler.transform(base_X_arr)
-            base_err = np.mean(np.square(Xb - ae.predict(Xb)), axis=1)
+            # base_X_arr / curr_X_arr are already normalised + PCA-projected.
+            base_err = np.mean(np.square(base_X_arr - ae.predict(base_X_arr)), axis=1)
             p95      = float(np.percentile(base_err, 95))
 
             # ── Score current batch ───────────────────────────────────────────
-            Xc            = scaler.transform(curr_X_arr)
-            curr_err      = np.mean(np.square(Xc - ae.predict(Xc)), axis=1)
+            curr_err      = np.mean(np.square(curr_X_arr - ae.predict(curr_X_arr)), axis=1)
             drifted_ratio = float(np.mean(curr_err > p95))
             drifted       = drifted_ratio > 0.10
 

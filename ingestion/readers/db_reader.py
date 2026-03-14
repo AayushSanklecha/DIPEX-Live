@@ -280,6 +280,90 @@ class DBReader:
         except Exception as exc:
             raise DBConnectionError(f"CouchDB error: {exc}") from exc
 
+    def list_tables(self, config: DBSourceConfig) -> List[str]:
+        b = config.backend.lower().replace("-", "").replace("_", "")
+        
+        if b in ("postgres", "postgresql", "mysql", "mariadb", "sqlite", "mssql", "sqlserver", "oracle", "snowflake", "redshift", "clickhouse"):
+            try:
+                from sqlalchemy import inspect, create_engine
+                dsn = self._build_dsn(config)
+                engine = create_engine(dsn, connect_args={"connect_timeout": 5})
+                insp = inspect(engine)
+                tables = insp.get_table_names(schema=config.schema or None)
+                views = insp.get_view_names(schema=config.schema or None)
+                engine.dispose()
+                return sorted(list(set(tables + views)))
+            except Exception as exc:
+                logger.error("Failed to list SQL tables: %s", exc)
+                raise
+                
+        if b in ("mongodb", "mongo"):
+            try:
+                from pymongo import MongoClient
+                u = _env(config.username_env)
+                p = _env(config.password_env)
+                if u and p:
+                    uri = f"mongodb://{u}:{p}@{config.host}:{config.port or 27017}/"
+                elif u:
+                    uri = f"mongodb://{u}@{config.host}:{config.port or 27017}/"
+                else:
+                    uri = f"mongodb://{config.host}:{config.port or 27017}/"
+                client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+                # Force connection to verify auth works
+                client.admin.command('ping')
+                db = client[config.database]
+                collections = db.list_collection_names()
+                client.close()
+                return sorted(collections)
+            except Exception as exc:
+                logger.error("Failed to list MongoDB collections: %s", exc)
+                raise
+                
+        if b == "redis":
+            try:
+                import redis as redis_lib
+                r = redis_lib.Redis(host=config.host, port=config.port or 6379,
+                                    password=_env(config.password_env) or None,
+                                    decode_responses=True, socket_connect_timeout=5)
+                # Just return a few top-level patterns or types to prevent overwhelming the UI
+                # Usually users filter by key prefix anyway, so we just return a placeholder or root keys 
+                keys = r.keys("*")
+                prefixes = {k.split(':')[0] for k in keys[:1000] if ':' in k}
+                return sorted(list(prefixes)) if prefixes else ["*"]
+            except Exception as exc:
+                logger.error("Failed to list Redis keys/prefixes: %s", exc)
+                return []
+                
+        if b == "neo4j":
+            try:
+                from neo4j import GraphDatabase
+                u = _env(config.username_env) or "neo4j"
+                p = _env(config.password_env) or "neo4j"
+                driver = GraphDatabase.driver(config.neo4j_uri, auth=(u, p))
+                labels = []
+                with driver.session(database=config.database or "neo4j") as sess:
+                    res = sess.run("CALL db.labels()")
+                    labels = [record[0] for record in res]
+                driver.close()
+                return sorted(labels)
+            except Exception as exc:
+                logger.error("Failed to list Neo4j labels: %s", exc)
+                return []
+                
+        if b == "dynamodb":
+            try:
+                import boto3
+                region = config.extra_connect_args.get("region_name", "us-east-1")
+                client = boto3.client("dynamodb", region_name=region)
+                return client.list_tables().get("TableNames", [])
+            except Exception as exc:
+                logger.error("Failed to list DynamoDB tables: %s", exc)
+                return []
+
+        # Default fallback for unimplemented list_tables backends
+        logger.warning(f"list_tables not explicitly implemented for {b}, returning empty list.")
+        return []
+
     def extract_schema(self, config: DBSourceConfig) -> Dict[str, Any]:
         b = config.backend.lower()
         if b in ("postgres", "postgresql", "mysql", "sqlite", "mssql", "oracle"):

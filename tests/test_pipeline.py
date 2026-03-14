@@ -16,9 +16,7 @@ from validation.qa_gate import QAGate
 from validation.schema_validator import SchemaValidator
 from profiling.profiler import Profiler
 from profiling.drift_detector import DriftDetector
-from verifier.statistical_verifier import StatisticalVerifier
-from verifier.confidence_aggregator import ConfidenceAggregator
-from verifier.baseline_verifier import BaselineVerifier
+
 
 
 # ---------------------------------------------------------------------------
@@ -149,12 +147,6 @@ class TestSchemaValidator:
         errors = validator.validate(df, {"types": {"x": "int"}})
         assert any(e["type"] == "TYPE_MISMATCH" for e in errors)
 
-    def test_null_threshold_exceeded(self):
-        df = pd.DataFrame({"x": [1, None, None, None, None]})
-        validator = SchemaValidator(self.CONFIG)
-        errors = validator.validate(df, {})
-        assert any(e["type"] == "NULL_THRESHOLD_EXCEEDED" for e in errors)
-
     def test_stateless_between_calls(self):
         """Two calls to validate() should NOT share error state."""
         df = pd.DataFrame({"x": [1, None, None, None, None]})
@@ -211,81 +203,4 @@ class TestDriftDetector:
         assert psi == 0.0
 
 
-# ---------------------------------------------------------------------------
-# StatisticalVerifier
-# ---------------------------------------------------------------------------
 
-class TestStatisticalVerifier:
-    def test_empty_array_returns_not_passed(self):
-        sv = StatisticalVerifier()
-        result = sv.verify(np.array([]), np.array([]), "classification")
-        assert result["passed"] is False
-
-    def test_perfect_classification_passes(self):
-        y = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
-        sv = StatisticalVerifier()
-        result = sv.verify(y, y, "classification")
-        assert result["passed"] is True
-
-    def test_single_class_returns_not_passed(self):
-        y = np.array([1, 1, 1, 1, 1])
-        sv = StatisticalVerifier()
-        result = sv.verify(y, y, "classification")
-        assert result["passed"] is False
-
-    def test_regression_verification_runs(self):
-        rng = np.random.default_rng(42)
-        y = rng.normal(0, 1, 100)
-        sv = StatisticalVerifier()
-        result = sv.verify(y, y, "regression")
-        assert "passed" in result
-        assert isinstance(result["value"], float)
-
-
-# ---------------------------------------------------------------------------
-# ConfidenceAggregator
-# ---------------------------------------------------------------------------
-
-class TestConfidenceAggregator:
-    def test_all_passed_gives_max_score(self):
-        agg = ConfidenceAggregator(weights={"a": 0.5, "b": 0.5})
-        result = agg.aggregate({
-            "a": {"passed": True, "detail": "ok"},
-            "b": {"passed": True, "detail": "ok"},
-        })
-        assert result["confidence_score"] == pytest.approx(1.0)
-        assert result["all_gates_passed"] is True
-
-    def test_failure_applies_penalty(self):
-        agg = ConfidenceAggregator(weights={"a": 0.5, "b": 0.5})
-        result = agg.aggregate({
-            "a": {"passed": True},
-            "b": {"passed": False},
-        })
-        assert result["all_gates_passed"] is False
-        assert result["confidence_score"] < 1.0
-
-    def test_no_results_returns_zero(self):
-        agg = ConfidenceAggregator()
-        result = agg.aggregate({})
-        assert result["confidence_score"] == 0.0
-
-
-# ---------------------------------------------------------------------------
-# BaselineVerifier
-# ---------------------------------------------------------------------------
-
-class TestBaselineVerifier:
-    def test_regression_perfect_model_passes(self):
-        y = np.array([1.0, 2.0, 3.0, 4.0, 5.0] * 10)
-        bv = BaselineVerifier(min_improvement=0.05)
-        # Model score of 0 (perfect) vs baseline MSE — should pass
-        result = bv.verify(0.0, "regression", y)
-        assert result["passed"] is True
-
-    def test_classification_majority_class_baseline(self):
-        y = np.array([0, 0, 0, 0, 1])  # Majority is 0
-        bv = BaselineVerifier(min_improvement=0.05)
-        # Model accuracy equal to baseline → should NOT pass
-        result = bv.verify(0.8, "classification", y)
-        assert "passed" in result

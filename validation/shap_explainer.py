@@ -199,3 +199,104 @@ def _to_numeric(df: pd.DataFrame) -> tuple[np.ndarray, list[str]]:
 
     mat = np.column_stack([out[c].values for c in out])
     return mat.astype(np.float32), list(out.keys())
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SHAP × Compliance Cross-Reference
+# ─────────────────────────────────────────────────────────────────────────────
+
+def explain_compliance_violations(
+    df: pd.DataFrame,
+    violations: list,
+    run_id: str = "N/A",
+    top_n: int = 10,
+) -> list:
+    """
+    Cross-references SHAP column-level anomaly scores with regulatory violations.
+
+    For each regulatory violation, enriches the record with:
+      - ``shap_impact``: the column's mean-absolute SHAP anomaly score
+      - ``risk_rank``:   the column's rank by combined risk signal
+                         (SHAP impact × severity weight)
+
+    This tells analysts: "column X breaches the AML rule AND is the #1
+    driver of anomaly signal — fix this one first."
+
+    Parameters
+    ----------
+    df         : The dataset being evaluated
+    violations : List of RegulatoryViolation objects (or dicts with .column / .severity)
+    run_id     : Run identifier for logging
+    top_n      : How many combined-risk columns to return (sorted by risk = SHAP × weight)
+
+    Returns
+    -------
+    List of dicts, each with:
+        {column, severity, rule_name, shap_impact, severity_weight, combined_risk, risk_rank}
+    Sorted descending by combined_risk.
+    """
+    import logging as _logging
+    _log = _logging.getLogger("dipex.shap.compliance")
+
+    if df is None or df.empty or not violations:
+        return []
+
+    # ── Get SHAP column risk scores ───────────────────────────────────────────
+    try:
+        shap_result = explain_gate_failure(df, run_id=run_id, top_n=len(df.columns))
+        shap_scores = {
+            item["column"]: item["shap_impact"]
+            for item in shap_result.get("top_risk_columns", [])
+        }
+    except Exception as exc:  # noqa: BLE001
+        _log.debug("SHAP computation failed in explain_compliance_violations: %s", exc)
+        shap_scores = {}
+
+    # ── Severity weights for combined risk score ──────────────────────────────
+    _SEVERITY_WEIGHT = {"CRITICAL": 3.0, "ERROR": 2.0, "WARNING": 1.0}
+
+    # ── Build per-column risk records ─────────────────────────────────────────
+    seen_cols: set = set()
+    records = []
+
+    for v in violations:
+        # Support both RegulatoryViolation objects and dicts
+        if hasattr(v, "column"):
+            col, severity, rule_name = v.column, v.severity, v.rule_name
+        else:
+            col = v.get("column", "N/A")
+            severity = v.get("severity", "WARNING")
+            rule_name = v.get("rule_name", "unknown")
+
+        if col in ("N/A", "") or col in seen_cols:
+            continue
+        seen_cols.add(col)
+
+        shap_impact = shap_scores.get(col, 0.0)
+        sev_weight  = _SEVERITY_WEIGHT.get(severity, 1.0)
+        combined    = shap_impact * sev_weight
+
+        records.append({
+            "column":           col,
+            "severity":         severity,
+            "rule_name":        rule_name,
+            "shap_impact":      round(shap_impact, 5),
+            "severity_weight":  sev_weight,
+            "combined_risk":    round(combined, 5),
+            "risk_rank":        None,  # filled below
+        })
+
+    # ── Sort by combined risk and assign ranks ────────────────────────────────
+    records.sort(key=lambda r: r["combined_risk"], reverse=True)
+    for rank, rec in enumerate(records[:top_n], start=1):
+        rec["risk_rank"] = rank
+
+    _log.info(
+        "[%s] SHAP×Compliance: ranked %d violation columns; top=%s (combined_risk=%.4f)",
+        run_id[:8],
+        len(records),
+        records[0]["column"] if records else "N/A",
+        records[0]["combined_risk"] if records else 0.0,
+    )
+
+    return records[:top_n]

@@ -65,9 +65,14 @@ class SchemaValidator:
         """
         errors: List[Dict[str, Any]] = []
 
+        # 1. Check for schema drift (missing / new / changed columns compared to last known schema)
+        self._check_schema_drift(df, schema_info, errors)
+
         self._check_required_columns(df, schema_info.get("required_columns", []), errors)
         self._check_types(df, schema_info.get("types", {}), errors)
-        self._check_nulls(df, errors)
+        # NOTE: Null threshold check intentionally removed — NullValidator is authoritative
+        # and provides three-tier severity (CRITICAL/ERROR/WARNING) with per-column overrides.
+        # Calling _check_nulls here caused double-counting of null violations.
         self._check_timestamps(df, schema_info.get("timestamp_columns", []), errors)
         self._check_unique_keys(df, schema_info.get("unique_keys", []), errors)
         self._check_ranges(df, schema_info.get("ranges", {}), errors)
@@ -83,6 +88,62 @@ class SchemaValidator:
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
+
+    def _check_schema_drift(
+        self,
+        df: pd.DataFrame,
+        schema_info: Dict[str, Any],
+        errors: List[Dict[str, Any]],
+    ) -> None:
+        """Detects silent data contract violations: missing, new, or dtype-changed columns."""
+        expected_types = schema_info.get("types", {})
+        if not expected_types:
+            return  # No baseline schema to compare against
+            
+        expected_cols = set(expected_types.keys())
+        actual_cols = set(df.columns)
+        
+        # 1. Missing columns
+        missing = expected_cols - actual_cols
+        for col in missing:
+            errors.append({
+                "column": col,
+                "severity": "ERROR",
+                "type": "SCHEMA_DRIFT_MISSING_COLUMN",
+                "message": f"Schema drift: expected column '{col}' has disappeared."
+            })
+            
+        # 2. New columns
+        new_cols = actual_cols - expected_cols
+        for col in new_cols:
+            errors.append({
+                "column": col,
+                "severity": "WARNING",
+                "type": "SCHEMA_DRIFT_NEW_COLUMN",
+                "message": f"Schema drift: unexpected new column '{col}' added."
+            })
+            
+        # 3. Changed data types (caught partially by _check_types, but we explicitly flag drift here)
+        for col in expected_cols.intersection(actual_cols):
+            expected = expected_types[col].lower()
+            actual_dtype = str(df[col].dtype)
+            compatible = _TYPE_COMPAT.get(expected, [expected])
+            
+            # If the dtype completely shifted out of its compatible family
+            if not any(actual_dtype.startswith(c) for c in compatible):
+                # Don't flag int->float coercion as a drift shift if they are whole numbers
+                # (handled gracefully by _check_types)
+                if expected == "int" and actual_dtype.startswith("float"):
+                     series = df[col].dropna()
+                     if not series.empty and (series % 1 == 0).all():
+                         continue
+                
+                errors.append({
+                    "column": col,
+                    "severity": "WARNING",
+                    "type": "SCHEMA_DRIFT_DTYPE_CHANGE",
+                    "message": f"Schema drift: column '{col}' shifted from '{expected}' to '{actual_dtype}'."
+                })
 
     def _check_required_columns(
         self,
@@ -118,34 +179,39 @@ class SchemaValidator:
             actual_dtype = str(df[col].dtype)
             compatible = _TYPE_COMPAT.get(expected.lower(), [expected])
             if not any(actual_dtype.startswith(c) for c in compatible):
+                # Fix 10: int declared as float64 is extremely common in CSVs with NaN rows.
+                # pandas reads int columns as float64 when NaN is present. If all non-null
+                # values are whole numbers, downgrade to WARNING instead of ERROR.
+                severity = "ERROR"
+                if expected.lower() == "int" and actual_dtype.startswith("float"):
+                    series = df[col].dropna()
+                    if not series.empty and (series % 1 == 0).all():
+                        severity = "WARNING"
+                        logger.warning(
+                            "Type check: column '%s' declared int, found float64 with "
+                            "whole-number values (likely NaN→float64 coercion) — WARNING only.",
+                            col,
+                        )
                 errors.append({
                     "column": col,
-                    "severity": "ERROR",
+                    "severity": severity,
                     "type": "TYPE_MISMATCH",
                     "message": (
                         f"Column '{col}' expected type '{expected}' "
-                        f"(compatible with {compatible}), found '{actual_dtype}'."
+                        f"(compatible with {compatible}), found '{actual_dtype}'. "
+                        + ("Values are whole numbers — likely NaN coercion." if severity == "WARNING" else "")
                     ),
                 })
 
     def _check_nulls(self, df: pd.DataFrame, errors: List[Dict[str, Any]]) -> None:
-        threshold: float = (
-            self.config.get("pipeline", {})
-            .get("qa_gate", {})
-            .get("null_threshold", 0.1)
-        )
-        null_pcts = df.isnull().mean()
-        for col, null_pct in null_pcts.items():
-            if null_pct > threshold:
-                errors.append({
-                    "column": col,
-                    "severity": "ERROR",
-                    "type": "NULL_THRESHOLD_EXCEEDED",
-                    "message": (
-                        f"Column '{col}' has {null_pct:.2%} nulls, "
-                        f"exceeding threshold of {threshold:.2%}."
-                    ),
-                })
+        """DEPRECATED: Null checking is now handled exclusively by NullValidator.
+
+        NullValidator provides three-tier severity (CRITICAL/ERROR/WARNING),
+        per-column threshold overrides, RL-dynamic thresholds, and critical-field
+        zero-tolerance. Calling this method causes double-counting. It is retained
+        as a no-op to avoid breaking any code that still calls it directly.
+        """
+        # Intentional no-op: see NullValidator.validate() for the authoritative check.
 
     def _check_timestamps(
         self,

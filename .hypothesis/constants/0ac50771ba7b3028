@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\validation\compliance_decision.py
+# hypothesis_version: 6.151.9
+
+[-1.0, 0.0, 0.02, 0.1, 0.2, 'CRITICAL', 'ComplianceAdvisor', 'ERROR', 'N/A', 'WARNING', 'a', 'allowed', 'audit', 'audit_violations', 'blocked', 'column', 'compliance', 'compliance_feedback', 'compliance_penalty', 'conditional', 'conflict_report', 'critical', 'decision', 'domain', 'error', 'evaluated_at', 'event', 'generic', 'llm_remediation', 'message', 'n_critical', 'n_error', 'n_warning', 'offending_count', 'penalty_weights', 'regulatory', 'remediation', 'remediation_steps', 'risk_rank', 'rl_feedback', 'rule', 'rule_name', 'run_id', 'severity', 'shap_impact', 'utf-8', 'validation', 'violating_columns', 'violation_count', 'violation_summary', 'warning']

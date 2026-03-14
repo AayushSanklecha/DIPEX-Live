@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\eda\auto_eda.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.25, 0.5, 0.7, 0.75, 1.5, 3.0, 100, 1000, 5000, 10000, '25%', '50%', '75%', 'by_column', 'categorical', 'categorical_columns', 'col_a', 'col_b', 'correlations', 'count', 'dataset_shape', 'dipex.eda.auto_eda', 'distributions', 'dtype_summary', 'elapsed_ms', 'high_missing_columns', 'html_report_path', 'insights', 'iqr', 'kurtosis', 'lower_fence', 'max', 'mean', 'min', 'missing_patterns', 'n_unique', 'note', 'null_count', 'null_pct', 'number', 'numeric', 'numeric_columns', 'outlier_count', 'outlier_pct', 'outliers', 'pairs', 'pattern_analysis', 'pearson', 'pearson_r', 'per_column', 'reports_output', 'skewness', 'spearman', 'spearman_r', 'std', 'strong_correlations', 'threshold', 'top_pairs', 'top_values', 'total_missing_cells', 'upper_fence', 'zscore']

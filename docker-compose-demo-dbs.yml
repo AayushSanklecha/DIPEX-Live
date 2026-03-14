@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  demo-postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: hackathon
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: dipex_demo
+    ports:
+      - "5432:5432"
+
+  demo-mongodb:
+    image: mongo:6
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: hackathon
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    ports:
+      - "27017:27017"

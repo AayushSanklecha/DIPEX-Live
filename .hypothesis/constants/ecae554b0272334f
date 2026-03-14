@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\preprocessing\feature_engineer.py
+# hypothesis_version: 6.151.9
+
+[0.0, 1e-08, 0.05, 2.0, 5.0, 200, 1000, 'FeatureEngineer', 'UNKNOWN', '_log1p', 'auto_log1p', 'binning', 'bins', 'calendar_columns', 'coerce', 'column', 'day', 'dayofweek', 'dfs_corr_threshold', 'dfs_max_features', 'drop', 'feature_engineering', 'features_added', 'frequency_encode', 'hour', 'interactions', 'lag_features', 'lags', 'log_transform', 'mean', 'minmax_scale', 'month', 'net_features_added', 'number', 'object', 'polynomial_columns', 'polynomial_degree', 'preprocessing', 'quantile', 'quarter', 'rolling_features', 'run_id', 'skew', 'stats', 'strategy', 'target', 'target_encode', 'transformations', 'type', 'warnings', 'windows', 'year', 'zscore_scale']

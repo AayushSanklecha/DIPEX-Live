@@ -1,0 +1,232 @@
+/* ── API Docs Container ─────────────────────────────────────────────── */
+.api-docs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.api-docs-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: var(--card-bg, #ffffff);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+}
+
+.api-docs-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.api-docs-icon {
+    width: 32px;
+    height: 32px;
+    color: #6366f1;
+}
+
+.api-docs-title h2 {
+    margin: 0 0 0.2rem;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text-primary, #1e293b);
+}
+
+.api-docs-title p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.api-docs-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.api-status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.api-status-badge.alive {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.api-status-badge.dead {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.swagger-link {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    border: 1.5px solid #c7d2fe;
+    background: #eef2ff;
+    color: #6366f1;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.swagger-link:hover {
+    background: #6366f1;
+    color: #fff;
+    border-color: #6366f1;
+}
+
+/* ── Endpoint Sections ──────────────────────────────────────────────── */
+.endpoint-section {
+    background: var(--card-bg, #ffffff);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+}
+
+.section-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-primary, #1e293b);
+    margin: 0 0 0.85rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border, #e2e8f0);
+}
+
+/* ── Route Cards ────────────────────────────────────────────────────── */
+.route-card {
+    border: 1px solid transparent;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.route-card:hover {
+    border-color: #c7d2fe;
+}
+
+.route-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    background: #f8fafc;
+    transition: background 0.2s;
+}
+
+.route-header:hover {
+    background: #f0f4ff;
+}
+
+.method-badge {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: 5px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: 0.05em;
+    min-width: 46px;
+    text-align: center;
+}
+
+.route-path {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1e293b;
+    white-space: nowrap;
+}
+
+.route-summary {
+    font-size: 0.82rem;
+    color: #64748b;
+    flex: 1;
+}
+
+.route-chevron {
+    color: #94a3b8;
+    margin-left: auto;
+}
+
+/* ── Parameters Table ───────────────────────────────────────────────── */
+.route-body {
+    padding: 0 1rem 1rem;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.params-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin-top: 0.75rem;
+}
+
+.params-table th {
+    text-align: left;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.params-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+    color: #475569;
+    vertical-align: top;
+}
+
+.params-table tr:last-child td {
+    border-bottom: none;
+}
+
+.params-table code {
+    background: #e2e8f0;
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #4f46e5;
+}
+
+.type-badge {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+    padding: 0.12rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.req-yes {
+    color: #ef4444;
+    font-weight: 700;
+    font-size: 0.78rem;
+}
+
+.req-no {
+    color: #94a3b8;
+    font-size: 0.78rem;
+}

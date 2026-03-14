@@ -29,7 +29,7 @@ class StreamLoader:
 
     def __init__(
         self,
-        bootstrap_servers: str = "localhost:9092",
+        bootstrap_servers: str = "kafka:29092",
         mock_mode: bool = True,
         window_config: Optional[StreamWindowConfig] = None,
     ):

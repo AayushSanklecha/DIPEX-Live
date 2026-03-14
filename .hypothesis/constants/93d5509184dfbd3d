@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\simple_pipeline.py
+# hypothesis_version: 6.151.9
+
+[1.0, '1.0', 'FAIL', 'PASS', 'audit/audit.jsonl', 'batch', 'data_mode', 'dataset_id', 'file', 'local', 'quality_score', 'r', 'row_count', 'run_id', 'schema_version', 'snapshot_id', 'source_type', 'source_uri', 'unknown', 'utf-8', 'validation_status']

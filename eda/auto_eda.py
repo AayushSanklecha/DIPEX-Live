@@ -41,6 +41,7 @@ class EDAReport:
     missing_patterns: Dict[str, Any] = field(default_factory=dict)
     dtype_summary: Dict[str, str] = field(default_factory=dict)
     insights: List[str] = field(default_factory=list)
+    html_report_path: Optional[str] = None
     elapsed_ms: float = 0.0
 
     def to_dict(self) -> Dict:
@@ -54,6 +55,7 @@ class EDAReport:
             "missing_patterns": self.missing_patterns,
             "dtype_summary": self.dtype_summary,
             "insights": self.insights,
+            "html_report_path": self.html_report_path,
             "elapsed_ms": round(self.elapsed_ms, 2),
         }
 
@@ -112,6 +114,9 @@ class AutoEDA:
         # ── Auto-insights ──────────────────────────────────────────────────
         report.insights = self._generate_insights(df, report)
 
+        # ── HTML Visual Report (Priority 4 Gap Fix) ────────────────────────
+        report.html_report_path = self._generate_html_report(df, run_id)
+
         report.elapsed_ms = (time.perf_counter() - t0) * 1000
         logger.info(
             "[AutoEDA][%s] rows=%d cols=%d numeric=%d cat=%d insights=%d elapsed=%.0fms",
@@ -122,6 +127,39 @@ class AutoEDA:
         return report
 
     # ── Private analysis methods ──────────────────────────────────────────────
+
+    def _generate_html_report(self, df: pd.DataFrame, run_id: Optional[str]) -> Optional[str]:
+        """
+        Generates a visually rich HTML Data Profiling report if ydata-profiling is available.
+        """
+        try:
+            from ydata_profiling import ProfileReport
+            import os
+            
+            # Ensure output directory exists (using a temp-like directory for now, 
+            # in a real system this would go to a specific run_id folder like /data/reports/)
+            output_dir = "reports_output"
+            os.makedirs(output_dir, exist_ok=True)
+            
+            run_str = run_id or f"run_{int(time.time())}"
+            filepath = os.path.join(output_dir, f"eda_profile_{run_str}.html")
+            
+            # Subsample if dataset is absolutely massive to save memory
+            df_prof = df.sample(min(len(df), 10000), random_state=42) if len(df) > 10000 else df
+            
+            logger.info("Generating ydata-profiling HTML report...")
+            profile = ProfileReport(df_prof, title=f"DIPEX Profiling Report ({run_str})", explorative=True, minimal=len(df)>5000)
+            profile.to_file(filepath)
+            
+            logger.info("Saved EDA HTML report to %s", filepath)
+            return filepath
+            
+        except ImportError:
+            logger.info("ydata-profiling not installed. Skipping interactive HTML EDA report generation.")
+            return None
+        except Exception as e:
+            logger.warning("Failed to generate EDA HTML profile: %s", e)
+            return None
 
     def _distributions(
         self,

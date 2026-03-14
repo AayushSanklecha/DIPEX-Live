@@ -29,7 +29,7 @@ logger = logging.getLogger("dipex.analytics.orchestrator")
 
 @dataclass
 class AnalyticsResult:
-    """Combined output from all 4 AI & Analytics sub-components."""
+    """Combined output from all 5 AI & Analytics sub-components."""
     run_id: str = ""
     eda_report: Dict = field(default_factory=dict)
     feature_manifest: Dict = field(default_factory=dict)
@@ -37,8 +37,11 @@ class AnalyticsResult:
     insights: List[str] = field(default_factory=list)
     insight_ranking: Dict = field(default_factory=dict)
     llm_summary: str = ""
+    eda_html_report_path: Optional[str] = None    # path to generated EDA HTML report
+    actions_log: Dict = field(default_factory=dict) # transformations applied
     elapsed_ms: float = 0.0
     errors: Dict[str, str] = field(default_factory=dict)
+    retrain_required: bool = False # New field for drift detection
 
     def to_dict(self, include_df: bool = False) -> Dict:
         out = {
@@ -48,8 +51,11 @@ class AnalyticsResult:
             "insights": self.insights,
             "insight_ranking": self.insight_ranking,
             "llm_summary": self.llm_summary,
+            "eda_html_report_path": self.eda_html_report_path,
+            "actions_log": self.actions_log,
             "elapsed_ms": round(self.elapsed_ms, 2),
             "errors": self.errors,
+            "retrain_required": self.retrain_required, # Include new field
         }
         if include_df and self.enriched_df is not None:
             out["enriched_shape"] = list(self.enriched_df.shape)
@@ -118,6 +124,27 @@ class AnalyticsOrchestrator:
         # ── Stage D: LLM Summarization ─────────────────────────────────────
         result.llm_summary = self._run_llm_summary(result, qa_result, run_id)
 
+        # ── Stage D.5: AutoCorrector (Apply Data Prep) ─────────────────────
+        try:
+            from preprocessing.auto_corrector import AutoCorrector
+            corrector = AutoCorrector(target_col=target_col)
+            result.enriched_df, result.actions_log = corrector.apply(working_df, result.eda_report)
+        except Exception as exc:
+            logger.warning("[AnalyticsOrchestrator] AutoCorrector failed: %s", exc)
+            result.actions_log = {}
+
+        # ── Stage D.6: Anomaly Scoring ─────────────────────────────────────
+        try:
+            from preprocessing.anomaly_scorer import AnomalyScorer
+            scorer = AnomalyScorer(config=self.config)
+            result.enriched_df, anomaly_report = scorer.score(result.enriched_df, run_id=run_id, target_col=target_col)
+            result.eda_report["anomaly_scoring"] = anomaly_report.to_dict()
+        except Exception as exc:
+            logger.warning("[AnalyticsOrchestrator] AnomalyScorer failed: %s", exc)
+
+        # ── Stage E: Enrich eda_report with histogram bins (for exec report charts) ──
+        result.eda_report = self._enrich_eda_with_histograms(result.eda_report, df)
+
         result.elapsed_ms = (time.perf_counter() - t0) * 1000
         logger.info(
             "[AnalyticsOrchestrator][%s] eda=%d insights, fe=%s, llm=%d chars, elapsed=%.0fms",
@@ -145,7 +172,7 @@ class AnalyticsOrchestrator:
         self, df: pd.DataFrame, target_col: Optional[str]
     ) -> tuple[Optional[pd.DataFrame], Dict]:
         try:
-            from feature_engineering.engineer import FeatureEngineer
+            from preprocessing.feature_engineer import FeatureEngineer
             fe = FeatureEngineer(config=self.config)
             fe_result = fe.transform(df, target_col=target_col)
             return fe_result.df, fe_result.to_dict()
@@ -201,3 +228,47 @@ class AnalyticsOrchestrator:
                     f"{result.feature_manifest['net_features_added']} engineered features added."
                 )
             return " ".join(parts) if parts else "Analytics summary unavailable."
+
+    def _enrich_eda_with_histograms(
+        self,
+        eda_report: Dict,
+        df: Optional[pd.DataFrame],
+    ) -> Dict:
+        """
+        Stage E — Attach histogram bins to eda_report.numeric_stats so the
+        executive report can render Chart.js distribution charts inline.
+
+        No separate file is created — everything goes into the single report.
+        """
+        if df is None or df.empty or not eda_report:
+            return eda_report
+
+        try:
+            import numpy as np
+
+            numeric_stats = eda_report.get("numeric_stats", {})
+            num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+
+            for col in num_cols[:16]:  # cap at 16 charts
+                series = df[col].dropna()
+                if len(series) < 5:
+                    continue
+                counts, bin_edges = np.histogram(series, bins=18)
+                col_stats = numeric_stats.get(col, {})
+                if not isinstance(col_stats, dict):
+                    col_stats = {}
+                col_stats["histogram_bins"]   = [round(float(b), 4) for b in bin_edges[:-1]]
+                col_stats["histogram_counts"] = [int(c) for c in counts]
+                if "mean" not in col_stats:
+                    col_stats["mean"] = round(float(series.mean()), 4)
+                if "skewness" not in col_stats and "skew" not in col_stats:
+                    col_stats["skew"] = round(float(series.skew()), 3)
+                numeric_stats[col] = col_stats
+
+            eda_report["numeric_stats"] = numeric_stats
+
+        except Exception as exc:
+            logger.debug("[AnalyticsOrchestrator] Histogram enrichment skipped: %s", exc)
+
+        return eda_report
+

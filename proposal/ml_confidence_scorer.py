@@ -53,8 +53,8 @@ _MODEL_PATH = os.path.join(
 
 # ── Feature extraction ────────────────────────────────────────────────────────
 
+# 9 features — order must match _extract_features() exactly.
 _FEATURE_KEYS = [
-    "anomaly_count",
     "drift_flag",
     "quality_score",
     "null_rate",
@@ -112,14 +112,15 @@ def _extract_features(
 def _heuristic_score(features: np.ndarray) -> float:
     """
     Weighted heuristic confidence (fallback when model absent).
+    Operates on the 9-element vector produced by _extract_features().
     Returns a [0, 1] confidence score.
     """
-    (anomaly_count, drift_flag, quality_score, null_rate,
+    # Unpack in the same order as _extract_features() / _FEATURE_KEYS
+    (drift_flag, quality_score, null_rate,
      sample_size_k, n_columns, cv_score, flag_severity_max,
-     columns_drifted, _) = features
+     columns_drifted, proposer_enc) = features
 
     score = 0.5
-    score += min(anomaly_count * 0.05, 0.2)
     score += drift_flag * 0.1
     score += (quality_score - 0.5) * 0.2
     score -= null_rate * 0.3

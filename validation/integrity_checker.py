@@ -61,6 +61,7 @@ class IntegrityChecker:
         self._check_id_uniqueness(df, errors)
         self._check_referential(df, errors)
         self._check_cross_column(df, errors)
+        self._check_cardinality(df, errors)  # Fix 7
 
         return errors
 
@@ -197,3 +198,81 @@ class IntegrityChecker:
                         f"but {bad} row(s) violate this rule."
                     ),
                 })
+
+    # Fix 7 — Cardinality / constant-column detection
+    def _check_cardinality(
+        self, df: pd.DataFrame, errors: List[Dict[str, Any]]
+    ) -> None:
+        """
+        Detect columns with zero or near-zero information content.
+
+        Three categories:
+          - Constant column:      nunique == 1 → WARNING (zero ML signal)
+          - Near-constant column: top_value_freq > 99% → WARNING (model bias risk)
+          - Fully-unique column:  nunique == nrows AND not a declared ID → WARNING
+                                  (model will memorize, not generalize)
+        """
+        n = len(df)
+        id_cols = set()
+        for key_def in self.id_columns:
+            if isinstance(key_def, str):
+                id_cols.add(key_def)
+            else:
+                id_cols.update(key_def)
+
+        for col in df.columns:
+            try:
+                n_unique = df[col].nunique(dropna=True)
+
+                # ── Constant column (zero information) ───────────────────────
+                if n_unique <= 1:
+                    errors.append({
+                        "column": col,
+                        "severity": "WARNING",
+                        "type": "CONSTANT_COLUMN",
+                        "message": (
+                            f"Column '{col}' has only {n_unique} unique value(s) — "
+                            "constant column carries zero information for ML. "
+                            "Consider dropping it."
+                        ),
+                    })
+                    logger.warning("Cardinality: constant column '%s'", col)
+                    continue
+
+                # ── Near-constant column (potential model bias) ───────────────
+                top_freq = float(df[col].value_counts(normalize=True, dropna=True).iloc[0])
+                if top_freq > 0.99:
+                    top_val = df[col].value_counts(dropna=True).index[0]
+                    errors.append({
+                        "column": col,
+                        "severity": "WARNING",
+                        "type": "NEAR_CONSTANT_COLUMN",
+                        "message": (
+                            f"Column '{col}' has {top_freq:.1%} rows with value "
+                            f"'{top_val}' — near-constant column may bias models. "
+                            "Consider dropping or using as a filter."
+                        ),
+                    })
+                    logger.warning(
+                        "Cardinality: near-constant '%s' (top_freq=%.1%)", col, top_freq
+                    )
+
+                # ── Fully-unique non-ID column (memorization risk) ────────────
+                elif n > 0 and n_unique == n and col not in id_cols:
+                    errors.append({
+                        "column": col,
+                        "severity": "WARNING",
+                        "type": "FULLY_UNIQUE_COLUMN",
+                        "message": (
+                            f"Column '{col}' has {n_unique} unique values across "
+                            f"{n} rows (100% unique) and is not declared as an ID column. "
+                            "Models will memorize this column without generalizing."
+                        ),
+                    })
+                    logger.warning(
+                        "Cardinality: fully-unique non-ID column '%s'", col
+                    )
+
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("Cardinality check failed for column '%s': %s", col, exc)
+

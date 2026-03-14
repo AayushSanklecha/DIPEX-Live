@@ -162,14 +162,23 @@ async def ingest_db(
         block_on_schema_break : bool
     """
     from ingestion.readers.db_reader import DBSourceConfig
+    from .pipeline_run import _db_cfg_from_uri
     try:
-        db_raw   = body.get("db_config", {})
-        db_cfg   = DBSourceConfig(**db_raw)
+        db_raw = body.get("db_config", {})
+        # If db_config is a string (URI or JSON), parse it
+        if isinstance(db_raw, str):
+            source_kind = body.get("source_kind", "database")
+            db_cfg_dict = _db_cfg_from_uri(db_raw, source_kind)
+        else:
+            # If it's already a dict, we assume it's the structured config
+            db_cfg_dict = db_raw
+
+        db_cfg = DBSourceConfig(**db_cfg_dict)
         cfg = SourceConfig(
             source_type="database",
             dataset_id=body.get("dataset_id", "db_extract"),
             data_mode="batch",
-            db_config=db_cfg,
+            db_config=db_cfg_dict,
             require_quality_pass=body.get("require_quality_pass", True),
             block_on_schema_break=body.get("block_on_schema_break", True),
         )

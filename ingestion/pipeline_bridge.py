@@ -69,6 +69,8 @@ class PipelineResult:
     confidence_vector: Optional[Dict] = None
     retry_count: int = 0
     analytics_result: Optional[Dict] = None   # AI & Analytics Layer output
+    governance_report: Optional[Dict] = None  # PII & policy enforcement report
+    regulatory_report: Optional[List[Dict]] = None # Compliance Engine Violations/Risk Flags
 
     @property
     def is_success(self) -> bool:
@@ -84,6 +86,8 @@ class PipelineResult:
             "stages": [s.to_dict() for s in self.stages],
             "report_path": self.report_path,
             "model_metrics": self.model_metrics,
+            "governance_report": self.governance_report,
+            "regulatory_report": self.regulatory_report,
             "silver_id": getattr(self, 'silver_id', None),
             "gold_artefacts": len(getattr(self, 'gold_artefacts', [])),
         }
@@ -245,12 +249,42 @@ class PipelineBridge:
         elif "streaming_window" not in skip:
             result.stages.append(StageResult("streaming_window", "SKIP", 0.0))
 
+        # ── Stage 0.5: Robust Data Triage ─────────────────────────────────────
+        # Runs BEFORE preprocessing to handle all real-world data pathologies:
+        # high-null cols, mixed types, zero variance, high cardinality, skew, imbalance.
+        triage_out = self._run_stage(
+            result, "triage", skip,
+            self._stage_triage, df, target_col,
+        )
+        if isinstance(triage_out, pd.DataFrame):
+            df = triage_out
+        # Carry triage imbalance info for use in the modeling stage
+        self._triage_imbalance_info: Dict[str, Any] = (
+            triage_out.attrs.get("triage_imbalance", {})
+            if isinstance(triage_out, pd.DataFrame) else {}
+        )
+
         # ── Stage 1: Preprocessing ────────────────────────────────────────────
+        # Stage 0.75: Missing pattern analysis — runs before main imputation
+        # so the DataCleaner can use the correct strategy per column.
+        mp_out = self._run_stage(
+            result, "missing_patterns", skip,
+            self._stage_missing_patterns, df,
+        )
+        if isinstance(mp_out, pd.DataFrame):
+            df = mp_out
+
         prep_out = self._run_stage(result, "preprocessing", skip,
                              self._stage_preprocess, df, target_col)
         if prep_out is not None:
             df = prep_out
 
+        # ── Stage 1.5: Schema Drift Detection ─────────────────────────────────
+        # Detects column additions/removals/dtype changes vs. prior run.
+        self._run_stage(
+            result, "drift_detection", skip,
+            self._stage_drift, df, snapshot.dataset_id,
+        )
 
         # ── Stage 2: Hard Gate 1 — Deterministic Validation ──────────────────
         gate1_ok = self._run_stage(result, "validation", skip,
@@ -288,10 +322,37 @@ class PipelineBridge:
                 df = enriched
 
         # ── Stage 5: Governance ───────────────────────────────────────────────
-        self._run_stage(result, "governance", skip, self._stage_governance, df)
+        gov_out = self._run_stage(result, "governance", skip, self._stage_governance, df, snapshot.dataset_id)
+        if isinstance(gov_out, dict):
+            result.governance_report = gov_out
+            # CRITICAL: if governance redacted PII, promote the cleansed DataFrame
+            # so downstream stages (stats, leakage, model, report) never see raw PII.
+            _cleansed = gov_out.pop("_cleansed_df", None)
+            if _cleansed is not None and not _cleansed.empty:
+                df = _cleansed
+                logger.info("[Bridge] Governance redaction applied — df replaced with cleansed copy.")
 
-        # ── Stage 5: Statistical Analysis ─────────────────────────────────────
+        # ── Stage 5.2: Statistical Analysis ───────────────────────────────────
         self._run_stage(result, "statistics", skip, self._stage_stats, df, target_col)
+
+        # ── Stage 5.5: Leakage Detection ──────────────────────────────────────
+        # Detect and remove data leakage before the model sees the features.
+        if target_col and target_col in df.columns:
+            leak_out = self._run_stage(
+                result, "leakage_detection", skip,
+                self._stage_leakage, df, target_col,
+            )
+            if isinstance(leak_out, pd.DataFrame):
+                df = leak_out
+
+        # ── Stage 5.7: Multicollinearity Check ─────────────────────────────────
+        # VIF-based removal of collinear features before modeling.
+        mc_out = self._run_stage(
+            result, "multicollinearity", skip,
+            self._stage_multicollinearity, df, target_col,
+        )
+        if isinstance(mc_out, pd.DataFrame):
+            df = mc_out
 
         # ── Stage 6: ML Modeling ──────────────────────────────────────────────
         model_metrics: Dict[str, Any] = {}
@@ -300,6 +361,29 @@ class PipelineBridge:
                                           self._stage_model, df, target_col)
             if isinstance(metrics_out, dict):
                 model_metrics = metrics_out
+                result.model_metrics = model_metrics
+
+        # ── Stage 6.5: Confidence Calibration ────────────────────────────────
+        # Calibrate raw model probabilities to reduce overconfidence.
+        if model_metrics and target_col and target_col in df.columns:
+            cal_out = self._run_stage(
+                result, "calibration", skip,
+                self._stage_calibrate, df, target_col, model_metrics,
+            )
+            if isinstance(cal_out, dict) and cal_out:
+                # Merge calibration metadata into model_metrics
+                model_metrics["calibration"] = cal_out
+                result.model_metrics = model_metrics
+
+        # ── Stage 6.7: Feature Importance Stability Check ─────────────────────
+        # Compare feature importances with prior run to detect upstream data issues.
+        if model_metrics:
+            stability_out = self._run_stage(
+                result, "feature_stability", skip,
+                self._stage_feature_stability, model_metrics, snapshot.dataset_id,
+            )
+            if isinstance(stability_out, dict) and stability_out:
+                model_metrics["feature_stability"] = stability_out
                 result.model_metrics = model_metrics
 
         # ── Stage 7: Hard Gate 2 — Independent Statistical Verifier ──────────
@@ -425,6 +509,15 @@ class PipelineBridge:
             except Exception as exc:  # noqa: BLE001
                 logger.debug("TransformRegistry skipped (non-fatal): %s", exc)
 
+            # ── Clean Data (Drop duplicates, Cap Outliers, etc) ───────────
+            try:
+                from preprocessing.cleaner import DataCleaner
+                cleaner = DataCleaner.from_config(self.config)
+                df, cl_report = cleaner.clean(df, run_id=self.run_id)
+                logger.debug("DataCleaner dropped %d duplicate rows.", cl_report.duplicates_removed)
+            except Exception as exc:
+                logger.warning("DataCleaner skipped (non-fatal): %s", exc)
+
             from preprocessing.pipeline_builder import PipelineBuilder
             builder = PipelineBuilder(self.config)
             pipe = builder.build(df, target_col=target_col)
@@ -469,15 +562,65 @@ class PipelineBridge:
                 logger.debug("[RL] Threshold for %s::%s → %.4f", dataset_id, col, rl_thresh)
         except Exception:  # noqa: BLE001
             pass
+
+        # ── Hard Gate 1 ────────────────────────────────────────────────────
         try:
             from validation.hard_gate import HardGate
             gate = HardGate.from_config(self.config)
             result_gate = gate.run(df, run_id=self.run_id)
             if result_gate.decision == "REJECT":
                 raise RuntimeError(f"Hard gate REJECTED: {result_gate.reason}")
-            return True
         except ImportError:
             raise RuntimeError("Validation engine missing: HardGate is required for deterministic validation.")
+
+        # ── Regulatory Rule Engine + Compliance Advisor ────────────────────
+        try:
+            from validation.regulatory.regulatory_engine import RegulatoryEngine
+            from validation.compliance_decision import ComplianceAdvisor
+
+            reg_engine = RegulatoryEngine.from_config(self.config)
+            violations = reg_engine.evaluate(df)
+            conflict_report = reg_engine.get_last_conflict_report()
+
+            advisor = ComplianceAdvisor.from_config(self.config)
+            decision = advisor.evaluate(
+                violations=violations,
+                conflict_report=conflict_report,
+                df=df,
+                run_id=self.run_id,
+            )
+
+            # Store on self so _stage_confidence_vector can pick it up
+            self._compliance_decision = decision
+
+            # Feature masking: temporarily disabled for demonstration so anomaly scorer can still view the flagged columns
+            if decision.violating_columns:
+                cols_to_drop = [c for c in decision.violating_columns if c in df.columns]
+                if cols_to_drop:
+                    # df.drop(columns=cols_to_drop, inplace=True)
+                    logger.warning(
+                        "[%s] ComplianceAdvisor: flagged %d violating column(s) but masking is disabled for demo: %s",
+                        self.run_id[:8], len(cols_to_drop), cols_to_drop,
+                    )
+
+            # Block pipeline entirely on BLOCKED decision (critical violations)
+            if decision.decision == "blocked":
+                raise RuntimeError(
+                    f"Compliance BLOCKED: {decision.n_critical} CRITICAL violation(s). "
+                    "Pipeline halted. See audit/compliance.jsonl for details."
+                )
+
+            logger.info(
+                "[%s] Compliance: decision=%s penalty=%.3f violations(C=%d E=%d W=%d)",
+                self.run_id[:8], decision.decision, decision.compliance_penalty,
+                decision.n_critical, decision.n_error, decision.n_warning,
+            )
+
+        except ImportError as ie:
+            logger.debug("RegulatoryEngine/ComplianceAdvisor not available: %s", ie)
+            self._compliance_decision = None
+
+        return True
 
     def _stage_profile(self, df: pd.DataFrame, run_id: str) -> dict:
         try:
@@ -489,21 +632,29 @@ class PipelineBridge:
             logger.warning("ProfileReport not available — skipping profiling")
             return {}
 
-    def _stage_governance(self, df: pd.DataFrame) -> dict:
+    def _stage_governance(self, df: pd.DataFrame, dataset_id: str) -> dict:
         try:
-            from governance.governance_engine import GovernanceEngine
-            engine = GovernanceEngine(self.config)
-            gov_result = engine.evaluate(
-                run_id=self.run_id,
-                confidence_score=0.8,   # default; overridden by ML scorer downstream
-                gate1_decision="PASS",
-                gate2_decision="PASS",
-                df_columns=list(df.columns),
-            )
-            return gov_result.to_dict() if hasattr(gov_result, "to_dict") else (gov_result or {})
+            from validation.governance.governor import DataGovernor
+            governor = DataGovernor(self.config)
+            cleansed_df, gov_report = governor.enforce(df, dataset_id=dataset_id)
+
+            # CRITICAL: when policy='redact', governor returns a NEW DataFrame with
+            # PII stripped. We must propagate it downstream so the original PII-
+            # containing df is NOT used for modeling/reporting.
+            # Attach under a private key so the bridge can promote it.
+            if gov_report.get("status") == "redacted":
+                gov_report["_cleansed_df"] = cleansed_df
+                logger.info(
+                    "[Governance] PII redacted — cleansed DataFrame will replace source df downstream."
+                )
+
+            return gov_report
         except ImportError:
-            logger.warning("GovernanceEngine not available — skipping governance")
+            logger.warning("DataGovernor not available — skipping governance")
             return {}
+        except Exception as exc:
+            logger.error("Governance stage failed: %s", exc)
+            return {"status": "error", "message": str(exc)}
 
     def _stage_stats(self, df: pd.DataFrame, target_col: Optional[str]) -> dict:
         try:
@@ -546,7 +697,20 @@ class PipelineBridge:
             feature_cols = [c for c in df.select_dtypes(include="number").columns if c != target_col]
             if not feature_cols:
                 return {"error": "No numeric features available"}
-            X = df[feature_cols].fillna(0)
+
+            # Triage + DataCleaner should have handled all NaNs. If NaNs remain,
+            # that means preprocessing was skipped or failed — warn and use median
+            # (not 0, which destroys statistical properties).
+            remaining_nulls = df[feature_cols].isnull().sum().sum()
+            if remaining_nulls > 0:
+                logger.warning(
+                    "[Model] %d NaN(s) remain after preprocessing — filling with column medians.",
+                    remaining_nulls,
+                )
+                X = df[feature_cols].fillna(df[feature_cols].median())
+            else:
+                X = df[feature_cols]
+
             y = df[target_col]
             result = trainer.train(X, y, run_id=self.run_id)
             metrics = result.get("metrics", {}) if isinstance(result, dict) else {}
@@ -603,9 +767,6 @@ class PipelineBridge:
         except ImportError:
             raise RuntimeError("Proposal engine missing: ProposalEngine is strictly required.")
 
-        # LLM narrative has been removed per architecture simplification
-        return ""
-
     def _stage_report(self, pipeline_result: "PipelineResult") -> str:
         """Stage 12 — Executive Report Generation.
 
@@ -630,6 +791,18 @@ class PipelineBridge:
             }
             narrative = llm.generate_summary(verified_result, run_id=pipeline_result.run_id)
 
+            risk_flags = []
+            if hasattr(self, "_compliance_decision") and self._compliance_decision:
+                for viol in getattr(self._compliance_decision, "violations", []):
+                    sev_level = "HIGH" if viol.severity == "CRITICAL" else ("MEDIUM" if viol.severity == "ERROR" else "LOW")
+                    risk_flags.append({
+                        "level": sev_level,
+                        "category": f"Regulatory ({viol.domain.upper()})",
+                        "message": f"Rule '{viol.rule_name}' on '{viol.column}' affected {viol.offending_count} row(s): {viol.message} Remediation: {viol.remediation}"
+                    })
+
+            pipeline_result.regulatory_report = risk_flags
+
             path = reporter.generate(
                 run_id=pipeline_result.run_id,
                 confidence_vector=pipeline_result.confidence_vector or {},
@@ -637,6 +810,7 @@ class PipelineBridge:
                 gate2_decision=pipeline_result.gate2_decision,
                 model_metrics=pipeline_result.model_metrics or {},
                 narrative=narrative or "",
+                risk_flags=risk_flags,
             )
             return path
         except ImportError:
@@ -813,9 +987,22 @@ class PipelineBridge:
 
         Produces weighted scalar confidence score ∈ [0,1] from:
           data_quality, statistical_strength, stability, drift_robustness,
-          compliance, retry_penalty.
+          compliance_penalty (new), retry_penalty.
         Domain thresholds: banking=0.85, healthcare=0.90, default=0.70.
         """
+        # Retrieve compliance penalty from ComplianceAdvisor (set in _stage_validate)
+        comp_decision = getattr(self, "_compliance_decision", None)
+        compliance_penalty: float = 0.0
+        compliance_decision_str: str = "allowed"
+        compliance_decision_dict = None
+        if comp_decision is not None:
+            compliance_penalty = float(getattr(comp_decision, "compliance_penalty", 0.0))
+            compliance_decision_str = str(getattr(comp_decision, "decision", "allowed"))
+            try:
+                compliance_decision_dict = comp_decision.to_dict()
+            except Exception:  # noqa: BLE001
+                compliance_decision_dict = None
+
         try:
             from verifier.confidence_vector import ConfidenceVector
             cv = ConfidenceVector.from_config(self.config)
@@ -825,10 +1012,16 @@ class PipelineBridge:
                 quality_score=float(snapshot.quality_score or 0.5),
                 gate2_passed=(gate2_ok is not False),
                 retry_count=getattr(self, "_current_retry_count", 0),
+                compliance_penalty=compliance_penalty,
+                compliance_decision=compliance_decision_str,
             )
+            # Embed full compliance decision in the confidence vector for reporting
+            if compliance_decision_dict:
+                vector["compliance"] = compliance_decision_dict
             logger.info(
-                "[%s] Confidence Vector: score=%.3f",
+                "[%s] Confidence Vector: score=%.3f (compliance_penalty=%.3f decision=%s)",
                 self.run_id[:8], vector.get("confidence_score", 0.0),
+                compliance_penalty, compliance_decision_str,
             )
             return vector
         except ImportError:
@@ -1089,3 +1282,235 @@ class PipelineBridge:
             return False
         except Exception as exc:  # noqa: BLE001
             raise RuntimeError(f"RL Update failed: {exc}")
+
+    # ── Robustness Stage Implementations ──────────────────────────────────────
+
+    def _stage_triage(
+        self, df: pd.DataFrame, target_col: Optional[str]
+    ) -> pd.DataFrame:
+        """
+        Stage 0.5 — Robust Data Triage.
+
+        Profiles each column and applies adaptive remediation:
+          • Drop near-all-null columns
+          • Coerce mixed-type columns to numeric
+          • Drop zero-variance (constant) columns
+          • Hash-encode high-cardinality categoricals
+          • Auto log1p skewed positive numeric columns
+          • Label-encode remaining object columns
+          • Detect class imbalance (advisory only)
+        """
+        from preprocessing.robust_triage import RobustTriage
+        triager = RobustTriage.from_config(self.config)
+        clean_df, triage_report = triager.triage(
+            df, target_col=target_col, run_id=self.run_id
+        )
+        logger.info(
+            "[%s] Triage: dropped=%d filled=%d zero_fixed=%d coerced=%d "
+            "hash_enc=%d label_enc=%d resampled=%s",
+            self.run_id[:8],
+            len(triage_report.columns_dropped),
+            len(triage_report.columns_filled),
+            len(triage_report.zero_fixed_columns),
+            len(triage_report.columns_coerced),
+            len(triage_report.columns_hash_encoded),
+            len(triage_report.columns_label_encoded),
+            triage_report.resample_info.get("method", "none") if triage_report.resample_info else "none",
+        )
+        # Store triage metadata as DataFrame attributes for downstream use
+        clean_df.attrs["triage_imbalance"] = triage_report.imbalance_info
+        clean_df.attrs["triage_report"] = triage_report.to_dict()
+        return clean_df
+
+    def _stage_drift(self, df: pd.DataFrame, dataset_id: str) -> dict:
+        """
+        Stage 1.5 — Schema & Distribution Drift Detection.
+
+        Compares the current DataFrame against the stored schema fingerprint
+        for dataset_id. Emits warnings for column additions/removals/dtype
+        changes and PSI-based distribution drift.
+
+        Returns the DriftReport dict for the audit trail.
+        """
+        from validation.drift_detector import SchemaDriftDetector
+        detector = SchemaDriftDetector.from_config(self.config)
+        drift_report = detector.detect(df, dataset_id=dataset_id, run_id=self.run_id)
+        n_err = sum(1 for v in drift_report.violations if v.severity == "ERROR")
+        n_warn = sum(1 for v in drift_report.violations if v.severity == "WARNING")
+        if drift_report.is_first_run:
+            logger.info(
+                "[%s] Drift detection: first run — schema fingerprint written.",
+                self.run_id[:8],
+            )
+        else:
+            logger.info(
+                "[%s] Drift detection: %d ERROR(s), %d WARNING(s).",
+                self.run_id[:8], n_err, n_warn,
+            )
+        return drift_report.to_dict()
+
+    def _stage_leakage(
+        self, df: pd.DataFrame, target_col: str
+    ) -> pd.DataFrame:
+        """
+        Stage 5.5 — Data Leakage Detection.
+
+        Scans all features for:
+          • Near-perfect correlation with target (numeric)
+          • Near-perfect categorical alignment (Cramér's V)
+          • ID-like columns (near-unique values)
+
+        CRITICAL leakage columns are removed from df.
+        """
+        from validation.leakage_detector import LeakageDetector
+        detector = LeakageDetector.from_config(self.config)
+        clean_df, leak_report = detector.detect(
+            df, target_col=target_col, run_id=self.run_id
+        )
+        n_crit = sum(1 for v in leak_report.violations if v.severity == "CRITICAL")
+        n_warn = sum(1 for v in leak_report.violations if v.severity == "WARNING")
+        logger.info(
+            "[%s] Leakage detection: %d CRITICAL (removed), %d WARNING(s).",
+            self.run_id[:8], n_crit, n_warn,
+        )
+        return clean_df
+
+    def _stage_calibrate(
+        self,
+        df: pd.DataFrame,
+        target_col: str,
+        model_metrics: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """
+        Stage 6.5 — Confidence Calibration.
+
+        Applies Platt Scaling or Isotonic Regression to correct the model's
+        over/under-confidence. Only applies calibration if ECE improves by
+        the configured minimum threshold.
+
+        Returns the CalibrationReport dict for embedding in model_metrics.
+        """
+        from qa_control.calibrator import ConfidenceCalibrator
+
+        cal = ConfidenceCalibrator.from_config(self.config)
+        feature_cols = [c for c in df.select_dtypes(include="number").columns
+                        if c != target_col]
+        if not feature_cols or target_col not in df.columns:
+            return {}
+
+        # Retrieve the trained model from model_metrics if available
+        model = model_metrics.get("_fitted_model")
+        if model is None:
+            logger.debug("[Calibrator] No fitted model in model_metrics — skipping.")
+            return {}
+
+        X = df[feature_cols].fillna(0)
+        y = df[target_col]
+
+        _, cal_report = cal.calibrate(
+            model=model, X_train=X, y_train=y, run_id=self.run_id
+        )
+        logger.info(
+            "[%s] Calibration: applied=%s method=%s ECE %.4f→%.4f",
+            self.run_id[:8],
+            cal_report.applied,
+            cal_report.method,
+            cal_report.ece_before or 0,
+            cal_report.ece_after or cal_report.ece_before or 0,
+        )
+        return cal_report.to_dict()
+
+    def _stage_missing_patterns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Stage 0.75 — Missing Data Pattern Analysis (MCAR / MAR / MNAR).
+
+        Runs before DataCleaner so imputation strategies are informed by WHY
+        data is missing, not just that it is missing.
+
+        MNAR columns get a `{col}_was_null` indicator feature added so the
+        model can learn from the fact that a value was absent.
+        """
+        from preprocessing.missing_pattern_analyzer import MissingPatternAnalyzer
+        analyzer = MissingPatternAnalyzer.from_config(self.config)
+        enriched_df, mp_report = analyzer.analyze(df, run_id=self.run_id)
+        logger.info(
+            "[%s] Missing patterns: MNAR=%d MAR=%d MCAR=%d — %d indicator cols added.",
+            self.run_id[:8],
+            len(mp_report.mnar_columns),
+            len(mp_report.mar_columns),
+            len(mp_report.mcar_columns),
+            sum(1 for p in mp_report.profiles if p.indicator_added),
+        )
+        # Persist pattern report in df attributes for downstream use
+        enriched_df.attrs["missing_pattern_report"] = mp_report.to_dict()
+        return enriched_df
+
+    def _stage_multicollinearity(
+        self, df: pd.DataFrame, target_col: Optional[str]
+    ) -> pd.DataFrame:
+        """
+        Stage 5.7 — VIF-Based Multicollinearity Detection.
+
+        Identifies numeric features with high VIF (collinear with other features).
+        Drops the higher-VIF column from each collinear pair, keeping the one
+        with more independent predictive power.
+        """
+        from validation.multicollinearity_detector import MulticollinearityDetector
+        detector = MulticollinearityDetector.from_config(self.config)
+        clean_df, mc_report = detector.detect(
+            df, target_col=target_col, run_id=self.run_id
+        )
+        n_err  = sum(1 for v in mc_report.violations if v.severity == "ERROR")
+        n_warn = sum(1 for v in mc_report.violations if v.severity == "WARNING")
+        logger.info(
+            "[%s] Multicollinearity: %d ERROR(s) (%d dropped), %d WARNING(s). "
+            "%d collinear pairs.",
+            self.run_id[:8],
+            n_err, len(mc_report.columns_dropped),
+            n_warn, len(mc_report.correlated_pairs),
+        )
+        return clean_df
+
+    def _stage_feature_stability(
+        self,
+        model_metrics: Dict[str, Any],
+        dataset_id: str,
+    ) -> Dict[str, Any]:
+        """
+        Stage 6.7 — Feature Importance Stability Monitor.
+
+        Compares SHAP/feature importance rankings from the current run against
+        the stored baseline. Emits WARNING if top features have shifted,
+        ERROR if they've changed completely.
+
+        Catches silent upstream data pipeline bugs that pass all validation gates.
+        """
+        from monitoring.feature_stability_monitor import FeatureStabilityMonitor
+        monitor = FeatureStabilityMonitor.from_config(self.config)
+
+        # Extract feature importances from model_metrics
+        importances: Dict[str, float] = {}
+        # Try SHAP importances first (most accurate), fall back to model importances
+        shap_imp = model_metrics.get("shap_importances") or \
+                   model_metrics.get("feature_importances") or {}
+        if isinstance(shap_imp, dict):
+            importances = {k: float(v) for k, v in shap_imp.items() if v is not None}
+
+        if not importances:
+            logger.debug("[FeatureStability] No importances found in model_metrics — skipping.")
+            return {}
+
+        stability_report = monitor.check(
+            feature_importances=importances,
+            dataset_id=dataset_id,
+            run_id=self.run_id,
+        )
+        logger.info(
+            "[%s] Feature stability: status=%s τ=%s gained=%s lost=%s",
+            self.run_id[:8],
+            stability_report.status,
+            f"{stability_report.tau:.3f}" if stability_report.tau is not None else "N/A",
+            stability_report.features_gained,
+            stability_report.features_lost,
+        )
+        return stability_report.to_dict()

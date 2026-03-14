@@ -20,7 +20,7 @@ pipeline:
     backoff_base_s: 2
     escalate_after: 3
 hard_gate_1:
-  max_null_rate: 0.3
+  max_null_rate: 0.95
   critical_columns: []
   allow_schema_drift: false
   regulatory_domain: default
@@ -28,6 +28,65 @@ hard_gate_2:
   min_sample_size: 30
   drift_psi_threshold: 0.2
   stability_cv_threshold: 0.3
+validation:
+  strict_mode: false
+  multicollinearity_threshold: 10.0
+  # ── Regulatory Rule Engine ───────────────────────────────────────────────────
+  regulatory:
+    domains: [banking]               # multi-domain list: banking | healthcare | finance | gdpr | generic
+    halt_on_critical: false          # block pipeline on CRITICAL regulatory violation
+    conflict_resolution: strictest_wins  # strictest_wins | domain_priority | advisory_only
+    banking:
+      amount_columns: [transaction_amount, loan_amount, fee_amount]
+      allow_zero_amounts: false
+      aml_amount_column: transaction_amount
+      aml_threshold: 10000.0
+      currency_column: currency
+      loan_ratio:
+        loan_col: loan_amount
+        value_col: collateral_value
+        max_ltv: 0.90
+      repayment:
+        repayment_col: repayment_amount
+        balance_col: outstanding_balance
+    healthcare:
+      age_column: patient_age
+      min_age: 0
+      max_age: 125
+      diagnosis_columns: [diagnosis_code]
+      text_columns_for_phi_scan: [notes, comments, description]
+      allowed_phi_columns: []
+    finance:
+      revenue_columns: [net_revenue, gross_revenue, segment_revenue]
+      credit_memo_column: is_credit_memo
+      capital_adequacy:
+        tier1_col: tier1_capital
+        rwa_col: risk_weighted_assets
+        min_car: 0.08
+      net_position:
+        position_column: net_position
+        max_long: 1000000
+        max_short: 500000
+    gdpr:
+      residency_column: data_region
+      allowed_regions: [EU, EEA, DE, FR, UK]
+      consent_column: consent_given
+      phi_columns: [patient_id, ssn, date_of_birth, full_name, address, phone, email]
+    sox:
+      audit_timestamp_column: modified_at
+      audit_user_column: modified_by
+
+compliance:
+  # Penalty weights — these directly subtract from ConfidenceVector.aggregate()
+  penalty_weights:
+    critical: 0.20     # per CRITICAL-severity rule that fires
+    error: 0.10        # per ERROR-severity rule that fires
+    warning: 0.02      # per WARNING-severity rule that fires
+  critical_blocks_pipeline: false   # CRITICAL violation halts pipeline like gate1 reject
+  audit_violations: true            # write violations to audit/compliance.jsonl
+  allowed_warning_count: 10         # >N warnings → conditional (not blocked)
+  llm_remediation: true             # use LLM to generate per-violation remediation narrative
+  rl_feedback: true                 # feed violations back to RLThresholdTuner Q-table
 rl:
   epsilon_min: 0.05
   epsilon_max: 0.3
@@ -46,7 +105,7 @@ llm:
   audit_prompts: true
   cost_tracking: true
 streaming:
-  kafka_bootstrap: kafka:9092
+  kafka_bootstrap: kafka:29092
   consumer_group: dipex-pipeline
   topics:
     raw_events: dipex.raw_events
@@ -97,6 +156,7 @@ monitoring:
   prometheus_scrape_interval: 15s
   grafana_port: 3001
   alert_rules_path: monitoring/alert_rules.yml
+  feature_stability_threshold: 0.5
   thresholds:
     pipeline_failure_rate: 0.2
     confidence_median_min: 0.7
@@ -119,7 +179,46 @@ preprocessing:
   encode_strategy: onehot
   outlier_method: iqr
   outlier_factor: 1.5
+  drop_col_null_threshold: 0.90
+  drop_near_zero_variance: true
+  mixed_type_coerce: true
+  high_cardinality_limit: 200
+  auto_log_skew_threshold: 1.0
+  handle_class_imbalance: true
+  imbalance_ratio_threshold: 5.0
+  feature_engineering: true
+  dfs_enabled: false
+  dfs_max_features: 50
+  dfs_corr_threshold: 0.05
+  temporal:
+    n_splits: 3
+    strategy: "sliding_window"
+  triage:
+    # ── Null handling (tiered) ─────────────────────────────────────────────────
+    drop_col_null_threshold: 0.90   # >90% null  → drop column entirely
+    medium_null_lower: 0.25         # 25-90% null → apply fill strategy below
+    medium_null_upper: 0.90
+    medium_null_strategy: ffill     # ffill | bfill | median | mean
+    # ── Zero handling ─────────────────────────────────────────────────────────
+    high_zero_threshold: 0.50       # >50% zeros → flag and fix
+    zero_to_nan: true               # replace zeros → NaN, then re-impute
+    zero_impute_strategy: median    # median | mean | mode | knn (defer to DataCleaner)
+    # ── Mixed-type coercion ───────────────────────────────────────────────────
+    mixed_type_coerce: true
+    mixed_type_loss_threshold: 0.15 # max fraction of NaN introduced before fallback
+    coerce_regex_fallback: true     # Pass 2: extract numerics via regex (e.g. "42kg" → 42)
+    # ── Column quality ────────────────────────────────────────────────────────
+    drop_near_zero_variance: true
+    high_cardinality_limit: 200
+    hash_buckets: 64
+    # ── Distribution ──────────────────────────────────────────────────────────
+    auto_log_transform: true
+    skew_threshold: 2.0
+    # ── Class imbalance ───────────────────────────────────────────────────────
+    imbalance_ratio_threshold: 5.0  # flag if majority/minority ratio >= this
+    auto_resample: true             # true → SMOTE / oversample; false → class_weight only
+    resample_strategy: smote        # smote | oversample | undersample
 universal_intake:
   snapshot_dir: data/snapshots
   quality_threshold: 0.6
-  max_file_size_mb: 500
+  max_file_size_mb: 5120

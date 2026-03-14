@@ -40,6 +40,7 @@ class CleaningReport:
     capping_log: List[Dict[str, Any]] = field(default_factory=list)
     coercion_log: List[Dict[str, Any]] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
+    anomaly_report: Dict[str, Any] = field(default_factory=dict)  # from AnomalyScorer
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -51,6 +52,7 @@ class CleaningReport:
             "capping_log": self.capping_log,
             "coercion_log": self.coercion_log,
             "warnings": self.warnings,
+            "anomaly_report": self.anomaly_report,
         }
 
 
@@ -88,6 +90,13 @@ class DataCleaner:
         self.type_coercions: Dict[str, str] = pre.get("type_coercions", {})
         self.date_columns: List[str] = pre.get("date_columns", [])
         self.string_strip: bool = bool(pre.get("string_strip", True))
+        
+        # Real-World Data Robustness Toggles
+        self.drop_col_null_threshold: float = float(pre.get("drop_col_null_threshold", 0.90))
+        self.drop_near_zero_variance: bool = bool(pre.get("drop_near_zero_variance", True))
+        self.mixed_type_coerce: bool = bool(pre.get("mixed_type_coerce", True))
+        self.mixed_type_coerce_threshold: float = float(pre.get("mixed_type_coerce_threshold", 0.10))
+        self.enable_anomaly_scoring: bool = bool(pre.get("enable_anomaly_scoring", True))
 
         if self.imputation_strategy not in self.VALID_STRATEGIES:
             raise ValueError(
@@ -115,6 +124,12 @@ class DataCleaner:
             duplicates_removed=0,
         )
         df = df.copy()
+        
+        # 0. Infinite value guard (standard robustness for extreme real-world outliers)
+        # We only apply to numeric columns to avoid accidental object coercion
+        num_cols_inf = df.select_dtypes(include=[np.number]).columns
+        if not num_cols_inf.empty:
+            df[num_cols_inf] = df[num_cols_inf].replace([np.inf, -np.inf], np.nan)
 
         # 1. String whitespace normalisation
         if self.string_strip:
@@ -134,12 +149,37 @@ class DataCleaner:
             if report.duplicates_removed:
                 logger.info("Removed %d duplicate rows.", report.duplicates_removed)
 
+        # 4.1 Drop High-Null Columns
+        df = self._drop_high_null_cols(df, report)
+
+        # 4.2 Detect and Coerce Mixed Types before imputation
+        if self.mixed_type_coerce:
+            df = self._coerce_mixed_types(df, report)
+
         # 5. Missing value imputation
         df = self._impute(df, report)
+
+        # 5.1 Drop Zero Variance Columns after imputation fills holes
+        if self.drop_near_zero_variance:
+            df = self._drop_zero_variance_cols(df, report)
 
         # 6. Outlier capping
         if self.outlier_capping and self.outlier_capping.lower() != "none":
             df = self._cap_outliers(df, report)
+
+        # 7. Row-level anomaly scoring (Isolation Forest)
+        if self.enable_anomaly_scoring:
+            try:
+                from preprocessing.anomaly_scorer import AnomalyScorer
+                scorer = AnomalyScorer(config={"preprocessing": {"anomaly_scoring": {"enabled": True}}})
+                df, anomaly_rpt = scorer.score(df, run_id=run_id)
+                report.anomaly_report = anomaly_rpt.to_dict()
+                if anomaly_rpt.severity in ("WARNING", "ERROR"):
+                    report.warnings.append(
+                        f"[AnomalyScorer] {anomaly_rpt.severity}: {anomaly_rpt.message}"
+                    )
+            except Exception as exc:
+                logger.debug("[DataCleaner] Anomaly scoring unavailable: %s", exc)
 
         report.rows_after = len(df)
         return df, report
@@ -181,6 +221,62 @@ class DataCleaner:
                 })
             except Exception as exc:  # noqa: BLE001
                 report.warnings.append(f"Date parse failed for '{col}': {exc}")
+        return df
+
+    def _drop_high_null_cols(self, df: pd.DataFrame, report: CleaningReport) -> pd.DataFrame:
+        """Drops columns with a null percentage > drop_col_null_threshold."""
+        if self.drop_col_null_threshold >= 1.0:
+            return df
+            
+        null_pcts = df.isna().mean()
+        cols_to_drop = null_pcts[null_pcts > self.drop_col_null_threshold].index.tolist()
+        
+        if cols_to_drop:
+            df = df.drop(columns=cols_to_drop)
+            msg = f"Dropped {len(cols_to_drop)} columns exceeding {self.drop_col_null_threshold*100:.0f}% null threshold: {cols_to_drop}"
+            report.warnings.append(msg)
+            logger.warning(msg)
+            
+        return df
+
+    def _coerce_mixed_types(self, df: pd.DataFrame, report: CleaningReport) -> pd.DataFrame:
+        """Detects mixed-type object columns and aggressively attempts numeric coercion."""
+        object_cols = df.select_dtypes(include=["object"]).columns
+        
+        for col in object_cols:
+            # Check if it's mixed or string-stored-numeric by looking at Pandas inferred types
+            inferred = pd.api.types.infer_dtype(df[col].dropna(), skipna=True)
+            if inferred in ("mixed", "mixed-integer", "mixed-integer-float", "string", "floating"):
+                logger.debug(f"Potential numeric column detected in '{col}' (inferred '{inferred}'). Attempting coercion.")
+                # Attempt to parse to numeric, turning unparseable strings into NaN
+                coerced = pd.to_numeric(df[col], errors='coerce')
+                
+                # If we didn't lose more than 10% of the data to NaN during coercion, keep it
+                original_nas = df[col].isna().sum()
+                new_nas = coerced.isna().sum()
+                total_rows = len(df)
+                
+                if (new_nas - original_nas) / total_rows < self.mixed_type_coerce_threshold:
+                    df[col] = coerced
+                    report.warnings.append(f"Coerced mixed-type column '{col}' to numeric.")
+                else:
+                    report.warnings.append(f"Failed to safely coerce mixed-type column '{col}' (too many NaNs produced). Left as string.")
+                    
+        return df
+
+    def _drop_zero_variance_cols(self, df: pd.DataFrame, report: CleaningReport) -> pd.DataFrame:
+        """Removes columns where all non-null values are identical."""
+        cols_to_drop = []
+        for col in df.columns:
+            if df[col].nunique(dropna=True) <= 1:
+                cols_to_drop.append(col)
+                
+        if cols_to_drop:
+            df = df.drop(columns=cols_to_drop)
+            msg = f"Dropped {len(cols_to_drop)} zero-variance/constant columns: {cols_to_drop}"
+            report.warnings.append(msg)
+            logger.info(msg)
+            
         return df
 
     def _impute(self, df: pd.DataFrame, report: CleaningReport) -> pd.DataFrame:

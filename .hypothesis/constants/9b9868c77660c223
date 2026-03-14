@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\api\routes\report.py
+# hypothesis_version: 6.151.9
+
+[0.0, 404, 500, '/api/reports', '/executive', '/list', '/report', '/{run_id}', '1.0', 'N/A', 'Reporting', 'UNKNOWN', 'analyst_flags_sample', 'approved_output_dir', 'columns', 'confidence_score', 'confidence_vector', 'config.yaml', 'count', 'dataset_shape', 'dipex.api.report', 'download_url', 'features', 'filename', 'fingerprint', 'flag_count', 'gate1_decision', 'gate2_decision', 'generated', 'narrative', 'profile_summary', 'proposal_summary', 'r', 'report_path', 'reports', 'retry_count', 'risk_level', 'rows', 'run_id', 'schema_version', 'size_bytes', 'status', 'storage', 'utf-8']

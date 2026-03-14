@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\proposal\rag_retriever.py
+# hypothesis_version: 6.151.9
+
+[1.0, 'all-MiniLM-L6-v2', 'cosine', 'data/chroma_db', 'distances', 'hnsw:space', 'id', 'ids', 'metadata', 'metadatas', 'relevance_score', 'verified_runs']

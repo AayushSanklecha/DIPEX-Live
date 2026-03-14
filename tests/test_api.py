@@ -199,8 +199,6 @@ class TestRouteCoverage:
     """Confirms all expected route prefixes exist in the OpenAPI schema."""
 
     EXPECTED_PREFIXES = [
-        "/",
-        "/health",
         "/api/results",
         "/ingest",
         "/stats",

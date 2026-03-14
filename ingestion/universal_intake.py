@@ -41,6 +41,7 @@ from ingestion.quality_gate import QualityGate
 from ingestion.schema_registry import SchemaRegistry
 from ingestion.adaptive_learner import AdaptiveLearner, IngestionOutcome
 from ingestion.schema_infer import SmartSchemaInferer
+from validation.governance.governor import DataGovernor, GovernanceError
 
 logger = logging.getLogger("dipex.ingestion.universal_intake")
 
@@ -117,6 +118,7 @@ class UniversalIntake:
         self.normaliser    = Normaliser()
         self.schema_reg    = SchemaRegistry(registry_dir=registry_dir)
         self.quality_gate  = QualityGate(config=self.config)
+        self.governor      = DataGovernor(config=self.config)
         self.learner       = AdaptiveLearner(kb_path=kb_path)
         self.schema_inferer = SmartSchemaInferer()   # [ML] semantic type classifier
         intake_cfg         = self.config.get("universal_intake", {})
@@ -245,6 +247,42 @@ class UniversalIntake:
                 severity="ERROR",
                 correlation_id=correlation_id,
             ))
+
+        # ── Step 3b: Active Data Governance (PII Scan) ───────────────────────
+        try:
+            df, gov_report = self.governor.enforce(df, dataset_id=cfg.dataset_id)
+            if gov_report.get("status") == "redacted":
+                logger.warning("[%s] Governance redaction applied — %d PII elements stripped.",
+                               correlation_id[:8], gov_report.get("total_redactions", 0))
+                from ingestion.issf import IngestionError as IE
+                ingestion_errors.append(IE(
+                    error_type="GOVERNANCE_REDACT",
+                    message=f"PII Redaction Applied. Stripped {gov_report.get('total_redactions', 0)} entities.",
+                    severity="WARN",
+                    correlation_id=correlation_id,
+                ))
+            elif gov_report.get("status") == "flagged":
+                # Add warning logs but don't halt
+                from ingestion.issf import IngestionError as IE
+                for pii_type, cols in gov_report.get("pii_hits", {}).items():
+                    ingestion_errors.append(IE(
+                        error_type="GOVERNANCE_FLAG",
+                        message=f"PII Flagged: Column '{pii_type}' contains {cols} entities.",
+                        severity="WARN",
+                        correlation_id=correlation_id,
+                    ))
+
+        except GovernanceError as gov_exc:
+            from ingestion.issf import IngestionError as IE
+            ingestion_errors.append(IE(
+                error_type="GOVERNANCE_ERROR",
+                message=str(gov_exc),
+                severity="CRITICAL",
+                correlation_id=correlation_id,
+            ))
+            # Wrap as a fatal error returning failure snapshot
+            logger.error("[%s] Governance policy rejected dataset: %s", correlation_id[:8], gov_exc)
+            return self._failure_snapshot(cfg, ingestion_errors, correlation_id)
 
         # ── Step 4: Quality Gate ──────────────────────────────────────────────
         baseline_df = self._load_baseline(cfg.baseline_snapshot_id)

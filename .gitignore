@@ -159,3 +159,11 @@ docs/
 *.pdf
 *.pptx
 *.docx
+*.txt
+*.log
+*.xml
+*.csv
+!requirements.txt
+!README.md
+!requirements.docker.txt
+!pyproject.toml

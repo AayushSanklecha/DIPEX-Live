@@ -3,46 +3,49 @@ validation/regulatory/regulatory_engine.py
 --------------------------------------------
 Orchestrates domain-specific regulatory rule evaluation for Hard Gate 1.
 
-The engine loads a domain profile from ``config.yaml``, instantiates the
-appropriate rule set, and runs every registered rule against the incoming
-DataFrame, returning a unified, severity-sorted list of ``RegulatoryViolation``
-objects.
+The engine loads domain profiles from ``config.yaml``, supports MULTIPLE
+simultaneous domains (e.g. banking + gdpr), runs conflict resolution, and
+exposes the violating columns for downstream feature masking.
 
 Supported domains
 -----------------
 ``"banking"``    — PositiveAmountRule, AMLThresholdRule, LoanRatioRule,
-                   RepaymentConsistencyRule
+                   RepaymentConsistencyRule, SuspiciousTransactionPatternRule,
+                   CurrencyConcentrationRule
 ``"healthcare"`` — AgeRangeRule, VitalSignsRule, DiagnosisCodeFormatRule,
-                   PHIPresenceRule
+                   PHIPresenceRule, ConsentValidationRule, DeIdentificationRule
+``"finance"``    — RevenueRecognitionRule, CapitalAdequacyRule, NetPositionLimitRule,
+                   MarginCallThresholdRule, DoubleEntryBalanceRule, FairValueHierarchyRule
+``"gdpr"``       — GDPRDataResidencyRule, GDPRConsentRequiredRule
+``"sox"``        — SOXAuditTrailRule
+``"hipaa"``      — HIPAAEncryptionFlagRule
 ``"generic"``    — No domain rules applied (safe default for non-regulated data)
-
-Extension pattern
------------------
-To add a new domain::
-
-    class MyCustomRule(BaseRegulatoryRule):
-        name = "my_rule"
-        domain = "custom"
-        def evaluate(self, df): ...
-
-    engine = RegulatoryEngine(domain="custom")
-    engine.add_rule(MyCustomRule())
-    violations = engine.evaluate(df)
 """
 
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional
+import os
+from typing import Any, Dict, List, Optional, Set
 
 import pandas as pd
+import yaml
 
 from .base_rule import BaseRegulatoryRule, RegulatoryViolation
 from .banking_rules import (
     AMLThresholdRule,
+    CurrencyConcentrationRule,
     LoanRatioRule,
     PositiveAmountRule,
     RepaymentConsistencyRule,
+    SuspiciousTransactionPatternRule,
+)
+from .conflict_resolver import RuleConflictResolver
+from .cross_domain_rules import (
+    GDPRConsentRequiredRule,
+    GDPRDataResidencyRule,
+    HIPAAEncryptionFlagRule,
+    SOXAuditTrailRule,
 )
 from .finance_rules import (
     CapitalAdequacyRule,
@@ -55,6 +58,8 @@ from .finance_rules import (
 )
 from .healthcare_rules import (
     AgeRangeRule,
+    ConsentValidationRule,
+    DeIdentificationRule,
     DiagnosisCodeFormatRule,
     PHIPresenceRule,
     VitalSignsRule,
@@ -68,69 +73,124 @@ _SEVERITY_ORDER: Dict[str, int] = {"CRITICAL": 0, "ERROR": 1, "WARNING": 2}
 
 class RegulatoryEngine:
     """
-    Pluggable regulatory rule engine.
+    Pluggable multi-domain regulatory rule engine.
 
-    Instantiation — from project config (recommended)::
+    Instantiation — from project config (recommended):
 
         engine = RegulatoryEngine.from_config(config)
         violations = engine.evaluate(df)
+        bad_cols   = engine.get_violating_columns()  # for feature masking
 
-    Instantiation — manual (for testing or custom domains)::
+    Instantiation — from rules.yaml directly:
+
+        engine = RegulatoryEngine.from_yaml_config("validation/regulatory/rules.yaml")
+
+    Instantiation — manual (for testing or custom domains):
 
         engine = RegulatoryEngine(domain="banking", rules=[PositiveAmountRule([...])])
         violations = engine.evaluate(df)
 
-    Runtime rule injection::
+    Multi-domain:
 
-        engine.add_rule(MyCustomRule())
+        engine = RegulatoryEngine.from_config_multi_domain(config, domains=["banking", "gdpr"])
     """
 
     def __init__(
         self,
         domain: str = "generic",
         rules: Optional[List[BaseRegulatoryRule]] = None,
+        conflict_strategy: str = "strictest_wins",
     ) -> None:
         self.domain = domain.lower()
         self.rules: List[BaseRegulatoryRule] = rules if rules is not None else []
+        self.conflict_strategy = conflict_strategy
+        self._last_violations: List[RegulatoryViolation] = []
+        self._last_conflict_report: List[Dict[str, Any]] = []
 
     # ------------------------------------------------------------------
-    # Factory
+    # Factories
     # ------------------------------------------------------------------
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "RegulatoryEngine":
         """
-        Builds a fully configured ``RegulatoryEngine`` from the project config dict.
-
-        The ``validation.regulatory`` section drives domain selection and
-        parameter loading.  Missing or empty sections are handled gracefully
-        — the engine falls back to ``"generic"`` (no rules applied).
+        Builds a RegulatoryEngine from the project config dict.
+        Reads ``validation.regulatory`` section.
+        Supports the new ``domains`` list for multi-domain.
+        Falls back to the single ``domain`` key for backward-compatibility.
         """
         reg_cfg = config.get("validation", {}).get("regulatory", {})
-        domain = str(reg_cfg.get("domain", "generic")).lower()
+        conflict_strategy = str(reg_cfg.get("conflict_resolution", "strictest_wins"))
+
+        # Multi-domain: new ``domains`` list takes precedence over singular ``domain``
+        domains_raw = reg_cfg.get("domains") or []
+        if domains_raw:
+            domains = [str(d).lower() for d in domains_raw]
+        else:
+            domains = [str(reg_cfg.get("domain", "generic")).lower()]
+
+        all_rules: List[BaseRegulatoryRule] = []
+
+        for domain in domains:
+            if domain == "banking":
+                rules = cls._build_banking_rules(reg_cfg.get("banking", {}))
+            elif domain == "healthcare":
+                rules = cls._build_healthcare_rules(reg_cfg.get("healthcare", {}))
+            elif domain == "finance":
+                rules = cls._build_finance_rules(reg_cfg.get("finance", {}))
+            elif domain in ("gdpr",):
+                rules = cls._build_gdpr_rules(reg_cfg.get("gdpr", {}))
+            elif domain == "sox":
+                rules = cls._build_sox_rules(reg_cfg.get("sox", {}))
+            elif domain == "hipaa":
+                rules = cls._build_hipaa_rules(reg_cfg.get("hipaa", {}))
+            else:
+                rules = []
+
+            if rules:
+                logger.info(
+                    "RegulatoryEngine: domain='%s' loaded — %d rule(s).", domain, len(rules)
+                )
+            all_rules.extend(rules)
+
+        primary_domain = domains[0] if domains else "generic"
+        engine = cls(domain=primary_domain, rules=all_rules, conflict_strategy=conflict_strategy)
+        logger.info(
+            "RegulatoryEngine: %d total rule(s) across domain(s) %s.", len(all_rules), domains
+        )
+        return engine
+
+    @classmethod
+    def from_yaml_config(cls, yaml_path: str) -> "RegulatoryEngine":
+        """
+        Builds a RegulatoryEngine by reading a rules.yaml file directly.
+        This enables override of config.yaml parameters for testing.
+        """
+        if not os.path.exists(yaml_path):
+            logger.warning("RegulatoryEngine.from_yaml_config: file not found: %s", yaml_path)
+            return cls(domain="generic", rules=[])
+
+        with open(yaml_path, "r", encoding="utf-8") as fh:
+            raw: Dict[str, Any] = yaml.safe_load(fh) or {}
+
         rules: List[BaseRegulatoryRule] = []
 
-        if domain == "banking":
-            rules = cls._build_banking_rules(reg_cfg.get("banking", {}))
-            logger.info(
-                "RegulatoryEngine: banking domain loaded — %d rule(s).", len(rules)
-            )
-        elif domain == "healthcare":
-            rules = cls._build_healthcare_rules(reg_cfg.get("healthcare", {}))
-            logger.info(
-                "RegulatoryEngine: healthcare domain loaded — %d rule(s).", len(rules)
-            )
-        elif domain == "finance":
-            rules = cls._build_finance_rules(reg_cfg.get("finance", {}))
-            logger.info(
-                "RegulatoryEngine: finance domain loaded — %d rule(s).", len(rules)
-            )
-        else:
-            logger.info(
-                "RegulatoryEngine: domain='%s' — no domain-specific rules loaded.", domain
-            )
-
-        return cls(domain=domain, rules=rules)
+        # Wrap into a synthetic config dict and call from_config
+        synthetic_config = {
+            "validation": {
+                "regulatory": {
+                    "domains": list(raw.keys()),
+                    **{k: {} for k in raw.keys()},
+                }
+            }
+        }
+        engine = cls.from_config(synthetic_config)
+        logger.info(
+            "RegulatoryEngine.from_yaml_config: loaded from '%s', %d rule(s).",
+            yaml_path,
+            len(engine.rules),
+        )
+        return engine
 
     # ------------------------------------------------------------------
     # Domain rule builders (static factories)
@@ -138,53 +198,63 @@ class RegulatoryEngine:
 
     @staticmethod
     def _build_banking_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
-        """Instantiates all banking-domain rules from the config sub-section."""
         rules: List[BaseRegulatoryRule] = []
 
         amount_cols: List[str] = cfg.get("amount_columns", [])
         if amount_cols:
-            rules.append(
-                PositiveAmountRule(
-                    amount_columns=amount_cols,
-                    allow_zero=cfg.get("allow_zero_amounts", False),
-                )
-            )
+            rules.append(PositiveAmountRule(
+                amount_columns=amount_cols,
+                allow_zero=cfg.get("allow_zero_amounts", False),
+            ))
 
         aml_col: Optional[str] = cfg.get("aml_amount_column")
         if aml_col:
-            rules.append(
-                AMLThresholdRule(
-                    amount_column=aml_col,
-                    threshold=float(cfg.get("aml_threshold", 10_000.0)),
-                    currency_column=cfg.get("currency_column"),
-                )
-            )
+            rules.append(AMLThresholdRule(
+                amount_column=aml_col,
+                threshold=float(cfg.get("aml_threshold", 10_000.0)),
+                currency_column=cfg.get("currency_column"),
+            ))
 
         ltv_cfg: Dict[str, Any] = cfg.get("loan_ratio", {})
         if ltv_cfg.get("loan_col") and ltv_cfg.get("value_col"):
-            rules.append(
-                LoanRatioRule(
-                    loan_col=str(ltv_cfg["loan_col"]),
-                    value_col=str(ltv_cfg["value_col"]),
-                    max_ltv=float(ltv_cfg.get("max_ltv", 0.90)),
-                    severity=str(ltv_cfg.get("severity", "ERROR")),
-                )
-            )
+            rules.append(LoanRatioRule(
+                loan_col=str(ltv_cfg["loan_col"]),
+                value_col=str(ltv_cfg["value_col"]),
+                max_ltv=float(ltv_cfg.get("max_ltv", 0.90)),
+                severity=str(ltv_cfg.get("severity", "ERROR")),
+            ))
 
         repay_cfg: Dict[str, Any] = cfg.get("repayment", {})
         if repay_cfg.get("repayment_col") and repay_cfg.get("balance_col"):
-            rules.append(
-                RepaymentConsistencyRule(
-                    repayment_col=str(repay_cfg["repayment_col"]),
-                    balance_col=str(repay_cfg["balance_col"]),
-                )
-            )
+            rules.append(RepaymentConsistencyRule(
+                repayment_col=str(repay_cfg["repayment_col"]),
+                balance_col=str(repay_cfg["balance_col"]),
+            ))
+
+        # Velocity spike (FATF Rec. 20)
+        velocity_cfg: Dict[str, Any] = cfg.get("velocity", {})
+        tx_id_col = velocity_cfg.get("transaction_id_column") or cfg.get("aml_amount_column")
+        if tx_id_col or amount_cols:
+            rules.append(SuspiciousTransactionPatternRule(
+                transaction_id_column=velocity_cfg.get("transaction_id_column", "account_id"),
+                timestamp_column=velocity_cfg.get("timestamp_column", "transaction_date"),
+                max_transactions_per_day=int(
+                    velocity_cfg.get("max_transactions_per_day", 50)
+                ),
+            ))
+
+        # Currency concentration (BCBS239)
+        curr_col = cfg.get("currency_column")
+        if curr_col:
+            rules.append(CurrencyConcentrationRule(
+                currency_column=curr_col,
+                max_concentration_pct=float(cfg.get("max_currency_concentration", 0.90)),
+            ))
 
         return rules
 
     @staticmethod
     def _build_finance_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
-        """Instantiates all finance-domain rules from the config sub-section."""
         rules: List[BaseRegulatoryRule] = []
 
         rev_cols: List[str] = cfg.get("revenue_columns", [])
@@ -237,34 +307,61 @@ class RegulatoryEngine:
 
     @staticmethod
     def _build_healthcare_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
-        """Instantiates all healthcare-domain rules from the config sub-section."""
         rules: List[BaseRegulatoryRule] = []
 
-        rules.append(
-            AgeRangeRule(
-                age_column=str(cfg.get("age_column", "age")),
-                min_age=float(cfg.get("min_age", 0.0)),
-                max_age=float(cfg.get("max_age", 130.0)),
-            )
-        )
-
-        vital_bounds: Optional[Dict[str, Dict[str, float]]] = cfg.get(
-            "vital_sign_bounds"
-        )
-        rules.append(VitalSignsRule(column_bounds=vital_bounds))
+        rules.append(AgeRangeRule(
+            age_column=str(cfg.get("age_column", "patient_age")),
+            min_age=float(cfg.get("min_age", 0.0)),
+            max_age=float(cfg.get("max_age", 125.0)),
+        ))
+        rules.append(VitalSignsRule(column_bounds=cfg.get("vital_sign_bounds")))
 
         diag_cols: List[str] = cfg.get("diagnosis_columns", ["diagnosis_code"])
         if diag_cols:
             rules.append(DiagnosisCodeFormatRule(diagnosis_columns=diag_cols))
 
-        rules.append(
-            PHIPresenceRule(
-                text_columns=cfg.get("text_columns_for_phi_scan"),
-                allowed_phi_columns=cfg.get("allowed_phi_columns", []),
-            )
-        )
+        rules.append(PHIPresenceRule(
+            text_columns=cfg.get("text_columns_for_phi_scan"),
+            allowed_phi_columns=cfg.get("allowed_phi_columns", []),
+        ))
+
+        # New: consent + de-identification
+        phi_cols = cfg.get("phi_columns") or cfg.get("allowed_phi_columns") or None
+        rules.append(ConsentValidationRule(
+            consent_column=cfg.get("consent_column", "consent_given"),
+            phi_columns=phi_cols,
+        ))
+        rules.append(DeIdentificationRule())
 
         return rules
+
+    @staticmethod
+    def _build_gdpr_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
+        rules: List[BaseRegulatoryRule] = []
+
+        rules.append(GDPRDataResidencyRule(
+            residency_column=cfg.get("residency_column", "data_region"),
+            allowed_regions=cfg.get("allowed_regions", ["EU", "EEA"]),
+        ))
+        rules.append(GDPRConsentRequiredRule(
+            consent_column=cfg.get("consent_column", "consent_given"),
+            phi_columns=cfg.get("phi_columns"),
+        ))
+        return rules
+
+    @staticmethod
+    def _build_sox_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
+        return [SOXAuditTrailRule(
+            audit_timestamp_column=cfg.get("audit_timestamp_column", "modified_at"),
+            audit_user_column=cfg.get("audit_user_column", "modified_by"),
+        )]
+
+    @staticmethod
+    def _build_hipaa_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
+        return [HIPAAEncryptionFlagRule(
+            phi_columns=cfg.get("phi_columns"),
+            encryption_flag_column=cfg.get("encryption_flag_column", "is_encrypted"),
+        )]
 
     # ------------------------------------------------------------------
     # Evaluation
@@ -275,16 +372,17 @@ class RegulatoryEngine:
         Runs all registered rules against ``df``.
 
         Each rule is evaluated independently inside a try/except block so that
-        a misconfigured or buggy rule cannot silently suppress evaluation of
-        subsequent rules.  Rule exceptions are surfaced as ``ERROR``-severity
-        violations.
+        a misconfigured rule cannot silently suppress other rules.
+
+        After evaluation, RuleConflictResolver is applied to handle any
+        column-level contradictions between rules from different domains.
 
         Returns:
-            Flat list of ``RegulatoryViolation`` objects,
-            sorted CRITICAL → ERROR → WARNING.
+            Flat, severity-sorted list of RegulatoryViolation objects.
         """
         if not self.rules:
             logger.debug("RegulatoryEngine: no rules registered — skipping.")
+            self._last_violations = []
             return []
 
         all_violations: List[RegulatoryViolation] = []
@@ -297,9 +395,7 @@ class RegulatoryEngine:
                 if violations:
                     logger.warning(
                         "Regulatory rule '%s' [%s]: %d violation(s) found.",
-                        rule.name,
-                        rule.domain,
-                        len(violations),
+                        rule.name, rule.domain, len(violations),
                     )
                 else:
                     logger.debug(
@@ -310,40 +406,64 @@ class RegulatoryEngine:
                 logger.error(
                     "Regulatory rule '%s' raised an unexpected exception: %s. "
                     "Recording as ERROR and continuing.",
-                    rule.name,
-                    exc,
-                    exc_info=True,
+                    rule.name, exc, exc_info=True,
                 )
-                all_violations.append(
-                    RegulatoryViolation(
-                        rule_name=rule.name,
-                        domain=self.domain,
-                        severity="ERROR",
-                        column="N/A",
-                        offending_count=0,
-                        message=(
-                            f"Rule '{rule.name}' raised an unexpected exception: {exc}. "
-                            "Investigate rule configuration and DataFrame schema."
-                        ),
-                        remediation=(
-                            "Review the rule's column references in config.yaml "
-                            "and ensure the DataFrame schema matches expectations."
-                        ),
-                    )
-                )
+                all_violations.append(RegulatoryViolation(
+                    rule_name=rule.name,
+                    domain=self.domain,
+                    severity="ERROR",
+                    column="N/A",
+                    offending_count=0,
+                    message=(
+                        f"Rule '{rule.name}' raised an unexpected exception: {exc}. "
+                        "Investigate rule configuration and DataFrame schema."
+                    ),
+                    remediation=(
+                        "Review the rule's column references in config.yaml "
+                        "and ensure the DataFrame schema matches expectations."
+                    ),
+                ))
+
+        # ── Conflict resolution ───────────────────────────────────────────────
+        resolver = RuleConflictResolver(
+            strategy=self.conflict_strategy,
+            primary_domain=self.domain,
+        )
+        resolved_violations, conflict_report = resolver.resolve(all_violations)
+        if conflict_report:
+            logger.info(
+                "RegulatoryEngine: %s", resolver.summarize(conflict_report)
+            )
+        self._last_conflict_report = conflict_report
 
         # Deterministic ordering: CRITICAL → ERROR → WARNING
-        all_violations.sort(
-            key=lambda v: _SEVERITY_ORDER.get(v.severity, 99)
-        )
-        return all_violations
+        resolved_violations.sort(key=lambda v: _SEVERITY_ORDER.get(v.severity, 99))
+        self._last_violations = resolved_violations
+        return resolved_violations
+
+    def get_violating_columns(self) -> Set[str]:
+        """
+        Returns the set of column names that triggered violations in the
+        last call to evaluate().
+
+        Used by PipelineBridge to mask non-compliant columns before model training.
+        Only includes columns from violations with severity CRITICAL or ERROR —
+        WARNING violations are flagged but their columns are not masked.
+        """
+        return {
+            v.column
+            for v in self._last_violations
+            if v.severity in ("CRITICAL", "ERROR") and v.column not in ("N/A", "")
+        }
+
+    def get_last_conflict_report(self) -> List[Dict[str, Any]]:
+        """Returns the conflict report from the last evaluate() call."""
+        return self._last_conflict_report
 
     def add_rule(self, rule: BaseRegulatoryRule) -> None:
         """
         Dynamically registers an additional rule at runtime.
-
-        This is the preferred extension point for domain-specific rules that
-        are not driven by ``config.yaml``.
+        The preferred extension point for domain-specific rules not in config.yaml.
         """
         if not isinstance(rule, BaseRegulatoryRule):
             raise TypeError(
@@ -357,5 +477,6 @@ class RegulatoryEngine:
     def __repr__(self) -> str:
         return (
             f"RegulatoryEngine(domain={self.domain!r}, "
-            f"rules={[r.name for r in self.rules]})"
+            f"rules={[r.name for r in self.rules]}, "
+            f"conflict_strategy={self.conflict_strategy!r})"
         )

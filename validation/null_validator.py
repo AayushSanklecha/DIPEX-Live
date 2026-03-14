@@ -18,6 +18,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -106,7 +107,14 @@ class NullValidator:
             logger.warning("NullValidator received an empty DataFrame.")
             return violations
 
-        null_counts = df.isnull().sum()
+        # Fix 9: np.inf / -np.inf pass isnull() checks silently.
+        # Use a shadow frame that maps inf→NaN for counting only — original df unchanged.
+        df_check = df.copy()
+        numeric_cols = df_check.select_dtypes(include=[np.number]).columns
+        if len(numeric_cols) > 0:
+            df_check[numeric_cols] = df_check[numeric_cols].replace([np.inf, -np.inf], np.nan)
+
+        null_counts = df_check.isnull().sum()
         null_pcts = null_counts / n_rows
 
         for col in df.columns:

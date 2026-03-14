@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\ingestion\connectors\factory.py
+# hypothesis_version: 6.151.9
+
+['.', 'api', 'arrow', 'cache', 'clickhouse', 'duckdb', 'elastic', 'elasticsearch', 'graph', 'graphql', 'kafka', 'mongo', 'mongodb', 'mssql', 'mysql', 'neo4j', 'opensearch', 'oracle', 'parquet', 'postgres', 'postgresql', 'redis', 'rest', 'source_type', 'sql', 'sqlite', 'type']

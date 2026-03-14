@@ -78,7 +78,7 @@ class UniversalFallbackReader:
     Integrates with AdaptiveLearner via strategy_used metadata.
     """
 
-    def __init__(self, max_fallback_rows: int = 100_000) -> None:
+    def __init__(self, max_fallback_rows: int = 5_000_000) -> None:
         self.max_rows = max_fallback_rows
 
     def read(self, path: str, hint_format: Optional[str] = None,

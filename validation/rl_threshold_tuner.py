@@ -106,7 +106,12 @@ class RLThresholdTuner:
 
     def _update(self, state: str, action_key: str, reward: float) -> None:
         if state not in self.q:
-            self._init_state(state, float(action_key))
+            # action_key may be "thresh_0.5000" — extract numeric part safely
+            try:
+                thresh_val = float(action_key.replace("thresh_", ""))
+            except (ValueError, AttributeError):
+                thresh_val = 0.5  # sensible fallback
+            self._init_state(state, thresh_val)
         if action_key not in self.q[state]:
             self.q[state][action_key] = 0.0
         curr = self.q[state][action_key]
@@ -189,6 +194,58 @@ class RLThresholdTuner:
             s: max(v, key=v.__getitem__)
             for s, v in self.q.items() if v
         }
+
+    def record_compliance_outcome(
+        self,
+        dataset_id: str,
+        column: str,
+        threshold: float,
+        violation_severity: str,
+    ) -> None:
+        """
+        Records a compliance-driven reward signal into the Q-table.
+
+        Called by ComplianceAdvisor after evaluating regulatory violations so
+        that the RL agent learns to tighten thresholds for columns that
+        repeatedly trigger compliance violations.
+
+        Reward mapping (negative = penalty, agent learns tighter threshold):
+          CRITICAL → -15.0  (very severe; tighten the threshold hard)
+          ERROR    →  -5.0  (regulatory violation; tighten moderately)
+          WARNING  →  -0.5  (minor; small discouragement)
+          NONE     →  +0.3  (compliance passed; small positive reinforcement)
+
+        Parameters
+        ----------
+        dataset_id        : Identifier for the dataset (used as state prefix)
+        column            : Column name that triggered the violation
+        threshold         : The threshold that was applied for this column
+        violation_severity: "CRITICAL" | "ERROR" | "WARNING" | "NONE"
+        """
+        _COMPLIANCE_REWARD: Dict[str, float] = {
+            "CRITICAL": -15.0,
+            "ERROR":     -5.0,
+            "WARNING":   -0.5,
+            "NONE":      +0.3,
+        }
+
+        reward = _COMPLIANCE_REWARD.get(violation_severity.upper(), -0.5)
+        state = f"{dataset_id}::{column}"
+        action_key = f"thresh_{threshold:.4f}"
+
+        self._update(state, action_key, reward)
+        logger.info(
+            "[RL] Compliance feedback: %s::%s | severity=%s | reward=%.1f",
+            dataset_id, column, violation_severity, reward,
+        )
+
+    @classmethod
+    def get_instance(cls) -> "RLThresholdTuner":
+        """
+        Returns the module-level singleton RLThresholdTuner.
+        Proxy for get_rl_tuner() that can be called via class reference.
+        """
+        return get_rl_tuner()
 
 
 # ── Module-level singleton ────────────────────────────────────────────────────

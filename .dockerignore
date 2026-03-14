@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+.env
+
+# Project specific huge folders
+data/
+models/
+audit/
+reports/
+frontend/node_modules/
+frontend/dist/
+*.log
+
+# Tests
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/

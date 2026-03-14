@@ -84,12 +84,19 @@ class CorrelationEngine:
         if df is None or df.empty:
             return {"pearson": {}, "spearman": {}, "cramers_v": {}, "highlights": []}
 
-        num_cols  = df.select_dtypes(include=[np.number]).columns.tolist()
-        cat_cols  = df.select_dtypes(include=["object", "category"]).columns.tolist()
+        MAX_CORR_SAMPLES = 5000
+        if len(df) > MAX_CORR_SAMPLES:
+            logger.info("CorrelationEngine: dataset too large (%d rows), sampling %d rows for faster pairwise correlations.", len(df), MAX_CORR_SAMPLES)
+            sample_df = df.sample(n=MAX_CORR_SAMPLES, random_state=42)
+        else:
+            sample_df = df
 
-        pearson   = self._compute_pearson(df, num_cols)
-        spearman  = self._compute_spearman(df, num_cols)
-        cramers_v = self._compute_cramers_v(df, cat_cols)
+        num_cols  = sample_df.select_dtypes(include=[np.number]).columns.tolist()
+        cat_cols  = sample_df.select_dtypes(include=["object", "category"]).columns.tolist()
+
+        pearson   = self._compute_pearson(sample_df, num_cols)
+        spearman  = self._compute_spearman(sample_df, num_cols)
+        cramers_v = self._compute_cramers_v(sample_df, cat_cols)
         highlights = self._collect_highlights(pearson, spearman, cramers_v)
 
         n_pairs = len(pearson) + len(cramers_v)

@@ -102,6 +102,25 @@ class ProposalEngine:
         n_proposals = sum(
             1 for c in proposals["candidates"].values() if "error" not in c
         )
+        
+        # ── ML Confidence Scoring ──────────────────────────────────────────────
+        try:
+            from .ml_confidence_scorer import ProposalConfidenceScorer
+            scorer = ProposalConfidenceScorer()
+            for name, cand in proposals["candidates"].items():
+                if "error" not in cand:
+                    # Enrich candidate with basic stats for the scorer
+                    cand["proposer_type"] = name
+                    cand["sample_size"] = len(df)
+                    cand["n_columns"] = df.shape[1]
+                    
+                    feat_vec = scorer.extract_features(cand, run_context=kwargs)
+                    score_res = scorer.score(feat_vec)
+                    cand["_ml_confidence"] = score_res
+                    
+            logger.info("ProposalEngine: Scored %d candidates with ML confidence.", n_proposals)
+        except Exception as e:  # noqa: BLE001
+            logger.warning("ProposalEngine: ML confidence scoring failed: %s", e)
         logger.info("ProposalEngine: %d proposer(s) yielded candidates.", n_proposals)
 
         return proposals

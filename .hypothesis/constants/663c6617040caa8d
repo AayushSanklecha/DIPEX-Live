@@ -1,0 +1,4 @@
+# file: C:\Users\sankl\Desktop\dipex_project\api\app.py
+# hypothesis_version: 6.151.9
+
+[0.0, 413, 1024, '*', ',', '-Infinity', '.html', '/', '/api/export/list', '/dashboard', '/docs', '/health', '/metrics', '/prom-metrics', '/redoc', '2.0.0', ':', 'Infinity', 'MODEL_REGISTRY_PATH', 'NaN', 'PASS', 'PIPELINE_RUN', 'System', 'architecture', 'audit', 'audit/audit.jsonl', 'content-length', 'dashboard', 'data', 'data/model_registry', 'db_ok', 'degraded', 'detail', 'dipex-api', 'docs', 'event', 'exports', 'gate_decision', 'healthy', 'http', 'model_registry_ok', 'name', 'null', 'operational', 'pass_rate', 'passed_runs', 'r', 'reports', 'reports_generated', 'service', 'status', 'timestamp', 'total_pipeline_runs', 'uptime', 'uptime_seconds', 'utf-8', 'version']

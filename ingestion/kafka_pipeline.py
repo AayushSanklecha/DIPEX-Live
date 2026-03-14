@@ -55,7 +55,7 @@ class KafkaPipelineRunner:
 
         {
           "kafka": {
-            "bootstrap_servers": "localhost:9092",
+            "bootstrap_servers": "kafka:29092",
             "group_id":          "dipex-pipeline",
             "topics":            ["raw_events", "sensor_data"],
             "batch_size":        1000,
@@ -400,7 +400,7 @@ def run_from_config(config: Dict[str, Any], block: bool = True) -> KafkaPipeline
         from ingestion.kafka_pipeline import run_from_config
         runner = run_from_config({
             "kafka": {
-                "bootstrap_servers": "localhost:9092",
+                "bootstrap_servers": "kafka:29092",
                 "topics": ["events"],
                 "group_id": "dipex",
             },
