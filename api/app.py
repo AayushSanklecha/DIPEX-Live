@@ -53,7 +53,8 @@ class NaNHandlingJSONResponse(JSONResponse):
 from api.metrics import get_metrics_response
 from api.routes import (
     audit, ingest, ingest_v2, pipeline_run, preprocess,
-    report, results, run, stats, analyst, cohort, exports, explorer
+    report, results, run, stats, analyst, cohort, exports, explorer,
+    feedback, analytics,
 )
 
 # ── Startup timestamp ─────────────────────────────────────────────────────────
@@ -73,22 +74,21 @@ app = FastAPI(
 )
 
 # ── Middleware ────────────────────────────────────────────────────────────────
-# NOTE: allow_credentials=True is incompatible with allow_origins=["*"] per CORS spec.
-# Browser will reject the response if both are set. Use explicit origins list instead.
-_CORS_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://localhost:8080",
-    "http://localhost:8000",
-]
+# Allow all origins so the app works on Hugging Face Spaces (*.hf.space),
+# local dev, and any other host without needing explicit whitelisting.
+# allow_credentials MUST be False when allow_origins=["*"] per the CORS spec;
+# the browser will reject responses that set both.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_CORS_ORIGINS,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
 )
+
+# ── API Key Authentication ────────────────────────────────────────────────────
+from api.middleware.auth import APIKeyMiddleware
+app.add_middleware(APIKeyMiddleware)
 
 # ── Upload size limit ─────────────────────────────────────────────────────────
 # This guard exists only to prevent truly runaway requests from exhausting memory.
@@ -134,10 +134,20 @@ app.include_router(exports.router)
 # DATA EXPLORER — Raw database preview
 app.include_router(explorer.router)
 
+# ANALYST INSTRUCTION LOOP — Satisfaction feedback + RL reward recording
+app.include_router(feedback.router)
+
+# ANALYTICS DASHBOARD — Power BI-style enriched analytical payload
+app.include_router(analytics.router)
+
 # ── System endpoints ──────────────────────────────────────────────────────────
 
-@app.get("/", tags=["System"])
-async def root():
+from fastapi.responses import RedirectResponse
+
+
+
+@app.get("/api/status", tags=["System"])
+async def system_status():
     """API root — lists workflow steps."""
     return {
         "name":    "DIPEX — Data Intelligence Platform for Expert Analysis",
@@ -227,6 +237,46 @@ async def metrics():
     }
 
 
-# ── Dashboard static mount ────────────────────────────────────────────────────
-if os.path.exists("dashboard"):
-    app.mount("/dashboard", StaticFiles(directory="dashboard", html=True), name="dashboard")
+# ── Dashboard static mount and SPA fallback ─────────────────────────────────────
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+dashboard_path = os.path.join(BASE_DIR, "dashboard")
+
+# Mount static assets if dashboard has been built
+_assets_path = os.path.join(dashboard_path, "assets")
+if os.path.isdir(_assets_path):
+    app.mount("/assets", StaticFiles(directory=_assets_path), name="assets")
+
+from fastapi import Request
+from fastapi.responses import FileResponse
+
+
+@app.get("/", include_in_schema=False)
+async def serve_root(request: Request):
+    """Serve the React dashboard root. Falls back to /docs if not built yet."""
+    index_path = os.path.join(dashboard_path, "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
+    # dashboard not built yet (dev mode or first deploy) → redirect to API docs
+    return RedirectResponse(url="/docs")
+
+
+@app.get("/{full_path:path}", include_in_schema=False)
+async def serve_spa_fallback(request: Request, full_path: str):
+    """SPA catch-all: serve static files or index.html for React Router routes."""
+    # Do not intercept API routes
+    if full_path.startswith("api/") or full_path == "api":
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    # Try to serve the exact file (favicon.ico, manifest.json, etc.)
+    file_path = os.path.join(dashboard_path, full_path)
+    if full_path and os.path.isfile(file_path):
+        return FileResponse(file_path)
+
+    # Fallback → index.html for React Router client-side routing
+    index_path = os.path.join(dashboard_path, "index.html")
+    if os.path.isfile(index_path):
+        return FileResponse(index_path)
+
+    # Dashboard not built: redirect to API docs so users see something useful
+    return RedirectResponse(url="/docs")
