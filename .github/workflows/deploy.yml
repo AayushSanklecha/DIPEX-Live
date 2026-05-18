@@ -1,0 +1,94 @@
+name: Deploy DIPEX to HuggingFace Space
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # allow manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      # ── Build React frontend ──────────────────────────────────────────────
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build frontend (Vite → dist/)
+        run: npm run build
+        working-directory: frontend
+        env:
+          VITE_API_URL: ''   # empty = relative paths, works on HF Space (same origin)
+
+      - name: Copy frontend build → dashboard/
+        run: |
+          rm -rf dashboard
+          cp -r frontend/dist dashboard
+
+      # ── Push to HuggingFace Space ─────────────────────────────────────────
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install huggingface_hub
+        run: pip install huggingface_hub
+
+      - name: Push to HuggingFace Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'EOF'
+          import os, sys
+          from pathlib import Path
+          from huggingface_hub import HfApi
+
+          token = os.environ["HF_TOKEN"]
+          api   = HfApi(token=token)
+          repo_id = "AayuSanklu/DIPEX-Live"
+
+          # Ensure the space exists (docker SDK)
+          api.create_repo(repo_id=repo_id, repo_type="space", space_sdk="docker", exist_ok=True)
+          print(f"Space ready: {repo_id}")
+
+          IGNORE = [
+              ".git/**", ".github/**", ".vscode/**",
+              "venv/**", "env/**", ".venv/**",
+              "**/__pycache__/**", "**/*.pyc",
+              ".env",                       # secrets - never deploy
+              "frontend/node_modules/**",
+              "frontend/src/**",            # source - we deploy dashboard/ (built)
+              "frontend/public/**",
+              "frontend/dist/**",           # same as dashboard/ after copy
+              "data/**",                    # runtime data - too large
+              "Invistico_Airline.csv",
+              "mock_banking_data.csv",
+              "scratch/**", "logs.txt",
+              "*.docx", "*.pdf", "*.pptx",
+              "Mock_DIPEX_Database.db", "sample_company.db",
+              "output/**",
+          ]
+
+          print("Uploading codebase (including dashboard/ + models/)...")
+          api.upload_folder(
+              folder_path=".",
+              repo_id=repo_id,
+              repo_type="space",
+              ignore_patterns=IGNORE,
+              commit_message="ci: auto-deploy from GitHub Actions",
+          )
+          print(f"Deployed → https://huggingface.co/spaces/{repo_id}")
+          EOF
