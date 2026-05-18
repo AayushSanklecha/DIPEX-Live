@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\validation\regulatory\healthcare_rules.py
-# hypothesis_version: 6.151.9
-
-[0.0, 25.0, 45.0, 130.0, 100, 200, 300, 'CRITICAL', 'DOB', 'ERROR', 'Email', 'Phone', 'SSN', 'age', 'age_range', 'anon', 'consent_given', 'consent_validation', 'date_of_birth', 'de_identification', 'deident', 'deidentified', 'diagnosis_code', 'diastolic_bp', 'full_name', 'healthcare', 'heart_rate', 'icd_code', 'masked', 'max', 'min', 'object', 'patient_id', 'phi_presence', 'pseudonym', 'redacted', 'spo2', 'ssn', 'string', 'systolic_bp', 'temperature', 'vital_signs']

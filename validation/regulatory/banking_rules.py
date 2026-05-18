@@ -306,7 +306,10 @@ class CurrencyConcentrationRule(BaseRegulatoryRule):
         if df[self.currency_column].isna().all():
             return []
 
-        counts = df[self.currency_column].dropna().value_counts(normalize=True)
+        try:
+            counts = df[self.currency_column].dropna().value_counts(normalize=True)
+        except Exception:
+            counts = df[self.currency_column].astype(str).dropna().value_counts(normalize=True)
         if counts.empty:
             return []
 
@@ -332,5 +335,206 @@ class CurrencyConcentrationRule(BaseRegulatoryRule):
                 "Diversify the dataset across multiple currencies, or ensure the "
                 "concentration is intentional and documented in the risk framework. "
                 "Update BCBS 239 risk data aggregation reports accordingly."
+            ),
+        )]
+
+
+# ── Basel III Extensions (Part 6 — MODIFY banking_rules.py) ──────────────────
+
+
+class BaselIIILeverageRule(BaseRegulatoryRule):
+    """
+    Basel III Article 429 — Leverage Ratio.
+
+    Tier 1 Capital / Total Exposure Measure must be ≥ 3%.
+    A leverage ratio below 3% indicates excessive leverage risk.
+    Regulatory basis: Basel III Art. 429, CRR Art. 429.
+    """
+    name = "basel3_leverage_ratio"
+    domain = "banking"
+
+    def __init__(
+        self,
+        tier1_col: str = "tier1_capital",
+        exposure_col: str = "total_exposure",
+        min_leverage: float = 0.03,
+    ) -> None:
+        self.tier1_col = tier1_col
+        self.exposure_col = exposure_col
+        self.min_leverage = min_leverage
+
+    def evaluate(self, df: pd.DataFrame) -> List[RegulatoryViolation]:
+        if self._col_missing(self.tier1_col, df) or self._col_missing(self.exposure_col, df):
+            return []
+        try:
+            pair = df[[self.tier1_col, self.exposure_col]].dropna()
+            safe_exp = pair[self.exposure_col].replace(0, float("nan")).dropna()
+            leverage = pair.loc[safe_exp.index, self.tier1_col] / safe_exp
+            breaches = (leverage < self.min_leverage).sum()
+            if breaches == 0:
+                return []
+            return [RegulatoryViolation(
+                rule_name=self.name, domain=self.domain, severity="ERROR",
+                column=f"{self.tier1_col}/{self.exposure_col}",
+                offending_count=int(breaches),
+                message=(
+                    f"[Basel III Art. 429] {breaches} record(s) have leverage ratio "
+                    f"< {self.min_leverage:.0%}. Min observed: {float(leverage.min()):.2%}."
+                ),
+                remediation=(
+                    "Increase Tier 1 capital or reduce off-balance-sheet exposures. "
+                    "Report the leverage ratio in Pillar 3 disclosures quarterly."
+                ),
+            )]
+        except Exception as exc:
+            logger.warning("BaselIIILeverageRule error: %s", exc)
+            return []
+
+
+class LCRRule(BaseRegulatoryRule):
+    """
+    Basel III — Liquidity Coverage Ratio (LCR).
+
+    High Quality Liquid Assets (HQLA) / Net Cash Outflows (30-day stress) ≥ 100%.
+    Regulatory basis: Basel III LCR standard (January 2013), CRR Art. 412.
+    """
+    name = "lcr_liquidity_coverage"
+    domain = "banking"
+
+    def __init__(
+        self,
+        hqla_col: str = "hqla_amount",
+        net_outflow_col: str = "net_cash_outflows_30d",
+        min_lcr: float = 1.00,
+    ) -> None:
+        self.hqla_col = hqla_col
+        self.net_outflow_col = net_outflow_col
+        self.min_lcr = min_lcr
+
+    def evaluate(self, df: pd.DataFrame) -> List[RegulatoryViolation]:
+        if self._col_missing(self.hqla_col, df) or self._col_missing(self.net_outflow_col, df):
+            return []
+        try:
+            pair = df[[self.hqla_col, self.net_outflow_col]].dropna()
+            safe_out = pair[self.net_outflow_col].replace(0, float("nan")).dropna()
+            lcr = pair.loc[safe_out.index, self.hqla_col] / safe_out
+            breaches = (lcr < self.min_lcr).sum()
+            if breaches == 0:
+                return []
+            return [RegulatoryViolation(
+                rule_name=self.name, domain=self.domain, severity="CRITICAL",
+                column=f"{self.hqla_col}/{self.net_outflow_col}",
+                offending_count=int(breaches),
+                message=(
+                    f"[Basel III LCR] {breaches} record(s) have LCR < {self.min_lcr:.0%}. "
+                    f"Min observed LCR: {float(lcr.min()):.2%}. Insufficient liquid asset buffer."
+                ),
+                remediation=(
+                    "Increase HQLA holdings (Level 1 or Level 2A assets). "
+                    "Reduce contractual outflows through liability management. "
+                    "Report breach to regulator within prescribed timeframe."
+                ),
+            )]
+        except Exception as exc:
+            logger.warning("LCRRule error: %s", exc)
+            return []
+
+
+class NSFRRule(BaseRegulatoryRule):
+    """
+    Basel III — Net Stable Funding Ratio (NSFR).
+
+    Available Stable Funding (ASF) / Required Stable Funding (RSF) ≥ 100%.
+    Ensures banks have stable, longer-term funding for their assets.
+    Regulatory basis: Basel III NSFR standard (October 2014).
+    """
+    name = "nsfr_stable_funding"
+    domain = "banking"
+
+    def __init__(
+        self,
+        asf_col: str = "available_stable_funding",
+        rsf_col: str = "required_stable_funding",
+        min_nsfr: float = 1.00,
+    ) -> None:
+        self.asf_col = asf_col
+        self.rsf_col = rsf_col
+        self.min_nsfr = min_nsfr
+
+    def evaluate(self, df: pd.DataFrame) -> List[RegulatoryViolation]:
+        if self._col_missing(self.asf_col, df) or self._col_missing(self.rsf_col, df):
+            return []
+        try:
+            pair = df[[self.asf_col, self.rsf_col]].dropna()
+            safe_rsf = pair[self.rsf_col].replace(0, float("nan")).dropna()
+            nsfr = pair.loc[safe_rsf.index, self.asf_col] / safe_rsf
+            breaches = (nsfr < self.min_nsfr).sum()
+            if breaches == 0:
+                return []
+            return [RegulatoryViolation(
+                rule_name=self.name, domain=self.domain, severity="ERROR",
+                column=f"{self.asf_col}/{self.rsf_col}",
+                offending_count=int(breaches),
+                message=(
+                    f"[Basel III NSFR] {breaches} record(s) have NSFR < {self.min_nsfr:.0%}. "
+                    f"Insufficient stable funding. Min NSFR: {float(nsfr.min()):.2%}."
+                ),
+                remediation=(
+                    "Increase stable funding sources (retail deposits, long-term wholesale funding). "
+                    "Reduce reliance on short-term unstable funding. "
+                    "Review RSF factors for off-balance-sheet commitments."
+                ),
+            )]
+        except Exception as exc:
+            logger.warning("NSFRRule error: %s", exc)
+            return []
+
+
+class IRRBBRule(BaseRegulatoryRule):
+    """
+    Basel III — Interest Rate Risk in the Banking Book (IRRBB).
+
+    Flags datasets representing banking book portfolios that lack
+    required interest rate sensitivity columns.
+    Regulatory basis: BCBS Standards on IRRBB (April 2016), EBA GL/2018/02.
+    """
+    name = "irrbb_rate_sensitivity"
+    domain = "banking"
+
+    REQUIRED_SENSITIVITY_PATTERNS = [
+        re.compile(r"nii|net.interest.income", re.I),
+        re.compile(r"eve|economic.value", re.I),
+        re.compile(r"duration|dv01|pv01|bpv", re.I),
+        re.compile(r"repricing", re.I),
+        re.compile(r"rate.sensitivity|interest.rate.risk", re.I),
+    ]
+
+    def evaluate(self, df: pd.DataFrame) -> List[RegulatoryViolation]:
+        # Only trigger if dataset looks like a banking book (has rate-related cols)
+        rate_cols = [c for c in df.columns if re.search(r"rate|yield|coupon|basis", c, re.I)]
+        if not rate_cols:
+            return []  # Not a banking book dataset
+
+        # Check that at least one sensitivity measure is present
+        sensitivity_cols = [
+            c for c in df.columns
+            if any(p.search(c) for p in self.REQUIRED_SENSITIVITY_PATTERNS)
+        ]
+        if sensitivity_cols:
+            return []  # IRRBB measures present
+
+        return [RegulatoryViolation(
+            rule_name=self.name, domain=self.domain, severity="WARNING",
+            column="N/A",
+            offending_count=0,
+            message=(
+                "[IRRBB BCBS 2016] Dataset contains interest rate columns "
+                f"({', '.join(rate_cols[:3])}) but lacks IRRBB sensitivity measures "
+                "(EVE, NII, DV01/PV01, repricing schedules). "
+                "Regulators require disclosure of IRRBB exposure."
+            ),
+            remediation=(
+                "Add interest rate sensitivity columns (EVE, NII delta per shock scenario). "
+                "Run parallel shift scenarios (+/-100bps, +/-200bps) as per BCBS IRRBB standard."
             ),
         )]

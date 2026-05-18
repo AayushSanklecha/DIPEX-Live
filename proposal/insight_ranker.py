@@ -560,7 +560,7 @@ class AnomalyFlagger:
         scores = clf.decision_function(X)  # higher = more normal
 
         # Normalise scores to [0,1] where 1.0 = most anomalous
-        norm_scores = 1.0 - (scores - scores.min()) / (scores.ptp() + 1e-10)
+        norm_scores = 1.0 - (scores - scores.min()) / ((scores.max() - scores.min()) + 1e-10)
 
         anomaly_mask    = (preds == -1)
         anomalous_idx   = list(df.index[anomaly_mask])

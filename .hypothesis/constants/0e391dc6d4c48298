@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\profiling\profiler.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-12, 0.03, 0.05, 0.5, 0.95, 1.0, 1.5, 3.0, 1000, 5000, 'HEAVY_TAILS', 'HIGH_CARDINALITY', 'HIGH_SKEW', 'analyst_flags', 'attrs', 'basic', 'cardinality', 'cardinality_tier', 'column', 'column_count', 'columns', 'count', 'dataset_id', 'detail', 'dtype', 'entropy_bits', 'fence_high', 'fence_low', 'flag', 'full', 'heavy_tails', 'high', 'high_pct', 'high_skew', 'iqr', 'iqr_multiplier', 'kurtosis', 'low', 'low_pct', 'max', 'mean', 'median', 'medium', 'min', 'mode', 'mode_freq', 'normal_dist', 'note', 'null_count', 'null_pct', 'outlier', 'outliers', 'pct', 'profiling', 'profiling_mode', 'q05', 'q25', 'q75', 'q95', 'range_days', 'row_count', 'shapiro_p', 'skewness', 'std', 'threshold', 'top_values', 'unique', 'unique_count', 'unique_pct', 'unknown', 'variance', 'zscore', 'zscore_threshold']

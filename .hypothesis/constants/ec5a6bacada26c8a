@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\universal_intake.py
-# hypothesis_version: 6.151.9
-
-[0.0, 100, 1000, 50000, '/bronze', '0.0.0', '; ', 'DATA_FORMAT_ERROR', 'ERROR', 'FAILED', 'QUALITY_WARN', 'SCHEMA_ERROR', 'UniversalIntake', 'WARN', 'api', 'auto', 'batch', 'bronze', 'bronze_checksum', 'bronze_dir', 'chunk_size', 'confidence', 'config.yaml', 'correlation_id', 'data', 'data/schema_registry', 'data/snapshots', 'data_layers', 'database', 'delimiter', 'duplicate_count', 'encoding', 'extra_meta', 'fallback', 'file', 'format', 'ingestion', 'kafka', 'ml_confidence', 'nlp_tags', 'normaliser', 'overall_null_rate', 'path', 'read_time_ms', 'schema_drift_summary', 'schema_registry_path', 'schema_version', 'semantic_type', 'silver_checksum', 'snapshot_dir', 'source_type', 'stream', 'topic', 'universal_intake', 'unknown', 'url', 'utf-8']

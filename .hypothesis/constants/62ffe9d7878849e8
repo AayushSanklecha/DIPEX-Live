@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\validation\shap_explainer.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.5, 1.0, 2.0, 3.0, 2000, ', ', 'CRITICAL', 'ERROR', 'N/A', 'WARNING', '__NA__', 'auto', 'col', 'column', 'column_null_rank', 'combined_risk', 'explanation', 'field', 'method', 'rank', 'risk_rank', 'rule_name', 'run_id', 'severity', 'severity_weight', 'shap_available', 'shap_impact', 'shap_tree', 'top_risk_columns', 'unknown']

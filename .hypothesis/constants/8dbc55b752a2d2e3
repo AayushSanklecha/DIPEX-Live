@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\api\routes\drift.py
-# hypothesis_version: 6.151.9
-
-[0.05, 400, 404, 5000, '.csv', '/correlation', '/detect', '/drift', '/multiple-correction', '/permutation', 'Dataset not found.', '_cleaned.csv', '_sample.csv', 'anova', 'correlation', 'current_run_id', 'data/uploads', 'dipex.api.drift', 'fdr_bh', 'reference_run_id', 'spearman', 'two_sample_mean']

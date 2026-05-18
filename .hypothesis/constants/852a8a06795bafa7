@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\analyst\strategic_advisor.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.05, 0.2, 0.5, 0.98, 1.0, 1.02, 1.282, 1.96, 100, 'CRITICAL', 'HIGH', 'LOW', 'MEDIUM', 'TBD', 'action', 'analysis', 'avg_revenue', 'best_result', 'board', 'bottom_segment', 'breakdown', 'category', 'ci_95', 'confidence_score', 'count', 'decreasing', 'demand_col', 'direct', 'direction', 'elasticity', 'error', 'horizon_days', 'impact_estimate', 'increasing', 'inf', 'insights', 'inverse', 'is_elastic', 'lever_score', 'lower', 'mean', 'mean_revenue', 'n', 'n_observations', 'name', 'object', 'p_value', 'price_col', 'r_squared', 'rank', 'rationale', 'recommendation', 'records', 'report_type', 'revenue_col', 'revenue_share_pct', 'risk_level', 'segment_column', 'segments', 'stable', 'std', 'sum', 'target_col', 'top_driving_segment', 'top_insights', 'top_levers', 'total_revenue', 'trend_direction', 'upper']

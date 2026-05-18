@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\proposal\proposers\transformation_proposer.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.03, 0.1, 0.5, 1.0, 1.5, 'CANDIDATES_COLLECTED', 'NO_CANDIDATES', 'bucketize', 'column', 'error', 'log1p', 'max', 'min', 'rationale', 'robust_scale', 'skewness', 'standard_scale', 'status', 'suggestions']

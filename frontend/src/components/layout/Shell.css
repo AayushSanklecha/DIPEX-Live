@@ -3,88 +3,129 @@
   display: flex;
   height: 100vh;
   width: 100vw;
-  background-color: var(--bg-main, #f8f9fa);
+  background-color: var(--bg-main);
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: var(--text-primary, #1e293b);
+  color: var(--text-primary);
 }
 
 .sidebar {
-  width: 250px;
-  background-color: var(--bg-surface, #ffffff);
-  border-right: 1px solid var(--border-color, #e2e8f0);
+  width: 260px;
+  background: var(--bg-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.3s ease;
 }
 
 .sidebar-header {
-  padding: 1.5rem;
+  padding: 1.75rem 1.5rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .brand-icon {
-  color: var(--accent-color, #3b82f6);
-  width: 24px;
-  height: 24px;
+  color: url(#accent-gradient); /* Uses an SVG gradient if we had one, fallback below */
+  stroke: var(--accent-color);
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.4));
 }
 
 .brand-name {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.35rem;
+  font-weight: 800;
   margin: 0;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .nav-links {
   list-style: none;
-  padding: 1rem 0;
+  padding: 1.5rem 1rem;
   margin: 0;
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.5rem;
-  color: var(--text-secondary, #64748b);
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
-  transition: all 0.2s;
-  border-left: 3px solid transparent;
+  font-size: 0.95rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--accent-gradient);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+  border-radius: 0 4px 4px 0;
 }
 
 .nav-item:hover {
-  background-color: var(--bg-hover, #f1f5f9);
-  color: var(--text-primary, #1e293b);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: translateX(4px);
 }
 
 .nav-item.active {
-  background-color: var(--bg-hover, #eff6ff);
-  color: var(--accent-color, #3b82f6);
-  border-left-color: var(--accent-color, #3b82f6);
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--accent-color);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.2);
+}
+
+.nav-item.active::before {
+  transform: scaleY(1);
 }
 
 .nav-icon {
   width: 20px;
   height: 20px;
+  stroke-width: 2.2px;
+  transition: transform 0.3s ease;
+}
+
+.nav-item:hover .nav-icon {
+  transform: scale(1.1);
 }
 
 .sidebar-footer {
   padding: 1.5rem;
-  border-top: 1px solid var(--border-color, #e2e8f0);
+  border-top: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .status-indicator {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--text-secondary, #64748b);
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -95,8 +136,15 @@
 }
 
 .dot.online {
-  background-color: var(--success-color, #10b981);
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  background-color: var(--success-color);
+  box-shadow: 0 0 12px var(--success-color);
+  animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 .main-content {
@@ -104,49 +152,67 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 .topbar {
-  height: 64px;
-  background-color: var(--bg-surface, #ffffff);
-  border-bottom: 1px solid var(--border-color, #e2e8f0);
+  height: 70px;
+  background: var(--bg-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
+  padding: 0 2.5rem;
   flex-shrink: 0;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
 }
 
 .page-title {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-weight: 500;
-  font-size: 0.875rem;
+  gap: 0.85rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.75rem 0.4rem 0.4rem;
+  border-radius: 30px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.user-profile:hover {
+  background: var(--bg-hover);
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background-color: var(--accent-color, #3b82f6);
+  background: var(--accent-gradient);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: var(--shadow-md);
 }
 
 .content-wrapper {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 2rem;
+  padding: 2.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .topbar-actions {
@@ -159,18 +225,20 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-secondary, #64748b);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem;
+  padding: 0.6rem;
   border-radius: 50%;
   transition: all 0.2s;
+  background: var(--bg-hover);
 }
 
 .theme-toggle:hover {
-  background-color: var(--bg-hover, #f1f5f9);
-  color: var(--text-primary, #1e293b);
+  transform: rotate(15deg) scale(1.05);
+  color: var(--accent-color);
+  box-shadow: var(--shadow-glow);
 }
 
 .theme-icon {

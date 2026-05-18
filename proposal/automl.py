@@ -234,6 +234,16 @@ class AutoMLProposal:
         X = df.drop(columns=[target_col]).copy()
         y = df[target_col].copy()
 
+        # ── Fix 2: Drop rows where target is NaN (real-world DBs often have
+        # unlabeled rows — cross_val_score crashes mid-fold on NaN targets)
+        valid_mask = y.notna()
+        if not valid_mask.all():
+            n_dropped = int((~valid_mask).sum())
+            logger.warning(
+                "[AutoML] Dropping %d rows with NaN target values.", n_dropped
+            )
+            X, y = X.loc[valid_mask], y.loc[valid_mask]
+
         # Ensure all columns are numeric for the Sklearn models
         numeric_features = X.select_dtypes(include=[np.number]).columns.tolist()
         categorical_features = X.select_dtypes(exclude=[np.number]).columns.tolist()
@@ -255,27 +265,46 @@ class AutoMLProposal:
         if X.empty or len(X.columns) == 0:
             raise ValueError("No feature columns available for AutoML after preprocessing.")
 
-        if len(df) < _MIN_SAMPLES:
+        if len(X) < _MIN_SAMPLES:
             raise ValueError(
-                f"Dataset has only {len(df)} rows — minimum {_MIN_SAMPLES} required for CV."
+                f"Dataset has only {len(X)} valid rows — minimum {_MIN_SAMPLES} required for CV."
             )
 
         # ── Detect task ───────────────────────────────────────────────────────
-        is_classification = y.nunique() < 20 or pd.api.types.is_object_dtype(y)
+        try:
+            n_unique_target = y.nunique()
+        except Exception:  # noqa: BLE001 — unhashable target values
+            n_unique_target = len(y.astype(str).unique())
+        is_classification = n_unique_target < 20 or pd.api.types.is_object_dtype(y)
         task = "classification" if is_classification else "regression"
+
+        # ── Fix 1: Guard against single-class target (after triage may have
+        # dropped enough rows that only 1 class remains → CV crashes)
+        if is_classification and n_unique_target < 2:
+            logger.warning(
+                "[AutoML] Only %d class(es) in target — cannot run classification CV.",
+                n_unique_target,
+            )
+            return {
+                "model_type": "None", "task": task,
+                "metric_name": "N/A", "metric_value": 0.0,
+                "features": list(X.columns), "features_used": len(X.columns),
+                "all_results": {}, "status": "SINGLE_CLASS",
+                "error": f"Only {n_unique_target} class(es) in target after preprocessing.",
+            }
 
         # Encode string labels
         if is_classification and pd.api.types.is_object_dtype(y):
             le = LabelEncoder()
             y  = pd.Series(le.fit_transform(y), index=y.index)
             # Binary-only for AUC — multi-class falls back to accuracy
-            if y.nunique() > 2:
+            if n_unique_target > 2:
                 is_classification = True   # still classification
                 primary_metric = "accuracy"
             else:
                 primary_metric = "roc_auc"
         elif is_classification:
-            primary_metric = "roc_auc" if y.nunique() == 2 else "accuracy"
+            primary_metric = "roc_auc" if n_unique_target == 2 else "accuracy"
         else:
             primary_metric = "r2"
 

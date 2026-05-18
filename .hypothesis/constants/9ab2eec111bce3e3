@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\validation\regulatory\cross_domain_rules.py
-# hypothesis_version: 6.151.9
-
-['CRITICAL', 'EEA', 'ERROR', 'EU', 'audit timestamp', 'audit user', 'consent_given', 'data_region', 'date_of_birth', 'email', 'full_name', 'gdpr', 'gdpr_data_residency', 'hipaa', 'is_encrypted', 'modified_at', 'modified_by', 'patient_id', 'sox', 'sox_audit_trail', 'ssn']

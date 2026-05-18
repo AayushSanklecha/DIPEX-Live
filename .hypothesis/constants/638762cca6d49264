@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\schema_registry.py
-# hypothesis_version: 6.151.9
-
-[' | ', '%Y%m%dT%H%M%SZ', ', ', '.', '.json', '1.0.0', 'ADDITIVE', 'BREAKING', 'MINOR', 'MISSING', 'SchemaVersion', 'TYPE_CHANGE', '[^\\w\\-]', '_', 'bool', 'change_type', 'changes', 'column', 'column_count', 'data/schema_registry', 'dataset_id', 'datetime', 'float', 'float\\d*', 'int', 'int\\d*', 'is_breaking', 'new_dtype', 'new_version', 'object', 'old_dtype', 'old_version', 'row_count', 'schema', 'severity', 'source_uri', 'str', 'string', 'summary', 'timestamp', 'utf-8', 'version', 'w']

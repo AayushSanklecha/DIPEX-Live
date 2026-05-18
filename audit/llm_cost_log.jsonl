@@ -1,0 +1,2 @@
+{"event": "LLM_CALL", "provider": "huggingface", "model": "mistralai/Mistral-7B-Instruct-v0.2", "prompt_tokens": 106, "response_tokens": 128, "total_tokens": 234, "session_tokens": 234, "session_calls": 1, "timestamp": "2026-03-05T02:20:07.874021+00:00"}
+{"event": "LLM_CALL", "provider": "huggingface", "model": "mistralai/Mistral-7B-Instruct-v0.2", "prompt_tokens": 140, "response_tokens": 231, "total_tokens": 371, "session_tokens": 371, "session_calls": 1, "timestamp": "2026-03-17T03:08:04.606821+00:00"}

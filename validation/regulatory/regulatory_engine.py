@@ -39,6 +39,11 @@ from .banking_rules import (
     PositiveAmountRule,
     RepaymentConsistencyRule,
     SuspiciousTransactionPatternRule,
+    # Basel III extensions
+    BaselIIILeverageRule,
+    LCRRule,
+    NSFRRule,
+    IRRBBRule,
 )
 from .conflict_resolver import RuleConflictResolver
 from .cross_domain_rules import (
@@ -46,6 +51,13 @@ from .cross_domain_rules import (
     GDPRDataResidencyRule,
     HIPAAEncryptionFlagRule,
     SOXAuditTrailRule,
+    # Phase 4 cross-domain extensions
+    GDPRDataMinimizationRule,
+    GDPRRightToErasureRule,
+    GDPRBreachNotificationRule,
+    HIPAAMinimumNecessaryRule,
+    FCAThanksConductRule,
+    RBIKYCRule,
 )
 from .finance_rules import (
     CapitalAdequacyRule,
@@ -64,6 +76,79 @@ from .healthcare_rules import (
     PHIPresenceRule,
     VitalSignsRule,
 )
+# Phase 4 new rule modules
+try:
+    from .pci_dss_rules import (
+        PANPresenceRule, CVVStorageRule, PCICardholderIsolationRule,
+    )
+    _HAS_PCI = True
+except ImportError:
+    _HAS_PCI = False
+
+try:
+    from .mifid2_rules import (
+        BestExecutionEvidenceRule, LEIISINFormatRule, AlgoTradingTagRule,
+    )
+    _HAS_MIFID2 = True
+except ImportError:
+    _HAS_MIFID2 = False
+
+try:
+    from .fatf_rules import (
+        StructuringDetectionRule, PEPScreeningRule, SanctionsCheckRule,
+    )
+    _HAS_FATF = True
+except ImportError:
+    _HAS_FATF = False
+
+try:
+    from .esg_rules import (
+        CarbonEmissionsValidityRule, ESGScoreRangeRule,
+    )
+    _HAS_ESG = True
+except ImportError:
+    _HAS_ESG = False
+
+try:
+    from .ccpa_rules import (
+        CaliforniaResidencyDisclosureRule, ConsumerRightsDeletionRule,
+        OptOutOfSaleRule,
+    )
+    _HAS_CCPA = True
+except ImportError:
+    _HAS_CCPA = False
+
+try:
+    from .cyber_rules import (
+        DataClassificationRule, EncryptionAtRestRule,
+    )
+    _HAS_CYBER = True
+except ImportError:
+    _HAS_CYBER = False
+
+try:
+    from .insurance_rules import (
+        SCRCapitalAdequacyRule, CombinedRatioRule,
+        ClaimSettlementTimelinessRule, PremiumIntegrityRule,
+    )
+    _HAS_INSURANCE = True
+except ImportError:
+    _HAS_INSURANCE = False
+
+try:
+    from .ecommerce_rules import (
+        SCAExemptionTagRule, ChargebackThresholdRule,
+        RefundRightWindowRule, CookieConsentTrackingRule,
+    )
+    _HAS_ECOMMERCE = True
+except ImportError:
+    _HAS_ECOMMERCE = False
+
+try:
+    from .auto_domain_detector import detect_domains as _auto_detect_domains
+    _HAS_AUTO_DETECT = True
+except ImportError:
+    _HAS_AUTO_DETECT = False
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +229,22 @@ class RegulatoryEngine:
                 rules = cls._build_sox_rules(reg_cfg.get("sox", {}))
             elif domain == "hipaa":
                 rules = cls._build_hipaa_rules(reg_cfg.get("hipaa", {}))
+            elif domain == "pci_dss":
+                rules = cls._build_pci_dss_rules(reg_cfg.get("pci_dss", {}))
+            elif domain == "mifid2":
+                rules = cls._build_mifid2_rules(reg_cfg.get("mifid2", {}))
+            elif domain == "fatf":
+                rules = cls._build_fatf_rules(reg_cfg.get("fatf", {}))
+            elif domain == "esg":
+                rules = cls._build_esg_rules(reg_cfg.get("esg", {}))
+            elif domain == "ccpa":
+                rules = cls._build_ccpa_rules(reg_cfg.get("ccpa", {}))
+            elif domain == "cyber":
+                rules = cls._build_cyber_rules(reg_cfg.get("cyber", {}))
+            elif domain == "insurance":
+                rules = cls._build_insurance_rules(reg_cfg.get("insurance", {}))
+            elif domain == "ecommerce":
+                rules = cls._build_ecommerce_rules(reg_cfg.get("ecommerce", {}))
             else:
                 rules = []
 
@@ -159,6 +260,57 @@ class RegulatoryEngine:
             "RegulatoryEngine: %d total rule(s) across domain(s) %s.", len(all_rules), domains
         )
         return engine
+
+    @classmethod
+    def from_config_auto(
+        cls,
+        config: Dict[str, Any],
+        df: Optional["pd.DataFrame"] = None,  # type: ignore[name-defined]
+    ) -> "RegulatoryEngine":
+        """
+        Auto-detect domains from the DataFrame columns and build a
+        RegulatoryEngine without requiring explicit domain configuration.
+        Falls back to from_config() if auto-detection is unavailable.
+        """
+        if df is not None and _HAS_AUTO_DETECT:
+            detected = _auto_detect_domains(df)
+            if detected:
+                reg_cfg = config.get("validation", {}).get("regulatory", {})
+                conflict_strategy = str(reg_cfg.get("conflict_resolution", "strictest_wins"))
+                all_rules: List[BaseRegulatoryRule] = []
+                for domain in detected:
+                    rules = cls._build_rules_for_domain(domain, reg_cfg)
+                    all_rules.extend(rules)
+                    if rules:
+                        logger.info("[AutoEngine] domain='%s' auto-detected — %d rule(s).", domain, len(rules))
+                primary = detected[0]
+                engine = cls(domain=primary, rules=all_rules, conflict_strategy=conflict_strategy)
+                logger.info("[AutoEngine] %d rule(s) loaded from %d auto-detected domains: %s",
+                            len(all_rules), len(detected), detected)
+                return engine
+        return cls.from_config(config)
+
+    @classmethod
+    def _build_rules_for_domain(
+        cls, domain: str, reg_cfg: Dict[str, Any]
+    ) -> List[BaseRegulatoryRule]:
+        """Single-domain rule builder — delegates to existing static factories."""
+        domain = domain.lower()
+        if domain == "banking":       return cls._build_banking_rules(reg_cfg.get("banking", {}))
+        if domain == "healthcare":    return cls._build_healthcare_rules(reg_cfg.get("healthcare", {}))
+        if domain == "finance":       return cls._build_finance_rules(reg_cfg.get("finance", {}))
+        if domain == "gdpr":          return cls._build_gdpr_rules(reg_cfg.get("gdpr", {}))
+        if domain == "sox":           return cls._build_sox_rules(reg_cfg.get("sox", {}))
+        if domain == "hipaa":         return cls._build_hipaa_rules(reg_cfg.get("hipaa", {}))
+        if domain == "pci_dss":       return cls._build_pci_dss_rules(reg_cfg.get("pci_dss", {}))
+        if domain == "mifid2":        return cls._build_mifid2_rules(reg_cfg.get("mifid2", {}))
+        if domain == "fatf":          return cls._build_fatf_rules(reg_cfg.get("fatf", {}))
+        if domain == "esg":           return cls._build_esg_rules(reg_cfg.get("esg", {}))
+        if domain == "ccpa":          return cls._build_ccpa_rules(reg_cfg.get("ccpa", {}))
+        if domain == "cyber":         return cls._build_cyber_rules(reg_cfg.get("cyber", {}))
+        if domain == "insurance":     return cls._build_insurance_rules(reg_cfg.get("insurance", {}))
+        if domain == "ecommerce":     return cls._build_ecommerce_rules(reg_cfg.get("ecommerce", {}))
+        return []
 
     @classmethod
     def from_yaml_config(cls, yaml_path: str) -> "RegulatoryEngine":
@@ -251,7 +403,36 @@ class RegulatoryEngine:
                 max_concentration_pct=float(cfg.get("max_currency_concentration", 0.90)),
             ))
 
+        # ── Basel III extensions ──────────────────────────────────────────────
+        leverage_cfg = cfg.get("leverage", {})
+        if leverage_cfg.get("tier1_col") and leverage_cfg.get("exposure_col"):
+            rules.append(BaselIIILeverageRule(
+                tier1_col=leverage_cfg["tier1_col"],
+                exposure_col=leverage_cfg["exposure_col"],
+                min_leverage=float(leverage_cfg.get("min_leverage", 0.03)),
+            ))
+
+        lcr_cfg = cfg.get("lcr", {})
+        if lcr_cfg.get("hqla_col") and lcr_cfg.get("net_outflow_col"):
+            rules.append(LCRRule(
+                hqla_col=lcr_cfg["hqla_col"],
+                net_outflow_col=lcr_cfg["net_outflow_col"],
+                min_lcr=float(lcr_cfg.get("min_lcr", 1.00)),
+            ))
+
+        nsfr_cfg = cfg.get("nsfr", {})
+        if nsfr_cfg.get("asf_col") and nsfr_cfg.get("rsf_col"):
+            rules.append(NSFRRule(
+                asf_col=nsfr_cfg["asf_col"],
+                rsf_col=nsfr_cfg["rsf_col"],
+                min_nsfr=float(nsfr_cfg.get("min_nsfr", 1.00)),
+            ))
+
+        # IRRBB — always add (self-detecting: only fires on rate-like datasets)
+        rules.append(IRRBBRule())
+
         return rules
+
 
     @staticmethod
     def _build_finance_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
@@ -362,6 +543,236 @@ class RegulatoryEngine:
             phi_columns=cfg.get("phi_columns"),
             encryption_flag_column=cfg.get("encryption_flag_column", "is_encrypted"),
         )]
+
+    # ── Phase 4 new rule module builders ─────────────────────────────────────
+
+    @staticmethod
+    def _build_pci_dss_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
+        if not _HAS_PCI:
+            logger.debug("PCI-DSS rules not available — import failed.")
+            return []
+        rules: List[BaseRegulatoryRule] = []
+        for RuleCls in [PANPresenceRule, CVVStorageRule, PCICardholderIsolationRule]:  # type: ignore[name-defined]
+            class _Wrapped(BaseRegulatoryRule):  # type: ignore[misc]
+                def __init__(self, cls=RuleCls, c=cfg):
+                    self._r = cls()
+                    self._cfg = c
+                    self.name = cls.name
+                    self.domain = "pci_dss"
+                def evaluate(self, df):  # type: ignore[override]
+                    from .base_rule import RegulatoryViolation as RV
+                    violations = []
+                    for v in self._r.run(df, self._cfg):
+                        violations.append(RV(
+                            rule_name=v.get("rule", self.name),
+                            domain="pci_dss", severity=v.get("severity", "ERROR"),
+                            column=v.get("column", "N/A"),
+                            offending_count=int(v.get("affected_rows", 0)),
+                            message=v.get("message", ""),
+                            remediation=v.get("recommended_action", v.get("remediation", "")),
+                        ))
+                    return violations
+            rules.append(_Wrapped())
+        return rules
+
+    @staticmethod
+    def _build_mifid2_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
+        if not _HAS_MIFID2:
+            return []
+        rules: List[BaseRegulatoryRule] = []
+        for RuleCls in [BestExecutionEvidenceRule, LEIISINFormatRule, AlgoTradingTagRule]:  # type: ignore[name-defined]
+            class _Wrapped(BaseRegulatoryRule):  # type: ignore[misc]
+                def __init__(self, cls=RuleCls, c=cfg):
+                    self._r = cls()
+                    self._cfg = c
+                    self.name = cls.name
+                    self.domain = "mifid2"
+                def evaluate(self, df):  # type: ignore[override]
+                    from .base_rule import RegulatoryViolation as RV
+                    violations = []
+                    for v in self._r.run(df, self._cfg):
+                        violations.append(RV(
+                            rule_name=v.get("rule", self.name),
+                            domain="mifid2", severity=v.get("severity", "WARNING"),
+                            column=v.get("column", "N/A"),
+                            offending_count=int(v.get("affected_rows", 0)),
+                            message=v.get("message", ""),
+                            remediation=v.get("recommended_action", v.get("remediation", "")),
+                        ))
+                    return violations
+            rules.append(_Wrapped())
+        return rules
+
+    @staticmethod
+    def _build_fatf_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
+        if not _HAS_FATF:
+            return []
+        rules: List[BaseRegulatoryRule] = []
+        for RuleCls in [StructuringDetectionRule, PEPScreeningRule, SanctionsCheckRule]:  # type: ignore[name-defined]
+            class _Wrapped(BaseRegulatoryRule):  # type: ignore[misc]
+                def __init__(self, cls=RuleCls, c=cfg):
+                    self._r = cls()
+                    self._cfg = c
+                    self.name = cls.name
+                    self.domain = "fatf"
+                def evaluate(self, df):  # type: ignore[override]
+                    from .base_rule import RegulatoryViolation as RV
+                    violations = []
+                    for v in self._r.run(df, self._cfg):
+                        violations.append(RV(
+                            rule_name=v.get("rule", self.name),
+                            domain="fatf", severity=v.get("severity", "WARNING"),
+                            column=v.get("column", "N/A"),
+                            offending_count=int(v.get("affected_rows", 0)),
+                            message=v.get("message", ""),
+                            remediation=v.get("recommended_action", v.get("remediation", "")),
+                        ))
+                    return violations
+            rules.append(_Wrapped())
+        return rules
+
+    @staticmethod
+    def _build_esg_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
+        if not _HAS_ESG:
+            return []
+        rules: List[BaseRegulatoryRule] = []
+        for RuleCls in [CarbonEmissionsValidityRule, ESGScoreRangeRule]:  # type: ignore[name-defined]
+            class _Wrapped(BaseRegulatoryRule):  # type: ignore[misc]
+                def __init__(self, cls=RuleCls, c=cfg):
+                    self._r = cls()
+                    self._cfg = c
+                    self.name = cls.name
+                    self.domain = "esg"
+                def evaluate(self, df):  # type: ignore[override]
+                    from .base_rule import RegulatoryViolation as RV
+                    violations = []
+                    for v in self._r.run(df, self._cfg):
+                        violations.append(RV(
+                            rule_name=v.get("rule", self.name),
+                            domain="esg", severity=v.get("severity", "WARNING"),
+                            column=v.get("column", "N/A"),
+                            offending_count=int(v.get("affected_rows", 0)),
+                            message=v.get("message", ""),
+                            remediation=v.get("recommended_action", v.get("remediation", "")),
+                        ))
+                    return violations
+            rules.append(_Wrapped())
+        return rules
+
+    @staticmethod
+    def _build_ccpa_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
+        if not _HAS_CCPA:
+            return []
+        rules: List[BaseRegulatoryRule] = []
+        for RuleCls in [CaliforniaResidencyDisclosureRule, ConsumerRightsDeletionRule, OptOutOfSaleRule]:  # type: ignore[name-defined]
+            class _Wrapped(BaseRegulatoryRule):  # type: ignore[misc]
+                def __init__(self, cls=RuleCls, c=cfg):
+                    self._r = cls()
+                    self._cfg = c
+                    self.name = cls.name
+                    self.domain = "ccpa"
+                def evaluate(self, df):  # type: ignore[override]
+                    from .base_rule import RegulatoryViolation as RV
+                    violations = []
+                    for v in self._r.run(df, self._cfg):
+                        violations.append(RV(
+                            rule_name=v.get("rule", self.name),
+                            domain="ccpa", severity=v.get("severity", "WARNING"),
+                            column=v.get("column", "N/A"),
+                            offending_count=int(v.get("affected_rows", 0)),
+                            message=v.get("message", ""),
+                            remediation=v.get("recommended_action", v.get("remediation", "")),
+                        ))
+                    return violations
+            rules.append(_Wrapped())
+        return rules
+
+    @staticmethod
+    def _build_cyber_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
+        if not _HAS_CYBER:
+            return []
+        rules: List[BaseRegulatoryRule] = []
+        for RuleCls in [EncryptionAtRestRule, DataClassificationRule]:  # type: ignore[name-defined]
+            class _Wrapped(BaseRegulatoryRule):  # type: ignore[misc]
+                def __init__(self, cls=RuleCls, c=cfg):
+                    self._r = cls()
+                    self._cfg = c
+                    self.name = cls.name
+                    self.domain = "cyber"
+                def evaluate(self, df):  # type: ignore[override]
+                    from .base_rule import RegulatoryViolation as RV
+                    violations = []
+                    for v in self._r.run(df, self._cfg):
+                        violations.append(RV(
+                            rule_name=v.get("rule", self.name),
+                            domain="cyber", severity=v.get("severity", "ERROR"),
+                            column=v.get("column", "N/A"),
+                            offending_count=int(v.get("affected_rows", 0)),
+                            message=v.get("message", ""),
+                            remediation=v.get("recommended_action", v.get("remediation", "")),
+                        ))
+                    return violations
+            rules.append(_Wrapped())
+        return rules
+
+    @staticmethod
+    def _build_insurance_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
+        if not _HAS_INSURANCE:
+            return []
+        rules: List[BaseRegulatoryRule] = []
+        # Use duck-typing wrappers since insurance rules have .run() not .evaluate()
+        for RuleCls in [SCRCapitalAdequacyRule, CombinedRatioRule,  # type: ignore[name-defined]
+                        ClaimSettlementTimelinessRule, PremiumIntegrityRule]:  # type: ignore[name-defined]
+            class _Wrapped(BaseRegulatoryRule):  # type: ignore[misc]
+                def __init__(self, cls=RuleCls, c=cfg):
+                    self._r = cls()
+                    self._cfg = c
+                    self.name = cls.name
+                    self.domain = "insurance"
+                def evaluate(self, df):  # type: ignore[override]
+                    from .base_rule import RegulatoryViolation as RV
+                    violations = []
+                    for v in self._r.run(df, self._cfg):
+                        violations.append(RV(
+                            rule_name=v.get("rule", self.name),
+                            domain="insurance", severity=v.get("severity", "WARNING"),
+                            column=v.get("column", "N/A"),
+                            offending_count=int(v.get("affected_rows", 0)),
+                            message=v.get("message", ""),
+                            remediation=v.get("recommended_action", ""),
+                        ))
+                    return violations
+            rules.append(_Wrapped())
+        return rules
+
+    @staticmethod
+    def _build_ecommerce_rules(cfg: Dict[str, Any]) -> List[BaseRegulatoryRule]:
+        if not _HAS_ECOMMERCE:
+            return []
+        rules: List[BaseRegulatoryRule] = []
+        for RuleCls in [SCAExemptionTagRule, ChargebackThresholdRule,  # type: ignore[name-defined]
+                        RefundRightWindowRule, CookieConsentTrackingRule]:  # type: ignore[name-defined]
+            class _Wrapped(BaseRegulatoryRule):  # type: ignore[misc]
+                def __init__(self, cls=RuleCls, c=cfg):
+                    self._r = cls()
+                    self._cfg = c
+                    self.name = cls.name
+                    self.domain = "ecommerce"
+                def evaluate(self, df):  # type: ignore[override]
+                    from .base_rule import RegulatoryViolation as RV
+                    violations = []
+                    for v in self._r.run(df, self._cfg):
+                        violations.append(RV(
+                            rule_name=v.get("rule", self.name),
+                            domain="ecommerce", severity=v.get("severity", "WARNING"),
+                            column=v.get("column", "N/A"),
+                            offending_count=int(v.get("affected_rows", 0)),
+                            message=v.get("message", ""),
+                            remediation=v.get("recommended_action", ""),
+                        ))
+                    return violations
+            rules.append(_Wrapped())
+        return rules
 
     # ------------------------------------------------------------------
     # Evaluation

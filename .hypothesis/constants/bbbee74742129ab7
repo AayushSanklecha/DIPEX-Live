@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\api\routes\governance.py
-# hypothesis_version: 6.151.9
-
-[0.0, 400, 404, '/catalog', '/catalog/register', '/evaluate', '/governance', '/policies', 'Audit Mandatory', 'Banking AML', 'Confidence Floor', 'Data Quality Gates', 'G001', 'G002', 'G003', 'G004', 'G005', 'G006', 'Governance', 'Healthcare HIPAA/PHI', 'INTERNAL', 'PASS', 'PII Enforcement', 'built_in_policies', 'config.yaml', 'description', 'dipex.api.governance', 'entries', 'entry', 'id', 'name', 'pii_columns', 'r', 'registered', 'sensitive_columns', 'status']

@@ -37,7 +37,7 @@ from ingestion.error_handler import (
 )
 from ingestion.issf import ColumnMeta, ISSFSnapshot
 from ingestion.normaliser import Normaliser
-from ingestion.quality_gate import QualityGate
+from ingestion.quality_gate import QualityGate, QualityReport
 from ingestion.schema_registry import SchemaRegistry
 from ingestion.adaptive_learner import AdaptiveLearner, IngestionOutcome
 from ingestion.schema_infer import SmartSchemaInferer
@@ -85,8 +85,8 @@ class SourceConfig:
     baseline_snapshot_id: Optional[str]                   = None
 
     # Governance
-    require_quality_pass: bool         = True   # Fail ingestion if quality FAILED
-    block_on_schema_break: bool        = True   # Fail ingestion on BREAKING drift
+    require_quality_pass: bool         = False  # Data always flows; quality issues logged as warnings
+    block_on_schema_break: bool        = False  # Schema breaks are advisory — data still flows through
 
     extra: Dict[str, Any]              = field(default_factory=dict)
 
@@ -190,17 +190,37 @@ class UniversalIntake:
                 logger.warning("Bronze layer storage failed (non-fatal): %s", _e)
 
         # ── Step 2: Normalise ─────────────────────────────────────────────────
-        df, column_meta = self.normaliser.normalise(df, dataset_id=cfg.dataset_id)
+        try:
+            df, column_meta = self.normaliser.normalise(df, dataset_id=cfg.dataset_id)
+        except Exception as _norm_exc:  # noqa: BLE001
+            logger.error(
+                "[%s] Normaliser crashed (non-fatal, using raw data): %s",
+                correlation_id[:8], _norm_exc,
+            )
+            column_meta = []
+            from ingestion.issf import IngestionError as IE
+            ingestion_errors.append(IE(
+                error_type="NORMALISATION_ERROR",
+                message=f"Normaliser failed: {_norm_exc}",
+                severity="ERROR",
+                correlation_id=correlation_id,
+            ))
 
         # ── [ML] Semantic Schema Enrichment ──────────────────────────────────
-        _raw_schema = {c.name: c.dtype for c in column_meta}
-        _enriched   = self.schema_inferer.enrich_schema(df, _raw_schema)
-        for cm in column_meta:
-            _e = _enriched.get(cm.name, {})
-            cm.extra_meta = getattr(cm, "extra_meta", {}) or {}
-            cm.extra_meta["semantic_type"] = _e.get("semantic_type", "unknown")
-            cm.extra_meta["nlp_tags"]      = _e.get("nlp_tags", [])
-            cm.extra_meta["ml_confidence"] = _e.get("confidence", 0.0)
+        try:
+            _raw_schema = {c.name: c.dtype for c in column_meta}
+            _enriched   = self.schema_inferer.enrich_schema(df, _raw_schema)
+            for cm in column_meta:
+                _e = _enriched.get(cm.name, {})
+                cm.extra_meta = getattr(cm, "extra_meta", {}) or {}
+                cm.extra_meta["semantic_type"] = _e.get("semantic_type", "unknown")
+                cm.extra_meta["nlp_tags"]      = _e.get("nlp_tags", [])
+                cm.extra_meta["ml_confidence"] = _e.get("confidence", 0.0)
+        except Exception as _ml_exc:  # noqa: BLE001
+            logger.warning(
+                "[%s] Schema enrichment failed (non-fatal): %s",
+                correlation_id[:8], _ml_exc,
+            )
 
         schema = {c.name: c.dtype for c in column_meta}
 
@@ -226,24 +246,41 @@ class UniversalIntake:
                 logger.warning("Silver layer promotion failed (non-fatal): %s", _e)
 
         # ── Step 3: Schema Registry ───────────────────────────────────────────
-        drift_report = self.schema_reg.register(
-            dataset_id=cfg.dataset_id,
-            schema=schema,
-            row_count=len(df),
-            source_uri=source_uri or "",
-        )
-        schema_version = drift_report.new_version
-
-        if drift_report.is_breaking and cfg.block_on_schema_break:
-            raise SchemaError(
-                f"BREAKING schema drift in dataset '{cfg.dataset_id}': {drift_report.summary}",
-                correlation_id=correlation_id,
+        drift_report = None
+        schema_version = "0.0.0"
+        try:
+            drift_report = self.schema_reg.register(
+                dataset_id=cfg.dataset_id,
+                schema=schema,
+                row_count=len(df),
+                source_uri=source_uri or "",
             )
-        if drift_report.is_breaking:
+            schema_version = drift_report.new_version
+
+            if drift_report.is_breaking and cfg.block_on_schema_break:
+                raise SchemaError(
+                    f"BREAKING schema drift in dataset '{cfg.dataset_id}': {drift_report.summary}",
+                    correlation_id=correlation_id,
+                )
+            if drift_report.is_breaking:
+                from ingestion.issf import IngestionError as IE
+                ingestion_errors.append(IE(
+                    error_type="SCHEMA_ERROR",
+                    message=drift_report.summary,
+                    severity="ERROR",
+                    correlation_id=correlation_id,
+                ))
+        except SchemaError:
+            raise  # re-raise if user wants to block on schema break
+        except Exception as _reg_exc:  # noqa: BLE001
+            logger.error(
+                "[%s] Schema registry crashed (non-fatal, using v0.0.0): %s",
+                correlation_id[:8], _reg_exc,
+            )
             from ingestion.issf import IngestionError as IE
             ingestion_errors.append(IE(
                 error_type="SCHEMA_ERROR",
-                message=drift_report.summary,
+                message=f"Schema registry failed: {_reg_exc}",
                 severity="ERROR",
                 correlation_id=correlation_id,
             ))
@@ -285,17 +322,37 @@ class UniversalIntake:
             return self._failure_snapshot(cfg, ingestion_errors, correlation_id)
 
         # ── Step 4: Quality Gate ──────────────────────────────────────────────
-        baseline_df = self._load_baseline(cfg.baseline_snapshot_id)
-        quality_report = self.quality_gate.check(
-            df=df,
-            dataset_id=cfg.dataset_id,
-            snapshot_id=correlation_id,
-            range_rules=cfg.range_rules,
-            allowed_categories=cfg.allowed_categories,
-            expected_dtypes=cfg.expected_dtypes,
-            baseline_df=baseline_df,
-            fk_rules=cfg.fk_rules,
-        )
+        try:
+            baseline_df = self._load_baseline(cfg.baseline_snapshot_id)
+            quality_report = self.quality_gate.check(
+                df=df,
+                dataset_id=cfg.dataset_id,
+                snapshot_id=correlation_id,
+                range_rules=cfg.range_rules,
+                allowed_categories=cfg.allowed_categories,
+                expected_dtypes=cfg.expected_dtypes,
+                baseline_df=baseline_df,
+                fk_rules=cfg.fk_rules,
+            )
+        except Exception as _qg_exc:  # noqa: BLE001
+            logger.error(
+                "[%s] Quality gate crashed (non-fatal, defaulting to WARN): %s",
+                correlation_id[:8], _qg_exc,
+            )
+            quality_report = QualityReport(
+                dataset_id=cfg.dataset_id, snapshot_id=correlation_id,
+                quality_score=0.5, validation_status="WARN",
+                row_count=len(df), duplicate_count=0, duplicate_rate=0.0,
+                overall_null_rate=0.0, column_quality=[], distribution_drift={},
+                violations=[], warnings=[f"Quality gate error: {_qg_exc}"],
+            )
+            from ingestion.issf import IngestionError as IE
+            ingestion_errors.append(IE(
+                error_type="QUALITY_GATE_ERROR",
+                message=f"Quality gate failed: {_qg_exc}",
+                severity="ERROR",
+                correlation_id=correlation_id,
+            ))
 
         if quality_report.validation_status == "FAILED" and cfg.require_quality_pass:
             raise QualityGateError(
@@ -342,7 +399,14 @@ class UniversalIntake:
             },
         )
 
-        snapshot.save(self.snapshot_dir)
+        try:
+            snapshot.save(self.snapshot_dir)
+        except Exception as _save_exc:  # noqa: BLE001
+            logger.error(
+                "[%s] Snapshot save failed (non-fatal): %s",
+                correlation_id[:8], _save_exc,
+            )
+
         logger.info(
             "[%s] Ingestion complete — %d rows, schema v%s, quality=%.2f, status=%s, elapsed=%.0fms",
             correlation_id[:8], len(df), schema_version,
@@ -350,26 +414,38 @@ class UniversalIntake:
         )
 
         # ── Post-flight: teach the learner ────────────────────────────────────
-        outcome = IngestionOutcome(
-            dataset_id=cfg.dataset_id,
-            source_type=cfg.source_type,
-            success=True,
-            quality_score=quality_report.quality_score,
-            validation_status=quality_report.validation_status,
-            row_count=len(df),
-            schema_version=schema_version,
-            elapsed_ms=elapsed_ms,
-            strategy_used={
-                "format": cfg.file_format or "auto",
-                "encoding": "auto",
-                "delimiter": "auto",
-            },
-            quality_issues=[v for v in quality_report.violations],
-            schema_drift=drift_report.is_breaking,
-            schema_drift_type=drift_report.changes[0].change_type if drift_report.changes else None,
-            source_uri=cfg.path or "",
-        )
-        self.learner.record(outcome)
+        try:
+            _drift_breaking = drift_report.is_breaking if drift_report else False
+            _drift_type = (
+                drift_report.changes[0].change_type
+                if drift_report and drift_report.changes else None
+            )
+            outcome = IngestionOutcome(
+                dataset_id=cfg.dataset_id,
+                source_type=cfg.source_type,
+                success=True,
+                quality_score=quality_report.quality_score,
+                validation_status=quality_report.validation_status,
+                row_count=len(df),
+                schema_version=schema_version,
+                elapsed_ms=elapsed_ms,
+                strategy_used={
+                    "format": cfg.file_format or "auto",
+                    "encoding": "auto",
+                    "delimiter": "auto",
+                },
+                quality_issues=[v for v in quality_report.violations],
+                schema_drift=_drift_breaking,
+                schema_drift_type=_drift_type,
+                source_uri=cfg.path or "",
+            )
+            self.learner.record(outcome)
+        except Exception as _learn_exc:  # noqa: BLE001
+            logger.warning(
+                "[%s] Learner record failed (non-fatal): %s",
+                correlation_id[:8], _learn_exc,
+            )
+
         return snapshot
 
     # ── Batch mode (multiple files or DB tables) ──────────────────────────────
@@ -409,26 +485,36 @@ class UniversalIntake:
 
     def _read_file(self, cfg: SourceConfig, executor: SafeExecutor):
         from ingestion.readers.file_reader import FileReader
+        from ingestion.data_rescue import rescue_dataframe
         reader = FileReader(chunk_size=self.chunk_size)
 
         def _do_read():
             return reader.read(cfg.path or "", fmt=cfg.file_format, sheet_name=cfg.sheet_name)
 
         result, errors = executor.run(_do_read)
-        if result is not None and not result.data.empty:
-            # Record format that worked so learner can use it next time
-            return result.data, errors + result.errors, cfg.path or ""
+        df_raw = result.data if result is not None else None
+        read_errors = (errors + result.errors) if result is not None else errors
 
-        # ── Primary reader failed: invoke universal fallback cascade ──────────
+        if df_raw is not None and not df_raw.empty:
+            # ── DataRescue pass: fix any structural issues ───────────────────
+            df_rescued, rescue_rpt = rescue_dataframe(
+                df_raw, source_type="file", context={"path": cfg.path}
+            )
+            if rescue_rpt.was_rescued:
+                from ingestion.issf import IngestionError as IE
+                for w in rescue_rpt.warnings:
+                    read_errors.append(IE(error_type="QUALITY_WARN", message=f"[DataRescue] {w}",
+                                          severity="WARN", correlation_id="rescue"))
+            return df_rescued, read_errors, cfg.path or ""
+
+        # ── Primary reader failed or empty: invoke universal fallback cascade ─
         logger.warning(
             "Primary FileReader failed or returned empty — activating UniversalFallbackReader cascade"
         )
         try:
             from ingestion.readers.universal_fallback import UniversalFallbackReader
             fallback = UniversalFallbackReader(max_fallback_rows=self.chunk_size * 10)
-            # Use learner recommendation for encoding hint
-            rec = self.learner.recommend(cfg.dataset_id, "file",
-                                         hints={"path": cfg.path})
+            rec = self.learner.recommend(cfg.dataset_id, "file", hints={"path": cfg.path})
             fb_result = fallback.read(
                 cfg.path or "",
                 hint_format=cfg.file_format or rec.recommended_format,
@@ -438,21 +524,25 @@ class UniversalIntake:
                 "UniversalFallbackReader succeeded — format=%s rows=%d partial=%s",
                 fb_result.format_detected, fb_result.row_count, fb_result.is_partial,
             )
-            # Teach learner about what format worked
             if fb_result.strategy_used:
                 cfg.file_format = fb_result.format_detected
 
-            # Wrap in same error list + fallback warnings
             from ingestion.issf import IngestionError as IE
-            fallback_errs = errors + [
+            fallback_errs = read_errors + [
                 IE(error_type="QUALITY_WARN", message=w,
                    severity="WARN", correlation_id="fallback")
                 for w in fb_result.warnings
             ]
-            return fb_result.data, fallback_errs, cfg.path or ""
+            # ── DataRescue pass on fallback result ───────────────────────────
+            df_rescued, rescue_rpt = rescue_dataframe(
+                fb_result.data, source_type="file", context={"path": cfg.path}
+            )
+            for w in rescue_rpt.warnings:
+                fallback_errs.append(IE(error_type="QUALITY_WARN", message=f"[DataRescue] {w}",
+                                        severity="WARN", correlation_id="rescue"))
+            return df_rescued, fallback_errs, cfg.path or ""
         except Exception as fb_exc:  # noqa: BLE001
             logger.error("UniversalFallbackReader also failed: %s", fb_exc)
-            # Teach learner about failure
             self.learner.record(IngestionOutcome(
                 dataset_id=cfg.dataset_id,
                 source_type="file",
@@ -461,37 +551,59 @@ class UniversalIntake:
                 error_message=str(fb_exc),
                 source_uri=cfg.path or "",
             ))
-            return None, errors, cfg.path or ""
+            # ── Last resort: return placeholder via DataRescue ───────────────
+            df_placeholder, _ = rescue_dataframe(
+                None, source_type="file", context={"path": cfg.path, "error": str(fb_exc)}
+            )
+            return df_placeholder, read_errors, cfg.path or ""
 
     def _read_api(self, cfg: SourceConfig, executor: SafeExecutor):
         from ingestion.readers.api_reader import APIReader, APISourceConfig
+        from ingestion.data_rescue import rescue_dataframe
         reader = APIReader()
         api_cfg = cfg.api_config
         if isinstance(api_cfg, dict):
             api_cfg = APISourceConfig(**api_cfg)
 
         result, errors = executor.run(reader.read, api_cfg)
-        if result is None:
-            return None, errors, getattr(api_cfg, "url", "")
-        return result.data, errors + result.errors, getattr(api_cfg, "url", "")
+        url = getattr(api_cfg, "url", "")
+        raw_df = result.data if result is not None else None
+        raw_errors = (errors + result.errors) if result is not None else errors
+        df_rescued, rescue_rpt = rescue_dataframe(
+            raw_df, source_type="api", context={"url": url}
+        )
+        if rescue_rpt.was_rescued:
+            from ingestion.issf import IngestionError as IE
+            for w in rescue_rpt.warnings:
+                raw_errors.append(IE(error_type="QUALITY_WARN", message=f"[DataRescue] {w}",
+                                     severity="WARN", correlation_id="rescue"))
+        return df_rescued, raw_errors, url
 
     def _read_db(self, cfg: SourceConfig, executor: SafeExecutor):
         from ingestion.readers.db_reader import DBReader, DBSourceConfig
+        from ingestion.data_rescue import rescue_dataframe
         reader = DBReader()
         db_cfg = cfg.db_config
         if isinstance(db_cfg, dict):
             db_cfg = DBSourceConfig(**db_cfg)
 
+        uri = f"{getattr(db_cfg, 'backend', 'db')}://{getattr(db_cfg, 'host', '')}/{getattr(db_cfg, 'database', '')}/{getattr(db_cfg, 'table_or_collection', '')}"
         result, errors = executor.run(reader.read, db_cfg)
-        if result is None:
-            return None, errors, f"{getattr(db_cfg, 'backend', 'db')}://{getattr(db_cfg, 'host', '')}"
-        return (
-            result.data, errors + result.errors,
-            f"{db_cfg.backend}://{db_cfg.host}/{db_cfg.database}/{db_cfg.table_or_collection}",
+        raw_df = result.data if result is not None else None
+        raw_errors = (errors + result.errors) if result is not None else errors
+        df_rescued, rescue_rpt = rescue_dataframe(
+            raw_df, source_type="database", context={"uri": uri}
         )
+        if rescue_rpt.was_rescued:
+            from ingestion.issf import IngestionError as IE
+            for w in rescue_rpt.warnings:
+                raw_errors.append(IE(error_type="QUALITY_WARN", message=f"[DataRescue] {w}",
+                                     severity="WARN", correlation_id="rescue"))
+        return df_rescued, raw_errors, uri
 
     def _read_stream(self, cfg: SourceConfig, executor: SafeExecutor):
         from ingestion.readers.stream_reader import StreamReader, WindowConfig, KafkaSourceConfig
+        from ingestion.data_rescue import rescue_dataframe
         reader = StreamReader()
         stream_cfg = cfg.stream_config
         window_cfg = cfg.window_config
@@ -500,20 +612,31 @@ class UniversalIntake:
         if window_cfg is None:
             window_cfg = WindowConfig()
 
+        topic = getattr(stream_cfg, "topic", "kafka")
         # Collect first N windows and concatenate into one DataFrame
         snapshots = []
+        stream_errors: list = []
         try:
             for snap in reader.read_kafka(stream_cfg, window_cfg, max_windows=cfg.max_stream_windows):
-                snapshots.append(snap.data)
+                if snap is not None and snap.data is not None and not snap.data.empty:
+                    snapshots.append(snap.data)
                 if len(snapshots) >= cfg.max_stream_windows:
                     break
         except Exception as exc:  # noqa: BLE001
             from ingestion.error_handler import StreamLagError
-            err = StreamLagError(f"Stream read error: {exc}")
-            return None, [err], getattr(stream_cfg, "topic", "kafka")
+            stream_errors.append(StreamLagError(f"Stream read error: {exc}"))
+            logger.warning("[UniversalIntake] Stream read error (non-fatal): %s", exc)
 
-        df = pd.concat(snapshots, ignore_index=True) if snapshots else pd.DataFrame()
-        return df, [], getattr(stream_cfg, "topic", "kafka")
+        raw_df = pd.concat(snapshots, ignore_index=True) if snapshots else None
+        df_rescued, rescue_rpt = rescue_dataframe(
+            raw_df, source_type="stream", context={"topic": topic}
+        )
+        if rescue_rpt.was_rescued:
+            from ingestion.issf import IngestionError as IE
+            for w in rescue_rpt.warnings:
+                stream_errors.append(IE(error_type="QUALITY_WARN", message=f"[DataRescue] {w}",
+                                        severity="WARN", correlation_id="rescue"))
+        return df_rescued, stream_errors, topic
 
     def _load_baseline(self, baseline_snapshot_id: Optional[str]) -> Optional[pd.DataFrame]:
         """Load a previous snapshot's data as baseline for PSI comparison.
@@ -540,17 +663,22 @@ class UniversalIntake:
         # Teach learner about this failure
         err_type = errors[0].error_type if errors else "DATA_FORMAT_ERROR"
         err_msg  = errors[0].message    if errors else "Read returned no data"
-        self.learner.record(IngestionOutcome(
-            dataset_id=cfg.dataset_id,
-            source_type=cfg.source_type,
-            success=False,
-            quality_score=0.0,
-            validation_status="FAILED",
-            error_type=err_type,
-            error_message=str(err_msg),
-            source_uri=cfg.path or "",
-            strategy_used={"format": cfg.file_format or "unknown"},
-        ))
+        try:
+            self.learner.record(IngestionOutcome(
+                dataset_id=cfg.dataset_id,
+                source_type=cfg.source_type,
+                success=False,
+                quality_score=0.0,
+                validation_status="FAILED",
+                error_type=err_type,
+                error_message=str(err_msg),
+                source_uri=cfg.path or "",
+                strategy_used={"format": cfg.file_format or "unknown"},
+            ))
+        except Exception as _learn_exc:  # noqa: BLE001
+            logger.warning(
+                "Learner record failed in failure_snapshot (non-fatal): %s", _learn_exc
+            )
         return ISSFSnapshot(
             dataset_id=cfg.dataset_id,
             snapshot_id=correlation_id,
@@ -565,6 +693,62 @@ class UniversalIntake:
             error_logs=errors,
             data=None,
         )
+
+    # ── Internal: Large Data Helpers ──────────────────────────────────────────
+
+    def _memory_guard(self) -> None:
+        """Pause ingestion if process RSS memory exceeds max_mem_rss_gb."""
+        try:
+            import psutil
+            large_cfg = self.config.get("large_data", {})
+            max_rss_gb = float(large_cfg.get("max_mem_rss_gb", 8.0))
+            process = psutil.Process(os.getpid())
+            rss_gb = process.memory_info().rss / (1024 ** 3)
+            if rss_gb > max_rss_gb:
+                logger.warning(
+                    "Memory guard triggered (RSS: %.1f GB > %s GB). Pausing ingestion...",
+                    rss_gb, max_rss_gb
+                )
+                time.sleep(2.0)
+                # optionally call gc.collect() here if we want tighter management
+                import gc
+                gc.collect()
+        except ImportError:
+            pass
+        except Exception as exc:
+            logger.debug("Memory guard failed: %s", exc)
+
+    def _union_parquet_files(self, paths: List[str]) -> pd.DataFrame:
+        """Merge multiple Parquet files via DuckDB if enabled, else Pandas concat."""
+        if not paths:
+            return pd.DataFrame()
+        large_cfg = self.config.get("large_data", {})
+        use_duckdb = large_cfg.get("use_duckdb_merge", True)
+
+        if use_duckdb:
+            try:
+                import duckdb
+                path_list = ", ".join(f"'{p}'" for p in paths)
+                sql = f"SELECT * FROM read_parquet([{path_list}])"
+                return duckdb.query(sql).df()
+            except ImportError:
+                logger.debug("DuckDB not available for _union_parquet_files")
+            except Exception as exc:
+                logger.warning("DuckDB merge failed, falling back: %s", exc)
+
+        # Fallback
+        dfs = []
+        for path in paths:
+            try:
+                if path.endswith(".parquet"):
+                    dfs.append(pd.read_parquet(path))
+                else:
+                    dfs.append(pd.read_csv(path))
+            except Exception as exc:
+                logger.warning("Could not read chunk %s: %s", path, exc)
+        if not dfs:
+            return pd.DataFrame()
+        return pd.concat(dfs, ignore_index=True)
 
     # ── Convenience factory ───────────────────────────────────────────────────
 

@@ -7,6 +7,7 @@ Enterprise-grade feature engineering engine.
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -52,6 +53,8 @@ class FeatureEngineer:
         self.dfs_enabled:    bool  = bool(dfs_val)
         self.dfs_max_feats:  int   = int(cfg.get("dfs_max_features", 50))
         self.dfs_corr_thresh: float = float(cfg.get("dfs_corr_threshold", 0.05))
+        self.dfs_max_rows:   int   = int(cfg.get("dfs_max_rows", 50_000))
+        self.dfs_timeout_s:  float = float(cfg.get("dfs_timeout_s", 30.0))
         
         # Real-World Data Robustness Toggles
         self.high_cardinality_limit: int = int(cfg.get("high_cardinality_limit", 200))
@@ -86,6 +89,7 @@ class FeatureEngineer:
         df = self._target_encode(df, report, target_col)
         df = self._log_transform(df, report)
         df = self._auto_log_correction(df, report)
+        df = self._apply_brain_transformations(df, report)
         df = self._polynomial_features(df, report)
         df = self._binning(df, report)
         df = self._interactions(df, report)
@@ -163,7 +167,11 @@ class FeatureEngineer:
     def _frequency_encode(self, df: pd.DataFrame, report: FeatureEngineeringReport) -> pd.DataFrame:
         for col in self.freq_encode_cols:
             if col not in df.columns: continue
-            if df[col].nunique() > self.high_cardinality_limit:
+            try:
+                n_unique = df[col].nunique()
+            except Exception:  # noqa: BLE001 — unhashable
+                n_unique = df[col].astype(str).nunique()
+            if n_unique > self.high_cardinality_limit:
                 new_col = f"{col}_hash_enc"
                 df[new_col] = df[col].astype(str).apply(lambda x: hash(x) % 1000).astype(int)
                 report.features_added.append(new_col)
@@ -219,6 +227,48 @@ class FeatureEngineer:
                         report.features_added.append(new_col)
                         report.transformations_applied.append({"type": "auto_log1p", "column": col, "skew": float(skew)})
             except Exception: continue
+        return df
+
+    def _apply_brain_transformations(self, df: pd.DataFrame, report: FeatureEngineeringReport) -> pd.DataFrame:
+        brain_decisions = df.attrs.get("column_decisions", {})
+        if not brain_decisions:
+            return df
+
+        for col, decision_dict in brain_decisions.items():
+            if col not in df.columns:
+                continue
+            strategy = decision_dict.get("transform_strategy")
+            
+            try:
+                if strategy == "log1p":
+                    new_col = f"{col}_log1p"
+                    if new_col not in df.columns and (df[col].dropna() >= 0).all():
+                        df[new_col] = np.log1p(df[col])
+                        report.features_added.append(new_col)
+                        report.transformations_applied.append({"type": "brain_log1p", "column": col})
+                elif strategy == "sqrt":
+                    new_col = f"{col}_sqrt"
+                    if new_col not in df.columns and (df[col].dropna() >= 0).all():
+                        df[new_col] = np.sqrt(df[col])
+                        report.features_added.append(new_col)
+                        report.transformations_applied.append({"type": "brain_sqrt", "column": col})
+                elif strategy == "yeo-johnson":
+                    new_col = f"{col}_yeojohnson"
+                    if new_col not in df.columns:
+                        try:
+                            from scipy.stats import yeojohnson
+                            yf_data, _ = yeojohnson(df[col].dropna())
+                            # To keep same length, re-apply to index
+                            temp_series = pd.Series(index=df[col].dropna().index, data=yf_data)
+                            df[new_col] = temp_series
+                            df[new_col] = df[new_col].fillna(temp_series.median()) # simple fill for nan row
+                            report.features_added.append(new_col)
+                            report.transformations_applied.append({"type": "brain_yeojohnson", "column": col})
+                        except Exception as yeo_exc:
+                            logger.debug("[FeatureEngineer] Yeo-Johnson failed on '%s': %s", col, yeo_exc)
+            except Exception as exc:
+                logger.debug("[FeatureEngineer] Brain transform '%s' failed on '%s': %s", strategy, col, exc)
+
         return df
 
     def _polynomial_features(self, df: pd.DataFrame, report: FeatureEngineeringReport) -> pd.DataFrame:
@@ -284,14 +334,49 @@ class FeatureEngineer:
         return df
 
     def _synthesize_features(self, df: pd.DataFrame, report: FeatureEngineeringReport, target_col: Optional[str] = None) -> pd.DataFrame:
+        """Deep Feature Synthesis with performance safeguards."""
+        DFS_MAX_COLS = 200  # hard cap to avoid O(n²) explosion
+
         num_cols = df.select_dtypes(include="number").columns.tolist()
         if target_col and target_col in num_cols: num_cols.remove(target_col)
         if len(num_cols) < 2: return df
+
+        # Guard 1: column cap
+        if len(num_cols) > DFS_MAX_COLS:
+            logger.warning(
+                "[DFS] %d numeric cols exceeds cap (%d). Sampling top-%d by variance.",
+                len(num_cols), DFS_MAX_COLS, DFS_MAX_COLS,
+            )
+            variances = df[num_cols].var().sort_values(ascending=False)
+            num_cols = variances.head(DFS_MAX_COLS).index.tolist()
+
+        # Guard 2: row limit — compute correlation on a sample
+        sample_df = df
+        if len(df) > self.dfs_max_rows:
+            logger.info(
+                "[DFS] Row count %d exceeds dfs_max_rows=%d. Sampling for correlation.",
+                len(df), self.dfs_max_rows,
+            )
+            sample_df = df.sample(n=self.dfs_max_rows, random_state=42)
+
+        # Guard 3: timeout
+        t0 = time.monotonic()
+
         try:
-            corr = df[num_cols].corr().abs()
+            corr = sample_df[num_cols].corr().abs()
             added = 0
             for i, c1 in enumerate(num_cols):
                 for c2 in num_cols[i + 1:]:
+                    # Timeout check
+                    if time.monotonic() - t0 > self.dfs_timeout_s:
+                        logger.warning(
+                            "[DFS] Timeout (%.0fs) reached after adding %d features.",
+                            self.dfs_timeout_s, added,
+                        )
+                        report.warnings.append(
+                            f"DFS timeout after {self.dfs_timeout_s}s with {added} features"
+                        )
+                        return df
                     if added >= self.dfs_max_feats: break
                     corr_val = corr.loc[c1, c2] if c1 in corr.index and c2 in corr.columns else 0.0
                     if not np.isnan(corr_val) and corr_val >= self.dfs_corr_thresh:
@@ -310,7 +395,10 @@ class FeatureEngineer:
     def _encode_remaining_objects(self, df: pd.DataFrame, report: FeatureEngineeringReport) -> pd.DataFrame:
         object_cols = df.select_dtypes(include=["object"]).columns
         for col in object_cols:
-            n_unique = df[col].nunique()
+            try:
+                n_unique = df[col].nunique()
+            except Exception:  # noqa: BLE001 — unhashable
+                n_unique = df[col].astype(str).nunique()
             if n_unique > self.high_cardinality_limit:
                 new_col = f"{col}_hash_enc"
                 df[new_col] = df[col].astype(str).apply(lambda x: hash(x) % 1000).astype(int)

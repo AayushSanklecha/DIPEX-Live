@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\query_engine\cohort_analysis.py
-# hypothesis_version: 6.151.9
-
-[0.0, 100, 'M', 'activity_col', 'best_cohort_period_3', 'cohort', 'cohort_col', 'cohort_period', 'cohort_sizes', 'entity_cohort', 'entity_col', 'error', 'left', 'ltv_matrix', 'matrix', 'max_periods', 'n_active', 'n_cohorts', 'period_1', 'period_3', 'period_7', 'period_avg_retention', 'retention_rates', 'revenue', 'value_col']

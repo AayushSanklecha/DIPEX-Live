@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\governance\data_catalog.py
-# hypothesis_version: 6.151.9
-
-['.', 'INTERNAL', 'PII', 'PUBLIC', 'SENSITIVE', 'allowed_in_output', 'allowed_in_training', 'classification', 'column_name', 'data_type', 'description', 'owner', 'r', 'registered_at', 'tags', 'updated_at', 'utf-8', 'w', '|']

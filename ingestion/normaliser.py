@@ -188,45 +188,60 @@ class Normaliser:
         """
         For each object column, try: numeric → datetime → boolean → keep string.
         Uses pd.to_numeric / pd.to_datetime with errors='coerce'.
+        One bad column never stops the rest.
         """
         for col in df.select_dtypes(include=["object"]).columns:
-            series = df[col]
-            non_null = series.dropna()
-            if len(non_null) == 0:
-                continue
-
-            # Try numeric
             try:
-                converted = pd.to_numeric(series, errors="coerce")
-                if converted.notna().sum() >= 0.9 * non_null.count():
-                    df[col] = converted
+                series = df[col]
+                non_null = series.dropna()
+                if len(non_null) == 0:
                     continue
-            except Exception:  # noqa: BLE001
-                pass
 
-            # Try datetime
-            try:
-                converted = pd.to_datetime(series, errors="coerce", utc=True)
-                if converted.notna().sum() >= 0.85 * non_null.count():
-                    df[col] = converted
-                    continue
-            except Exception:  # noqa: BLE001
-                pass
+                # Try numeric
+                try:
+                    converted = pd.to_numeric(series, errors="coerce")
+                    if converted.notna().sum() >= 0.9 * non_null.count():
+                        df[col] = converted
+                        continue
+                except Exception:  # noqa: BLE001
+                    pass
 
-            # Try boolean
-            try:
-                bool_map = {"true": True, "false": False, "yes": True, "no": False,
-                            "1": True, "0": False, "t": True, "f": False}
-                # Safe unique check for bools
-                def _to_lower_safe(v):
-                    if isinstance(v, str): return v.lower()
-                    return str(v).lower()
-                
-                unique_vals = non_null.apply(_to_lower_safe).unique()
-                if len(unique_vals) > 0 and set(unique_vals).issubset(set(bool_map.keys())):
-                    df[col] = non_null.apply(_to_lower_safe).map(bool_map)
-            except Exception:
-                pass
+                # Try datetime — attempt ISO 8601 first (most common), then fallback
+                try:
+                    # Try ISO 8601 (covers YYYY-MM-DD, YYYY-MM-DDTHH:MM:SS, etc.)
+                    converted = pd.to_datetime(series, errors="coerce", utc=True, format="ISO8601")
+                    if converted.notna().sum() >= 0.85 * non_null.count():
+                        df[col] = converted
+                        continue
+                    # Fallback: mixed formats — pandas will infer per-element
+                    converted = pd.to_datetime(series, errors="coerce", utc=True, format="mixed")
+                    if converted.notna().sum() >= 0.85 * non_null.count():
+                        df[col] = converted
+                        continue
+                except Exception:  # noqa: BLE001
+                    pass
+
+                # Try boolean
+                try:
+                    bool_map = {"true": True, "false": False, "yes": True, "no": False,
+                                "1": True, "0": False, "t": True, "f": False}
+                    # Safe unique check for bools
+                    def _to_lower_safe(v):
+                        if isinstance(v, str): return v.lower()
+                        return str(v).lower()
+                    
+                    unique_vals = non_null.apply(_to_lower_safe).unique()
+                    if len(unique_vals) > 0 and set(unique_vals).issubset(set(bool_map.keys())):
+                        df[col] = non_null.apply(_to_lower_safe).map(bool_map)
+                except Exception:
+                    pass
+
+            except Exception as _col_exc:  # noqa: BLE001
+                # One column failed — log and skip, don't crash the pipeline
+                logger.warning(
+                    "Type coercion failed for column '%s' (skipping): %s",
+                    col, _col_exc,
+                )
 
         return df
 

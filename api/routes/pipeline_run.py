@@ -3,8 +3,10 @@ api/routes/pipeline_run.py
 ---------------------------
 Pipeline execution endpoints:
 
-  POST /api/pipeline/run         — Full pipeline run (upload file separately first)
-  POST /api/pipeline/simple-run  — Unified: ingest + full 13-stage pipeline in one call
+  POST /api/pipeline/run           — Full pipeline run (upload file separately first)
+  POST /api/pipeline/simple-run    — Unified: ingest + full 13-stage pipeline in one call
+  POST /api/pipeline/preview-plan  — Schema-only scan, returns ops plan for UI approval (2-5s)
+  POST /api/pipeline/list-tables   — List tables/collections from a database source
 
 Supported source types (source_kind):
   file      — CSV, Excel, JSON, Parquet file upload
@@ -28,10 +30,11 @@ import logging
 import os
 import shutil
 import tempfile
+import time
 import uuid
 from datetime import datetime, timezone
 from urllib.parse import parse_qs, urlparse
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 
 from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
@@ -192,6 +195,266 @@ def _stream_cfg_from_input(source_input: str, config: Dict[str, Any]) -> Dict[st
         "group_id": "dipex-consumer",
         "max_messages": 10000,
     }
+
+
+# ── PREVIEW PLAN ──────────────────────────────────────────────────────────────
+
+def _int_or_none(v) -> Optional[int]:
+    """Safely convert a value to int; returns None for missing/non-numeric input."""
+    try:
+        return int(v) if v is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+class _PreviewPlanRequest:
+    """Pydantic-free request model parsed from JSON body."""
+    def __init__(self, data: Dict[str, Any]):
+        self.domain:            str            = data.get("domain", "generic") or "generic"
+        self.target_col:        Optional[str]  = data.get("target_col") or None
+        self.mode:              str            = data.get("mode", "auto") or "auto"
+        self.user_context:      str            = data.get("user_context", "") or ""
+        self.user_instructions: str            = data.get("user_instructions", "") or ""
+        self.column_names:      List[str]      = data.get("column_names") or []
+        self.n_rows:            Optional[int]  = data.get("n_rows")
+        self.n_cols:            Optional[int]  = data.get("n_cols")
+        self.null_rate:         Optional[float]= data.get("null_rate")
+        self.plan_rejection_count: int         = int(data.get("plan_rejection_count", 0))
+        # Actual type distribution computed from real data values by the frontend.
+        # When present these override the name-keyword heuristic in pipeline_preview_plan.
+        self.numeric_cols_count:    Optional[int] = _int_or_none(data.get("numeric_cols_count"))
+        self.categorical_cols_count:Optional[int] = _int_or_none(data.get("categorical_cols_count"))
+        self.temporal_cols_count:   Optional[int] = _int_or_none(data.get("temporal_cols_count"))
+        self.text_cols_count:       Optional[int] = _int_or_none(data.get("text_cols_count"))
+
+
+def _build_operations_plan(
+    req: _PreviewPlanRequest,
+    null_pct: float,
+    parsed_hints: Optional[Any] = None,
+) -> List[Dict[str, Any]]:
+    """Decide which pipeline operations are planned vs skipped based on context and parsed hints."""
+    ops = []
+
+    # Extract skip list from parsed hints (instruction-driven skips)
+    hint_skip_stages: List[str] = []
+    if parsed_hints is not None and hasattr(parsed_hints, "hints"):
+        hint_skip_stages = parsed_hints.hints.skip_stages or []
+
+    def _status(stage_key: str, default: str = "planned") -> str:
+        return "skipped (per instruction)" if stage_key in hint_skip_stages else default
+
+    # Always-on
+    ops.append({"op": "pii_scan",         "label": "PII Scan",          "detail": "Email, SSN, Credit Card, Phone, ICD-10, IBAN detection", "status": _status("pii_scan")})
+    ops.append({"op": "schema_validation", "label": "Schema Validation",  "detail": "Null rates, cardinality, type inference",                "status": "planned"})
+
+    # Null-dependent
+    if null_pct > 0.01:
+        ops.append({"op": "null_imputation", "label": "Null Imputation",   "detail": f"Median / KNN imputation (null rate: {null_pct*100:.1f}%)", "status": "planned"})
+    else:
+        ops.append({"op": "null_imputation", "label": "Null Imputation",   "detail": "Skipped — dataset is clean (<1% nulls)",                 "status": "skipped"})
+
+    # Outlier detection — label adjusted for hint
+    outlier_hint = parsed_hints.hints.outlier_policy if parsed_hints and hasattr(parsed_hints, "hints") else None
+    outlier_detail = {
+        "preserve":   "Outliers preserved (per your instruction)",
+        "quarantine": "Outliers quarantined / removed (per your instruction)",
+        "flag":       "Outliers flagged for review (per your instruction)",
+        "winsorize":  "Outliers capped via winsorization",
+    }.get(outlier_hint or "", "IQR winsorize + IsolationForest anomaly score")
+    ops.append({"op": "outlier_detection",   "label": "Outlier Detection",  "detail": outlier_detail,                                             "status": _status("anomaly_detection")})
+    ops.append({"op": "feature_engineering", "label": "Feature Engineering", "detail": "DFS ratio/product pairs, polynomial, calendar, binning",   "status": _status("feature_engineering")})
+
+    # Domain-specific
+    effective_domain = req.domain
+    if parsed_hints and hasattr(parsed_hints, "hints") and parsed_hints.hints.domain:
+        effective_domain = parsed_hints.hints.domain
+    if effective_domain and effective_domain not in ("generic", ""):
+        ops.append({"op": "regulatory_compliance", "label": "Regulatory Compliance",
+                    "detail": f"Domain: {effective_domain.upper()} rules enforced", "status": _status("regulatory_compliance")})
+    else:
+        ops.append({"op": "regulatory_compliance", "label": "Regulatory Compliance",
+                    "detail": "Skipped — no domain selected", "status": "skipped"})
+
+    # Supervised vs unsupervised (target from hint takes priority)
+    effective_target = req.target_col
+    if parsed_hints and hasattr(parsed_hints, "hints") and parsed_hints.hints.target_col:
+        effective_target = parsed_hints.hints.target_col
+    if effective_target:
+        cv_folds = (parsed_hints.hints.cv_folds or 5) if parsed_hints and hasattr(parsed_hints, "hints") else 5
+        ops.append({"op": "automl", "label": "AutoML",
+                    "detail": f"XGBoost + LightGBM {cv_folds}-fold CV → predict '{effective_target}'",
+                    "status": _status("modeling")})
+    else:
+        ops.append({"op": "unsupervised", "label": "Unsupervised Analysis",
+                    "detail": "IsolationForest anomaly + K-Means clustering", "status": _status("modeling")})
+
+    return ops
+
+
+def _build_warnings(req: _PreviewPlanRequest, n_rows: int, n_cols: int, null_pct: float) -> List[Dict[str, str]]:
+    """Generate contextual warnings from dataset metadata."""
+    warns = []
+
+    if n_rows < 100:
+        warns.append({"level": "warning", "message": f"Very small dataset ({n_rows} rows) — model training quality may be limited."})
+    elif n_rows > 5_000_000:
+        warns.append({"level": "info", "message": f"Large dataset ({n_rows:,} rows) — chunked streaming and DuckDB merge will be used."})
+
+    if null_pct > 0.40:
+        warns.append({"level": "warning", "message": f"High null rate ({null_pct*100:.1f}%) — many rows may be quarantined."})
+
+    if n_cols > 200:
+        warns.append({"level": "info", "message": f"Wide dataset ({n_cols} cols) — DFS feature explosion is capped at 50 new features."})
+
+    if req.target_col and req.target_col not in (req.column_names or []):
+        if req.column_names:
+            warns.append({"level": "warning", "message": f"Target column '{req.target_col}' not found in declared column list — will auto-detect at runtime."})
+
+    if not req.domain or req.domain == "generic":
+        warns.append({"level": "info", "message": "No regulatory domain selected — compliance checks will be skipped."})
+
+    return warns
+
+
+@router.post(
+    "/pipeline/preview-plan",
+    summary="Schema-only scan to preview what the pipeline will do before running",
+    response_model=None,
+)
+async def pipeline_preview_plan(request_body: Dict[str, Any]) -> Dict[str, Any]:  # noqa: C901
+    """
+    **Pre-Analysis Plan endpoint** — returns a plan JSON the UI uses in the
+    AnalysisPlanModal before the user approves a run.
+
+    - Accepts column names, row/col counts, null rate — NO data uploaded.
+    - Does NOT run any ML or preprocessing.
+    - Returns in 2-5s (pure Python metadata logic).
+
+    Response shape:
+    ```json
+    {
+      "data_summary": { ... },
+      "domain": { "active": "banking", "rules_count": 7, "rules": [...] },
+      "operations": [ { "op": "pii_scan", "label": "...", "status": "planned" }, ... ],
+      "warnings": [ { "level": "warning", "message": "..." } ],
+      "plan_elapsed_ms": 42
+    }
+    ```
+    """
+    t0 = time.monotonic()
+    req = _PreviewPlanRequest(request_body)
+
+    # ── Parse analyst instructions ────────────────────────────────────────────
+    parsed_hints = None
+    instruction_summary: List[str] = []
+    if req.user_instructions.strip():
+        try:
+            from api.routes.instruction_parser import parse_instructions
+            parsed_hints = parse_instructions(req.user_instructions)
+            instruction_summary = parsed_hints.summary
+            # Override request fields with parsed hints where applicable
+            if parsed_hints.hints.target_col and not req.target_col:
+                req.target_col = parsed_hints.hints.target_col
+            if parsed_hints.hints.domain and req.domain in ("", "generic"):
+                req.domain = parsed_hints.hints.domain
+        except Exception as _pe:
+            logger.warning("Instruction parsing failed: %s", _pe)
+
+    n_rows    = int(req.n_rows or 0)
+    n_cols    = int(req.n_cols or len(req.column_names) or 0)
+    null_rate = float(req.null_rate or 0.0)
+
+    # Estimate drop/quarantine columns
+    columns_to_drop: List[str] = []
+    rows_quarantine_est = 0
+    numeric_cols = 0
+    categorical_cols = 0
+
+    # ── Use actual type distribution from frontend's data analysis when available ──
+    # The frontend runs inferType() on real column values and sends exact counts.
+    # Only fall back to the name-keyword heuristic when no real data is provided
+    # (e.g. database / Kafka / API sources where preview rows aren't available).
+    if req.numeric_cols_count is not None:
+        numeric_cols     = int(req.numeric_cols_count)
+        categorical_cols = int(req.categorical_cols_count or 0)
+    elif req.column_names:
+        # Name-keyword heuristic (fallback for non-file sources only)
+        date_kws = {"date", "time", "year", "month", "day", "created", "updated"}
+        num_kws  = {"amount", "age", "price", "count", "total", "value", "score",
+                    "rate", "qty", "revenue", "distance", "delay", "minutes", "id"}
+        for col in req.column_names:
+            cl = col.lower()
+            if any(k in cl for k in date_kws):
+                pass  # temporal — not counted as numeric or categorical
+            elif any(k in cl for k in num_kws) or any(c.isdigit() for c in col):
+                numeric_cols += 1
+            else:
+                categorical_cols += 1
+
+    if null_rate > 0.9:
+        rows_quarantine_est = int(n_rows * null_rate * 0.5)
+
+    # Auto-detect domain from column names if not specified
+    detected_domains: List[str] = []
+    if req.column_names:
+        banking_kws    = {"iban", "swift", "aml", "basel", "ltv", "collateral", "account_balance"}
+        healthcare_kws = {"icd", "diagnosis", "patient", "clinical", "phi", "lab_result", "medication"}
+        finance_kws    = {"portfolio", "nav", "volatility", "sharpe", "drawdown", "var", "mifid"}
+        gdpr_kws       = {"consent", "data_subject", "residency", "retention", "erasure"}
+        all_cols_lower = {c.lower() for c in req.column_names}
+
+        if all_cols_lower & banking_kws:    detected_domains.append("banking")
+        if all_cols_lower & healthcare_kws: detected_domains.append("healthcare")
+        if all_cols_lower & finance_kws:    detected_domains.append("finance")
+        if all_cols_lower & gdpr_kws:       detected_domains.append("gdpr")
+
+    active_domain = req.domain if req.domain and req.domain != "generic" else (detected_domains[0] if detected_domains else "generic")
+
+    # Build domain rule list
+    domain_rules_map = {
+        "banking":    ["AML Threshold", "Transaction Velocity", "LTV Ratio", "Basel III Capital", "Know Your Customer (KYC)"],
+        "healthcare": ["HIPAA PHI Scan", "Patient Age Validation", "ICD-10 Code Integrity", "Data De-identification"],
+        "finance":    ["SEC Reporting", "VaR Limits", "Portfolio Concentration", "MiFID II Trade Reporting"],
+        "gdpr":       ["Consent Validation", "Data Residency", "Retention Period", "Right to Erasure"],
+        "sox":        ["Audit Trail Completeness", "Segregation of Duties", "Change Management"],
+        "hipaa":      ["PHI Encryption", "Access Control", "Audit Logging", "Backup Procedures"],
+        "generic":    [],
+    }
+    active_rules = domain_rules_map.get(active_domain, [])
+
+    ops      = _build_operations_plan(req, null_rate, parsed_hints)
+    warnings = _build_warnings(req, n_rows, n_cols, null_rate)
+
+    plan = {
+        "data_summary": {
+            "n_rows":                  n_rows,
+            "n_cols":                  n_cols,
+            "overall_null_pct":        null_rate * 100,
+            "numeric_cols":            numeric_cols,
+            "categorical_cols":        categorical_cols,
+            "duplicate_rows":          0,   # cannot know without data
+            "columns_to_drop":         columns_to_drop,
+            "rows_to_quarantine_est":  rows_quarantine_est,
+            "target_col":              req.target_col,
+        },
+        "domain": {
+            "selected":    req.domain,
+            "detected":    detected_domains,
+            "active":      active_domain,
+            "rules_count": len(active_rules),
+            "rules":       active_rules,
+        },
+        "operations": ops,
+        "warnings":   warnings,
+        # ── Instruction intelligence ──────────────────────────────────────────
+        "instruction_summary":      instruction_summary,
+        "instruction_confidence":   round(parsed_hints.confidence, 3) if parsed_hints else 0.0,
+        "instruction_hints":        parsed_hints.hints.to_dict() if parsed_hints else {},
+        "plan_rejection_count":     req.plan_rejection_count,
+        "plan_elapsed_ms": round((time.monotonic() - t0) * 1000, 1),
+    }
+    return plan
 
 
 @router.post(
@@ -363,13 +626,19 @@ async def pipeline_simple_run(
     extra_domains: str = Form("", description="Comma-separated secondary domains"),
     col_range: str = Form("", description="Optional range of columns to analyze (e.g. 1-10)"),
     row_range: str = Form("", description="Optional range of rows to analyze (e.g. 1-100)"),
-    skip_stages: str = Form("drift_detection,experience_memory,rl_update", description="Comma-separated stage names to skip"),
+    skip_stages: str = Form("", description="Comma-separated stage names to skip"),
+    plan_approved: str = Form("false", description="Set 'true' if user approved the pre-analysis plan in the UI"),
+    user_instructions: str = Form("", description="Free-text analyst instructions to guide the pipeline (max 500 chars)"),
+    plan_rejection_count: int = Form(0, description="Number of times user rejected the plan before approving"),
 ) -> Dict[str, Any]:
     """
     Minimal one-click endpoint used by simplified UI.
 
     Accepts a single source definition and automatically runs:
       intake -> ISSF snapshot -> full pipeline bridge -> formatted final result
+
+    When `plan_approved=true` is passed the audit log records that the user
+    explicitly reviewed and approved the pre-analysis plan before execution.
     """
     from ingestion.pipeline_bridge import PipelineBridge
     from ingestion.universal_intake import SourceConfig, UniversalIntake
@@ -379,6 +648,37 @@ async def pipeline_simple_run(
     run_id = str(uuid.uuid4())
     source_kind = (source_kind or "file").strip().lower()
     dataset_id = (dataset_id or "").strip()
+    _plan_approved = (plan_approved or "").strip().lower() == "true"
+
+    # ── Parse analyst instructions ────────────────────────────────────────────
+    _parsed_hints = None
+    _instruction_summary: List[str] = []
+    _user_instructions = (user_instructions or "").strip()[:500]
+    if _user_instructions:
+        try:
+            from api.routes.instruction_parser import parse_instructions
+            _parsed_hints = parse_instructions(_user_instructions)
+            _instruction_summary = _parsed_hints.summary
+            # Override form fields with instruction-parsed values (non-destructive)
+            if not target_col.strip() and _parsed_hints.hints.target_col:
+                target_col = _parsed_hints.hints.target_col
+            if not domain.strip() and _parsed_hints.hints.domain:
+                domain = _parsed_hints.hints.domain
+            if not row_range.strip() and _parsed_hints.hints.row_range:
+                row_range = _parsed_hints.hints.row_range
+            # Merge instruction-level skip stages into skip_stages
+            if _parsed_hints.hints.skip_stages:
+                existing_skips = {s.strip() for s in skip_stages.split(",") if s.strip()}
+                merged_skips = existing_skips | set(_parsed_hints.hints.skip_stages)
+                skip_stages = ",".join(merged_skips)
+            # Inject pipeline hints into config
+            config = _parsed_hints.hints.apply_to_config(config)
+            logger.info(
+                "Instructions parsed — confidence=%.2f summary=%s",
+                _parsed_hints.confidence, _instruction_summary,
+            )
+        except Exception as _pe:
+            logger.warning("Instruction parsing skipped: %s", _pe)
 
     intake = UniversalIntake.from_yaml("config.yaml") if os.path.exists("config.yaml") else UniversalIntake(config=config)
     tmp_path = ""
@@ -427,7 +727,9 @@ async def pipeline_simple_run(
                 raise HTTPException(status_code=400, detail="Provide source_input as connection URI")
 
             db_cfg = _db_cfg_from_uri(source_input, source_kind)
-            dataset_id = dataset_id or f"{db_cfg.get('backend', 'database')}_dataset"
+            db_table = db_cfg.get("table_or_collection", "")
+            safe_table = db_table if db_table else "dataset"
+            dataset_id = dataset_id or f"{db_cfg.get('backend', 'database')}_{safe_table}"
             cfg = SourceConfig(
                 source_type="database",
                 dataset_id=dataset_id,
@@ -480,56 +782,83 @@ async def pipeline_simple_run(
                 ),
             )
 
-        # ── Apply column range slicing if requested ──────────────────────────────
-        if col_range.strip():
-            try:
-                import re
-                val = col_range.strip()
-                if re.match(r"^\d+\s*-\s*\d+$", val):
-                    # Numeric range
-                    parts = [int(p.strip()) for p in val.split("-")]
-                    start_idx = max(0, parts[0] - 1) # 1-indexed to 0-indexed
-                    end_idx = parts[1]
-                    if snapshot.data is not None and not snapshot.data.empty:
-                        # Slice data by columns
-                        snapshot.data = snapshot.data.iloc[:, start_idx:end_idx].copy()
-                        # Sync column metadata
-                        if hasattr(snapshot, "column_metadata") and snapshot.column_metadata:
-                            snapshot.column_metadata = snapshot.column_metadata[start_idx:end_idx]
-                else:
-                    # Specific column names
-                    col_names = [c.strip() for c in val.split(",") if c.strip()]
-                    if snapshot.data is not None and not snapshot.data.empty:
-                        valid_cols = []
-                        df_cols_lower = {str(c).lower(): c for c in snapshot.data.columns}
-                        for c in col_names:
-                            if c in snapshot.data.columns:
-                                valid_cols.append(c)
-                            elif c.lower() in df_cols_lower:
-                                valid_cols.append(df_cols_lower[c.lower()])
-                        
-                        if valid_cols:
-                            snapshot.data = snapshot.data[valid_cols].copy()
-                            if hasattr(snapshot, "column_metadata") and snapshot.column_metadata:
-                                snapshot.column_metadata = [cm for cm in snapshot.column_metadata if cm.name in valid_cols]
-                        else:
-                            logger.warning(f"None of the specified columns {col_names} found in data.")
-            except Exception as _slice_exc:
-                logger.warning(f"Failed to slice data by col_range '{col_range}': {_slice_exc}")
+        # ──────────────────────────────────────────────────────────────────────
+        # Apply optional filters  (all three fields are fully independent;
+        # any combination of 0 / 1 / 2 / 3 filled values is valid in every
+        # source mode: file, database, kafka, api)
+        # Order: row_range first (fewer rows to copy), then col_range.
+        # target_col is ALWAYS preserved even if omitted from col_range.
+        # ──────────────────────────────────────────────────────────────────────
+        import re as _re
 
-        # ── Apply row range slicing if requested ──────────────────────────────
-        if row_range.strip():
+        # ── Row-range filter ──────────────────────────────────────────────────
+        _rr = (row_range or "").strip().replace(" ", "")
+        if _rr:
             try:
-                parts = [p.strip() for p in row_range.strip().split("-")]
-                if len(parts) == 2:
-                    start_idx = max(0, int(parts[0]) - 1) 
-                    end_idx = int(parts[1])
+                _rr_match = _re.match(r"^(\d+)[\-\u2013](\d+)$", _rr)
+                if _rr_match:
+                    _r_start = max(0, int(_rr_match.group(1)) - 1)  # 1-indexed
+                    _r_end   = int(_rr_match.group(2))
                     if snapshot.data is not None and not snapshot.data.empty:
-                        # Slice data by rows
-                        snapshot.data = snapshot.data.iloc[start_idx:end_idx].copy()
+                        snapshot.data = snapshot.data.iloc[_r_start:_r_end].reset_index(drop=True).copy()
                         snapshot.row_count = len(snapshot.data)
-            except Exception as _slice_exc:
-                logger.warning(f"Failed to slice data by row_range '{row_range}': {_slice_exc}")
+                        logger.info("[filter] row_range '%s' -> rows %d-%d (%d rows)",
+                                    _rr, _r_start + 1, _r_end, snapshot.row_count)
+                elif _rr.isdigit():
+                    # Single number: treat as head(N)
+                    if snapshot.data is not None and not snapshot.data.empty:
+                        snapshot.data = snapshot.data.head(int(_rr)).copy()
+                        snapshot.row_count = len(snapshot.data)
+                else:
+                    logger.warning("[filter] row_range '%s' not recognized — ignored (use '10-500')", _rr)
+            except Exception as _rr_exc:
+                logger.warning("[filter] row_range '%s' failed: %s — skipped", _rr, _rr_exc)
+
+        # ── Column-range / column-name filter ─────────────────────────────────
+        _cr = (col_range or "").strip()
+        if _cr and snapshot.data is not None and not snapshot.data.empty:
+            try:
+                all_cols = list(snapshot.data.columns)
+                keep_cols: List[str] = []
+
+                _cr_clean = _cr.replace(" ", "")
+                if _re.match(r"^\d+[\-\u2013]\d+$", _cr_clean):
+                    # Numeric index range (1-indexed)
+                    _cr_m = _re.match(r"^(\d+)[\-\u2013](\d+)$", _cr_clean)
+                    _c_start = max(0, int(_cr_m.group(1)) - 1)
+                    _c_end   = int(_cr_m.group(2))
+                    keep_cols = all_cols[_c_start:_c_end]
+                    logger.info("[filter] col_range '%s' -> cols %d-%d (%d cols)",
+                                _cr, _c_start + 1, _c_end, len(keep_cols))
+                else:
+                    # Comma-separated column names (case-insensitive)
+                    _col_names = [c.strip() for c in _cr.split(",") if c.strip()]
+                    _cols_lower = {str(c).lower(): c for c in all_cols}
+                    for _cn in _col_names:
+                        if _cn in all_cols:
+                            keep_cols.append(_cn)
+                        elif _cn.lower() in _cols_lower:
+                            keep_cols.append(_cols_lower[_cn.lower()])
+                    if keep_cols:
+                        logger.info("[filter] col_range '%s' -> named cols: %s", _cr, keep_cols)
+                    else:
+                        logger.warning("[filter] col_range '%s' — no matching columns, filter skipped", _cr)
+
+                if keep_cols:
+                    # Always re-inject target_col if it was excluded
+                    _tc = target_col.strip() if target_col else None
+                    if _tc and _tc in all_cols and _tc not in keep_cols:
+                        keep_cols.append(_tc)
+                        logger.info("[filter] target_col '%s' re-injected into col_range slice", _tc)
+                    # Preserve original column order
+                    keep_cols = [c for c in all_cols if c in keep_cols]
+                    snapshot.data = snapshot.data[keep_cols].copy()
+                    if hasattr(snapshot, "column_metadata") and snapshot.column_metadata:
+                        snapshot.column_metadata = [
+                            cm for cm in snapshot.column_metadata if cm.name in keep_cols
+                        ]
+            except Exception as _cr_exc:
+                logger.warning("[filter] col_range '%s' failed: %s — skipped", _cr, _cr_exc)
 
         # ── Always save snapshot so results.py can load sample_rows ──────────
         snap_dir = config.get("storage", {}).get("snapshot_dir", "data/snapshots")
@@ -547,24 +876,25 @@ async def pipeline_simple_run(
             banking_cfg = reg_cfg.setdefault("banking", {})
             
             # Auto-detect amount_columns
-            if "amount_columns" not in banking_cfg:
+            configured_amts = banking_cfg.get("amount_columns", [])
+            if not any(c in snapshot.data.columns for c in configured_amts):
                 amt_matches = [c for c in snapshot.data.columns if "amount" in str(c).lower() or "balance" in str(c).lower()]
                 if amt_matches:
                     banking_cfg["amount_columns"] = amt_matches
                 
             # Auto-detect aml_amount_column
-            if "aml_amount_column" not in banking_cfg:
+            if banking_cfg.get("aml_amount_column") not in snapshot.data.columns:
                 amt_matches = [c for c in snapshot.data.columns if "amount" in str(c).lower()]
                 if amt_matches:
                     banking_cfg["aml_amount_column"] = amt_matches[0]
                     
             # Auto-detect velocity columns
             vel_cfg = banking_cfg.setdefault("velocity", {})
-            if "transaction_id_column" not in vel_cfg:
+            if vel_cfg.get("transaction_id_column") not in snapshot.data.columns:
                 id_matches = [c for c in snapshot.data.columns if "account" in str(c).lower() or "customer" in str(c).lower() or "id" in str(c).lower()]
                 if id_matches:
                     vel_cfg["transaction_id_column"] = id_matches[0]
-            if "timestamp_column" not in vel_cfg:
+            if vel_cfg.get("timestamp_column") not in snapshot.data.columns:
                 time_matches = [c for c in snapshot.data.columns if "date" in str(c).lower() or "time" in str(c).lower()]
                 if time_matches:
                     vel_cfg["timestamp_column"] = time_matches[0]
@@ -601,6 +931,70 @@ async def pipeline_simple_run(
 
         # ── Persist to audit log so Reports page can find this run ───────────
         os.makedirs("audit", exist_ok=True)
+
+        # ── Collect rich analytics data from bridge_result ────────────────────
+        _analytics_result = bridge_result.analytics_result or {}
+        _governance_report = bridge_result.governance_report or {}
+        _regulatory_report_raw = bridge_result.regulatory_report or []
+
+        # Feature importances — from model_metrics or analytics_result
+        _feature_importances = {}
+        mm = bridge_result.model_metrics or {}
+        if mm.get("feature_importances"):
+            _feature_importances = mm["feature_importances"]
+        elif mm.get("feature_importance"):
+            _feature_importances = mm["feature_importance"]
+        elif _analytics_result.get("feature_importances"):
+            _feature_importances = _analytics_result["feature_importances"]
+
+        # Statistical tests — from analytics_result
+        _statistical_tests = _analytics_result.get("statistical_tests", {})
+        if not _statistical_tests:
+            _statistical_tests = _analytics_result.get("stats", {})
+
+        # Bias & fairness report — from analytics_result
+        _bias_report = _analytics_result.get("bias_report", {})
+        if not _bias_report:
+            _bias_report = _analytics_result.get("bias_fairness", {})
+
+        # Anomaly report — from analytics_result
+        _anomaly_report = _analytics_result.get("anomaly_report", {})
+        if not _anomaly_report:
+            _anomaly_report = _analytics_result.get("anomaly_deep_dive", {})
+
+        # Regulatory report — normalise from list → dict keyed by domain
+        _regulatory_report: dict = {}
+        if isinstance(_regulatory_report_raw, list):
+            for item in _regulatory_report_raw:
+                if isinstance(item, dict):
+                    d = item.get("domain", "generic")
+                    _regulatory_report.setdefault(d, {"violations": []})
+                    _regulatory_report[d]["violations"].append(item)
+        elif isinstance(_regulatory_report_raw, dict):
+            _regulatory_report = _regulatory_report_raw
+        # Also try analytics_result
+        if not _regulatory_report:
+            _regulatory_report = _analytics_result.get("regulatory_report", {})
+
+        # RL agent summary — try to read from PPO agent checkpoint
+        _rl_agent_summary: dict = {}
+        try:
+            from learning.rl_agent.agent import PPOAgent
+            _ppo = PPOAgent.from_config(_load_config())
+            _rl_agent_summary = {
+                "episode_count":  _ppo._episode_count,
+                "in_shadow_mode": _ppo.in_shadow_mode,
+                "last_reward":    getattr(_ppo, "_last_reward", None),
+                "recommended_action": None,
+                "reward_components":  None,
+            }
+        except Exception:
+            pass
+
+        # ── Determine effective domain list for audit ─────────────────────────
+        _domain_used = primary or ""           # primary domain string (e.g. "banking")
+        _domain_list_used = domain_list if primary else []  # full list incl. extra domains
+
         audit_entry = {
             "event":             "PIPELINE_RUN",
             "run_id":            run_id,
@@ -617,7 +1011,24 @@ async def pipeline_simple_run(
             "col_count":         col_count,
             "retry_count":       bridge_result.retry_count,
             "snapshot_id":       snapshot.snapshot_id,
-            "model_metrics":     bridge_result.model_metrics or {},
+            "model_metrics":     mm,
+            "plan_approved":     _plan_approved,
+            # ── Regulatory domain tracking (always saved, even if 0 violations) ─
+            "domain_used":       _domain_used,
+            "domain_list_used":  _domain_list_used,
+            # ── Rich analytics data (powers /api/analytics/{run_id}) ───────────
+            "feature_importances": _feature_importances,
+            "statistical_tests":   _statistical_tests,
+            "bias_report":         _bias_report,
+            "anomaly_report":      _anomaly_report,
+            "regulatory_report":   _regulatory_report,
+            "governance_report":   _governance_report,
+            "rl_agent_summary":    _rl_agent_summary,
+            # ── Instruction intelligence tracking ─────────────────────────────
+            "user_instructions":      _user_instructions,
+            "instruction_summary":    _instruction_summary,
+            "instruction_confidence": round(_parsed_hints.confidence, 3) if _parsed_hints else 0.0,
+            "plan_rejection_count":   plan_rejection_count,
             "stages": [
                 {
                     "name":        s.get("stage", s.get("name", f"Stage {i+1}")),
@@ -631,7 +1042,7 @@ async def pipeline_simple_run(
         }
         try:
             with open("audit/audit.jsonl", "a", encoding="utf-8") as af:
-                af.write(json.dumps(audit_entry) + "\n")
+                af.write(json.dumps(audit_entry, default=str) + "\n")
         except Exception as _audit_exc:
             logger.warning("Audit log write failed: %s", _audit_exc)
 
@@ -645,6 +1056,12 @@ async def pipeline_simple_run(
             "col_count":   col_count,
             "sample_rows": sample_rows,
             "target_column_used": effective_target,
+            "plan_approved": _plan_approved,
+            # ── Instruction intelligence ──────────────────────────────────────
+            "user_instructions":      _user_instructions,
+            "instruction_summary":    _instruction_summary,
+            "instruction_confidence": round(_parsed_hints.confidence, 3) if _parsed_hints else 0.0,
+            "plan_rejection_count":   plan_rejection_count,
             "final_result": {
                 "gate_decision":      bridge_result.gate_decision,
                 "gate1_decision":     bridge_result.gate1_decision,
@@ -716,4 +1133,100 @@ async def pipeline_list_tables(
     except Exception as exc:
         logger.exception("pipeline/list-tables failed")
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@router.post(
+    "/pipeline/preview-source",
+    summary="Generic preview to extract sample rows and schema metadata for DB, Kafka, and API without running the full pipeline",
+    response_model=None,
+)
+async def pipeline_preview_source(
+    source_kind: str = Form("database", description="database|graph_db|api|live"),
+    source_input: str = Form("", description="URI/topic/url or optional JSON config"),
+) -> Dict[str, Any]:
+    """
+    Unified preview endpoint that safely connects to a Database, API, or Kafka stream,
+    fetches a maximum of 500 rows, and returns the real rows + metadata (total row count, null rate).
+    """
+    from ingestion.universal_intake import SourceConfig
+    from ingestion.readers.db_reader import DBReader, DBSourceConfig
+    from ingestion.readers.api_reader import APIReader, APISourceConfig
+    from ingestion.readers.stream_reader import StreamReader, KafkaSourceConfig, WindowConfig
+    
+    source_kind = (source_kind or "database").strip().lower()
+    if not source_input.strip():
+        raise HTTPException(status_code=400, detail="Provide source_input")
+
+    config = _load_config()
+
+    df = None
+    errors = []
+    
+    try:
+        if source_kind in ("database", "graph_db"):
+            db_cfg_dict = _db_cfg_from_uri(source_input, source_kind)
+            db_cfg = DBSourceConfig(**db_cfg_dict)
+            reader = DBReader()
+            result = reader.read(db_cfg)
+            if result and result.data is not None:
+                df = result.data.head(500)
+                errors = result.errors
+                
+        elif source_kind == "api":
+            api_cfg_dict = _api_cfg_from_input(source_input)
+            api_cfg = APISourceConfig(**api_cfg_dict)
+            reader = APIReader()
+            result = reader.read(api_cfg)
+            if result and result.data is not None:
+                df = result.data.head(500)
+                errors = result.errors
+                
+        elif source_kind == "live":
+            stream_cfg_dict = _stream_cfg_from_input(source_input, config)
+            stream_cfg = KafkaSourceConfig(**stream_cfg_dict)
+            window_cfg = WindowConfig(strategy="tumbling", window_size_s=5, watermark_delay_s=5)
+            reader = StreamReader()
+            
+            # Fetch exactly 1 window for preview
+            snapshots = []
+            for snap in reader.read_kafka(stream_cfg, window_cfg, max_windows=1):
+                if snap and snap.data is not None and not snap.data.empty:
+                    snapshots.append(snap.data)
+            
+            if snapshots:
+                import pandas as pd
+                df = pd.concat(snapshots, ignore_index=True).head(500)
+                
+        else:
+            raise HTTPException(status_code=400, detail=f"Unsupported source_kind for preview: {source_kind}")
+
+        if df is None:
+            return {
+                "status": "empty",
+                "rows": [],
+                "n_rows": 0,
+                "null_rate": 0,
+                "errors": [str(e) for e in errors]
+            }
+            
+        # Compute exact metadata needed for Pre-Analysis Plan
+        total_rows = len(df)
+        total_nulls = df.isna().sum().sum()
+        total_cells = df.size
+        null_rate = float(total_nulls / total_cells) if total_cells > 0 else 0.0
+
+        sample_rows = df.where(df.notna(), None).to_dict(orient="records")
+
+        return {
+            "status": "ok",
+            "rows": sample_rows,
+            "n_rows": total_rows, # Extrapolating beyond 500 would require counting the full source, we return sample count here
+            "null_rate": null_rate,
+            "errors": [str(e) for e in errors]
+        }
+        
+    except Exception as exc:
+        logger.exception("pipeline/preview-source failed")
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
 

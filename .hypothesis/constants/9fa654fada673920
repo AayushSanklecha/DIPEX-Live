@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\proposal\proposers\window_proposer.py
-# hypothesis_version: 6.151.9
-
-[2.0, 3.0, 5.0, 10.0, 60.0, 3600.0, 'CANDIDATES_COLLECTED', 'NO_CANDIDATES', 'coerce', 'date', 'error', 'message', 'rationale', 'status', 'time', 'timestamp', 'timestamp_column', 'watermark_seconds', 'window_candidates']

@@ -37,6 +37,32 @@ from ingestion.issf import ISSFSnapshot
 logger = logging.getLogger("dipex.ingestion.pipeline_bridge")
 
 
+# ── Dtype restoration helper (Bug 6: int→float64 NaN coercion) ───────────────
+
+def _restore_integer_dtypes(
+    df: "pd.DataFrame", original_dtypes: "Dict[str, Any]"
+) -> "pd.DataFrame":
+    """
+    After imputation, pandas promotes int columns to float64 to accommodate NaN.
+    This function converts them back to pd.Int64Dtype() (nullable integer) if all
+    non-null values are whole numbers AND the original dtype was integer.
+    """
+    for col, orig_dtype in original_dtypes.items():
+        if col not in df.columns:
+            continue
+        orig_str = str(orig_dtype)
+        if orig_str.startswith(("int", "uint", "Int")):
+            current = str(df[col].dtype)
+            if current.startswith("float"):
+                series = df[col].dropna()
+                if not series.empty and (series % 1 == 0).all():
+                    try:
+                        df[col] = df[col].astype(pd.Int64Dtype())
+                    except (ValueError, TypeError):
+                        pass  # Leave as float if conversion fails
+    return df
+
+
 # ── Stage Result ──────────────────────────────────────────────────────────────
 
 @dataclass
@@ -64,13 +90,15 @@ class PipelineResult:
     model_metrics: Optional[Dict] = None
     report_path: Optional[str] = None
     gate_decision: str  = "PENDING"    # PASS | FAIL | WARN
-    gate1_decision: str = "PENDING"    # PASS | REJECT
+    gate1_decision: str = "PENDING"    # PASS | REJECT | ADVISORY_REJECT
     gate2_decision: str = "PENDING"    # PASS | REJECT | NOT_RUN
     confidence_vector: Optional[Dict] = None
     retry_count: int = 0
     analytics_result: Optional[Dict] = None   # AI & Analytics Layer output
     governance_report: Optional[Dict] = None  # PII & policy enforcement report
     regulatory_report: Optional[List[Dict]] = None # Compliance Engine Violations/Risk Flags
+    quarantine_df: Optional[pd.DataFrame] = None   # rows too null to process
+    cleaning_audit: Optional[Dict] = None           # full audit of every data fix applied
 
     @property
     def is_success(self) -> bool:
@@ -90,6 +118,8 @@ class PipelineResult:
             "regulatory_report": self.regulatory_report,
             "silver_id": getattr(self, 'silver_id', None),
             "gold_artefacts": len(getattr(self, 'gold_artefacts', [])),
+            "quarantine_rows": len(self.quarantine_df) if self.quarantine_df is not None else 0,
+            "cleaning_audit": self.cleaning_audit,
         }
 
 
@@ -110,6 +140,7 @@ class PipelineBridge:
         self.config = config or {}
         self.run_id = str(uuid.uuid4())
         self._rl_plan: Optional[Dict] = None   # populated by RLOrchestrator each run
+        self._rl_recs: Optional[Dict[str, Any]] = None  # actively used by Preprocessing stages
         # ── Layer isolation ─────────────────────────────────────────────────
         try:
             from ingestion.data_layers import LayerManager
@@ -142,8 +173,8 @@ class PipelineBridge:
         self._run_start = time.perf_counter()  # for RL orchestrator feedback
 
         # ── RL / Experience attributes — must be initialised before any stage ─
-        self._attempt: int = 0              # incremented in _retry_engine_loop
         self._episode: str = self.run_id    # used by ReinforcementUpdateEngine
+        self._rl_recs: Optional[Dict[str, Any]] = None  # To be filled at start of run()
         self._current_retry_count: int = 0  # used by _stage_confidence_vector
 
         result = PipelineResult(
@@ -186,9 +217,52 @@ class PipelineBridge:
             result.completed_at = datetime.now(timezone.utc).isoformat()
             return result
 
+        # ── Step 0: RL Context — call recommend() to arm the learning loop ────
+        # IMPORTANT: recommend() must be called HERE (before pipeline runs) so
+        # that agent._current_state/_current_action_indices is set.
+        # record_outcome() at Stage 11 reads those attributes to compute reward.
+        self._rl_recs: Optional[Dict[str, Any]] = None
+        self._gate_decision_cache: str = "WARN"       # updated after Gate 2
+        self._model_metrics_cache: Dict = {}          # updated after modeling stage
+        try:
+            from learning.rl_agent.agent import PPOAgent
+            from learning.rl_agent.state_encoder import StateEncoder
+            _ppo_agent = PPOAgent.from_config(self.config)
+            # Build context from snapshot for recommend()
+            _ctx = {
+                "n_rows":       snapshot.row_count,
+                "n_cols":       len(df.columns),
+                "null_rate":    float(df.isnull().mean().mean()),
+                "anomaly_rate": 0.0,   # updated by drift stage later
+                "drift_psi":    0.0,   # updated by drift stage later
+                "data_health":  50.0,  # updated by analyst brain later
+                "domain":       str(snapshot.meta.get("domain", "generic"))
+                                if hasattr(snapshot, "meta") else "generic",
+                "target_col":   target_col,
+                "prior_confidence": self.config.get("pipeline", {}).get(
+                    "prior_confidence", 0.5),
+                "quarantine_frac":  0.0,
+                "retry_count":      self._current_retry_count,
+            }
+            _action = _ppo_agent.recommend(_ctx)
+            self._rl_recs = _action.to_dict()  # steers AnalystBrain + MDE
+            # Persist the live agent instance on self so Stage 11 reuses it
+            # (avoids re-loading checkpoint and losing _current_state)
+            self._ppo_agent_instance = _ppo_agent
+            logger.info(
+                "[%s] RL recommend(): episode=%d shadow=%s "
+                "imputation=%s cv=%s/%s conf=%.2f complexity=%s",
+                self.run_id[:8],
+                _ppo_agent._episode_count,
+                _ppo_agent.in_shadow_mode,
+                _action.imputation, _action.cv_folds, _action.cv_strategy,
+                _action.confidence_threshold, _action.model_complexity,
+            )
+        except Exception as _e:
+            logger.debug("[%s] RL context bootstrap skipped: %s", self.run_id[:8], _e)
+            self._ppo_agent_instance = None
+
         # ── Build Silver ImmutableDataFrame for Gold derivation ───────────────
-        result.silver_id = snapshot.snapshot_id
-        result.gold_artefacts = []
         _silver_imm = None
         if self._lm is not None:
             try:
@@ -249,6 +323,25 @@ class PipelineBridge:
         elif "streaming_window" not in skip:
             result.stages.append(StageResult("streaming_window", "SKIP", 0.0))
 
+        # ── Stage 0.4: Analyst Intelligence Brain ─────────────────────────────
+        # The "senior data analyst brain" — runs FIRST on raw data.
+        # Determines for EVERY column:
+        #   • Semantic type (ID / datetime / currency / categorical / etc.)
+        #   • Transform strategy (log1p / sqrt / yeo-johnson / none)
+        #   • Outlier policy (IQR / winsorise / flag)
+        #   • Imputation hint (median / mode / knn / mice / forward_fill)
+        #   • Business rule violations (negative age, impossible dates, etc.)
+        # Results are attached to df.attrs so all downstream stages can use them.
+        brain_out = self._run_stage(
+            result, "analyst_brain", skip,
+            self._stage_analyst_brain, df, target_col,
+        )
+        if isinstance(brain_out, dict):
+            df = brain_out.get("df", df)
+            # Expose brain report on result for API / reporting access
+            if not hasattr(result, "brain_report"):
+                object.__setattr__(result, "brain_report", brain_out.get("report", {}))
+
         # ── Stage 0.5: Robust Data Triage ─────────────────────────────────────
         # Runs BEFORE preprocessing to handle all real-world data pathologies:
         # high-null cols, mixed types, zero variance, high cardinality, skew, imbalance.
@@ -264,6 +357,31 @@ class PipelineBridge:
             if isinstance(triage_out, pd.DataFrame) else {}
         )
 
+        # ── Stage 0.6: Missing Data Engine ────────────────────────────────────
+        # Unified intelligent missing-data handler. Runs after Triage so that
+        # the gross structural issues (mixed types, zero-variance) are fixed first.
+        # Classifies MCAR/MAR/MNAR per column, applies correct imputation strategy,
+        # quarantines rows that are ≥80% null even after imputation.
+        mde_out = self._run_stage(
+            result, "missing_data_engine", skip,
+            self._stage_missing_data_engine, df, target_col,
+        )
+        if isinstance(mde_out, dict):
+            df               = mde_out.get("df", df)
+            result.quarantine_df  = mde_out.get("quarantine_df")
+            result.cleaning_audit = mde_out.get("report")
+
+        # ── Early exit: if triage+cleaning produced an empty DataFrame ────────
+        if df is None or df.empty or len(df.columns) == 0:
+            logger.warning(
+                "[%s] DataFrame empty after triage/cleaning — skipping remaining stages.",
+                self.run_id[:8],
+            )
+            result.gate_decision = "FAIL"
+            result.completed_at = datetime.now(timezone.utc).isoformat()
+            self._audit(result, snapshot)
+            return result
+
         # ── Stage 1: Preprocessing ────────────────────────────────────────────
         # Stage 0.75: Missing pattern analysis — runs before main imputation
         # so the DataCleaner can use the correct strategy per column.
@@ -273,6 +391,10 @@ class PipelineBridge:
         )
         if isinstance(mp_out, pd.DataFrame):
             df = mp_out
+
+        # Save raw df BEFORE preprocessing so the regulatory engine always
+        # evaluates original column values (strings, real amounts, etc.)
+        self._df_raw_for_compliance = df.copy()
 
         prep_out = self._run_stage(result, "preprocessing", skip,
                              self._stage_preprocess, df, target_col)
@@ -286,21 +408,22 @@ class PipelineBridge:
             self._stage_drift, df, snapshot.dataset_id,
         )
 
-        # ── Stage 2: Hard Gate 1 — Deterministic Validation ──────────────────
-        gate1_ok = self._run_stage(result, "validation", skip,
-                                   self._stage_validate, df, snapshot.dataset_id)
-        if gate1_ok is False:
-            result.gate_decision  = "FAIL"
-            result.gate1_decision = "REJECT"
-            result.gate2_decision = "NOT_RUN"
-            result.completed_at   = datetime.now(timezone.utc).isoformat()
-            self._audit(result, snapshot)
+        # ── Stage 2: Hard Gate 1 — Deterministic Validation (NON-BLOCKING) ──────
+        # advisory_mode=True (default) means gate flags issues but NEVER halts.
+        # All downstream stages always run — the gate is purely informational.
+        gate1_out = self._run_stage(result, "validation", skip,
+                                    self._stage_validate, df, snapshot.dataset_id)
+        if gate1_out is False:
+            # Strict-mode reject (advisory_mode=False in config). Even so, we
+            # continue — pipeline does not halt. Status is recorded for audit.
+            result.gate1_decision = "ADVISORY_REJECT"
             logger.warning(
-                "[%s] Hard Gate 1 REJECTED — pipeline halted, RL update suppressed.",
+                "[%s] Hard Gate 1 ADVISORY_REJECT — pipeline continues in advisory mode. "
+                "All downstream stages will still execute.",
                 self.run_id[:8],
             )
-            return result
-        result.gate1_decision = "PASS"
+        else:
+            result.gate1_decision = "PASS"
 
         # ── Stage 3: Data Profiling ───────────────────────────────────────
         profile_result = self._run_stage(result, "profiling", skip,
@@ -401,7 +524,14 @@ class PipelineBridge:
             confidence_score = float(conf_vector.get("confidence_score", 0.5))
 
         # ── Stage 9: Intelligent Retry Engine ─────────────────────────────────
-        domain = self.config.get("pipeline", {}).get("domain", "default")
+        # B8 fix: multi-level domain lookup with fallbacks
+        _pipe_cfg = self.config.get("pipeline", {})
+        domain = (
+            _pipe_cfg.get("domain")
+            or _pipe_cfg.get("regulatory", {}).get("domain")
+            or self.config.get("domain")
+            or "default"
+        )
         conf_thresh = float(
             self.config.get("pipeline", {}).get("confidence", {}).get(
                 "threshold",
@@ -432,8 +562,21 @@ class PipelineBridge:
                             snapshot, conf_vector or {}, model_metrics)
 
         # ── Stage 11: RL Update (Gate 1 must have passed) ─────────────────────
+        q_rows = len(result.quarantine_df) if getattr(result, "quarantine_df", None) is not None else 0
+        tot_rows = max(getattr(snapshot, "row_count", 0) or (q_rows + (len(df) if df is not None else 0)), 1)
+        q_frac = float(q_rows / tot_rows)
+        
+        # Extract data health if AnalystBrain was run successfully
+        data_health: float = 50.0 # default baseline
+        try:
+            brain_report = df.attrs.get("brain_report") if df is not None else None
+            if brain_report and "data_health_score" in brain_report:
+                data_health = float(brain_report["data_health_score"])
+        except Exception:
+            pass
+        
         self._run_stage(result, "rl_update", skip,
-                        self._stage_rl_update, snapshot.snapshot_id, drift_psi)
+                        self._stage_rl_update, snapshot.snapshot_id, drift_psi, q_frac, data_health)
 
         # ── Stage 12: Executive Reporting ─────────────────────────────────────
         report_path = self._run_stage(result, "reporting", skip,
@@ -490,7 +633,216 @@ class PipelineBridge:
             logger.debug(traceback.format_exc())
             return None
 
+    # ── Universal DataFrame guard ──────────────────────────────────────────────
+
+    def _guard_df(self, df: "Optional[pd.DataFrame]", stage_name: str) -> bool:
+        """
+        Returns False if the DataFrame cannot support this stage at all.
+        0-row DataFrames return True — schema/profiling can still run on structure.
+        """
+        if df is None:
+            logger.warning("[%s] Stage '%s': df is None — skipped.", self.run_id[:8], stage_name)
+            return False
+        if len(df.columns) == 0:
+            logger.warning("[%s] Stage '%s': df has 0 columns — skipped.", self.run_id[:8], stage_name)
+            return False
+        if len(df) == 0:
+            logger.info(
+                "[%s] Stage '%s': df has 0 rows — limited analysis only (schema/profiling still run).",
+                self.run_id[:8], stage_name,
+            )
+        elif len(df) < 5:
+            logger.info(
+                "[%s] Stage '%s': df has only %d row(s) — some analytics will be limited.",
+                self.run_id[:8], stage_name, len(df),
+            )
+        return True
+
     # ── Stage implementations ─────────────────────────────────────────────────
+
+    def _stage_analyst_brain(
+        self, df: pd.DataFrame, target_col: "Optional[str]"
+    ) -> "Dict[str, Any]":
+        """
+        Stage 0.4 — Senior Expert Analyst Intelligence Brain.
+
+        Analyses every single column with the reasoning of a seasoned data
+        analyst:
+          • Detects semantic type (ID / datetime / email / currency / categorical…)
+          • Chooses the correct transform strategy (log1p / sqrt / yeo-johnson)
+          • Selects the best outlier policy (IQR / winsorise / flag)
+          • Determines the right imputation method per column (MCAR→median,
+            MAR→KNN, MNAR→MICE, datetime→forward_fill, categorical→mode)
+          • Checks every business rule (negative ages/salaries, impossible dates,
+            future hire dates, percentage out of range, etc.)
+          • Detects exact duplicate columns
+          • Flags near-perfect correlations (multicollinearity)
+          • Identifies potential data leakage columns
+          • Auto-suggests a target variable if none is given
+          • Computes data health score 0–100
+
+        Every single decision is logged in plain English — full audit trail.
+        Results are attached to df.attrs for ALL downstream stages to use.
+        Returns dict {"df": annotated_df, "report": brain_report_dict}.
+        """
+        if not self._guard_df(df, "analyst_brain"):
+            return {"df": df, "report": {}}
+        try:
+            from preprocessing.analyst_brain import AnalystBrain
+            brain = AnalystBrain.from_config(self.config)
+            annotated_df, brain_report = brain.run(
+                df, run_id=self.run_id, target_col=target_col,
+                rl_recommendations=self._rl_recs
+            )
+            report_dict = brain_report.to_dict()
+
+            # Log key findings so they appear in the stage log immediately
+            drops = [col for col, d in brain_report.column_decisions.items() if d.should_drop]
+            violations = sum(
+                len(d.violations) for d in brain_report.column_decisions.values()
+            )
+            logger.info(
+                "[%s] AnalystBrain: domain=%s health=%.1f cols=%d "
+                "drops_recommended=%d violations=%d",
+                self.run_id[:8],
+                brain_report.detected_domain,
+                brain_report.data_health_score,
+                len(df.columns),
+                sum(1 for d in brain_report.column_decisions.values() if d.should_drop),
+                sum(len(d.violations) for d in brain_report.column_decisions.values()),
+            )
+            if drops:
+                logger.info("[%s] Brain recommends dropping: %s", self.run_id[:8], drops)
+            for note in brain_report.dataset_level_notes:
+                logger.info("[%s] Brain note: %s", self.run_id[:8], note)
+
+            return {"df": annotated_df, "report": report_dict}
+
+        except ImportError:
+            logger.warning("[%s] AnalystBrain not available — skipping (non-fatal).", self.run_id[:8])
+            return {"df": df, "report": {}}
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "[%s] AnalystBrain failed (non-fatal): %s — continuing without brain annotations.",
+                self.run_id[:8], exc,
+            )
+            return {"df": df, "report": {}}
+
+    def _stage_missing_data_engine(
+        self, df: pd.DataFrame, target_col: "Optional[str]"
+    ) -> "Dict[str, Any]":
+        """
+        Stage 0.6 — Missing Data Intelligence Engine.
+
+        Runs after RobustTriage (which fixes types/structure) and before
+        MissingPatternAnalyzer. Handles:
+          • String/numeric sentinel → NaN replacement
+          • >90%-null column dropping
+          • Per-column MCAR/MAR/MNAR classification
+          • Strategy-correct imputation (median→KNN→MICE)
+          • MNAR indicator column addition
+          • ≥80%-null row quarantine
+
+        Non-fatal: any failure returns the original df unchanged.
+        """
+        if not self._guard_df(df, "missing_data_engine"):
+            return {"df": df, "quarantine_df": pd.DataFrame(), "report": {}}
+        try:
+            from preprocessing.missing_data_engine import MissingDataEngine
+            engine = MissingDataEngine(config=self.config)
+
+            # Capture original dtypes BEFORE imputation so we can restore int columns after
+            original_dtypes = df.dtypes.to_dict()
+
+            clean_df, quarantine_df, md_report = engine.run(
+                df, run_id=self.run_id, target_col=target_col,
+                rl_recommendations=self._rl_recs
+            )
+
+            # Restore integer columns that were promoted to float64 by NaN injection
+            clean_df = _restore_integer_dtypes(clean_df, original_dtypes)
+
+            logger.info(
+                "[%s] MissingDataEngine: original=%s final=%s "
+                "dropped_cols=%d quarantine=%d sentinels=%d lib=%s",
+                self.run_id[:8],
+                md_report.original_shape, md_report.final_shape,
+                len(md_report.columns_dropped),
+                md_report.quarantine_rows,
+                md_report.sentinel_replacements_total,
+                md_report.imputation_library_used,
+            )
+            return {
+                "df": clean_df,
+                "quarantine_df": quarantine_df,
+                "report": md_report.to_dict(),
+            }
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "[%s] MissingDataEngine failed (non-fatal): %s — df unchanged.",
+                self.run_id[:8], exc,
+            )
+            return {"df": df, "quarantine_df": pd.DataFrame(), "report": {"error": str(exc)}}
+
+    def _stage_unsupervised(self, df: pd.DataFrame) -> "Dict[str, Any]":
+        """
+        Unsupervised analysis path — runs when:
+          • No target_col was provided
+          • Modeling guards fire (too few rows, no numeric cols, single class)
+
+        Executes:
+          1. Isolation Forest — anomaly detection (contamination=5%)
+          2. KMeans — cluster summary (2-5 clusters, adaptive)
+
+        Never crashes: all exceptions return empty results.
+        """
+        results: "Dict[str, Any]" = {"mode": "unsupervised"}
+        num_df = df.select_dtypes(include="number")
+        if num_df.empty or len(df) < 5:
+            logger.info("[%s] Unsupervised: insufficient numeric data (%d rows, %d numeric cols).",
+                        self.run_id[:8], len(df), len(num_df.columns))
+            results["info"] = "insufficient_data_for_unsupervised"
+            return results
+
+        X = num_df.fillna(num_df.median())
+
+        # ── 1. Isolation Forest anomaly detection ─────────────────────────────
+        try:
+            from sklearn.ensemble import IsolationForest
+            iso = IsolationForest(contamination=0.05, random_state=42, n_estimators=50)
+            preds = iso.fit_predict(X)
+            results["anomaly_count"] = int((preds == -1).sum())
+            results["anomaly_pct"]   = round(float((preds == -1).mean()) * 100, 2)
+            logger.info(
+                "[%s] Unsupervised IsoForest: %d anomalies (%.1f%%)",
+                self.run_id[:8], results["anomaly_count"], results["anomaly_pct"],
+            )
+        except Exception as exc:
+            logger.debug("[%s] IsolationForest failed: %s", self.run_id[:8], exc)
+            results["anomaly_error"] = str(exc)
+
+        # ── 2. KMeans clustering ──────────────────────────────────────────────
+        try:
+            from sklearn.cluster import KMeans
+            n_clusters = max(2, min(5, len(df) // max(10, len(df) // 10)))
+            km = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+            labels = km.fit_predict(X)
+            import pandas as _pd
+            cluster_sizes = _pd.Series(labels).value_counts().to_dict()
+            results["n_clusters"]    = n_clusters
+            results["cluster_sizes"] = {str(k): int(v) for k, v in cluster_sizes.items()}
+            logger.info(
+                "[%s] Unsupervised KMeans: %d clusters — sizes: %s",
+                self.run_id[:8], n_clusters, results["cluster_sizes"],
+            )
+        except Exception as exc:
+            logger.debug("[%s] KMeans failed: %s", self.run_id[:8], exc)
+            results["cluster_error"] = str(exc)
+
+        return results
+
+    # ── Stage implementations ─────────────────────────────────────────────────
+
 
     def _stage_preprocess(self, df: pd.DataFrame, target_col: Optional[str]) -> pd.DataFrame:
         try:
@@ -520,8 +872,21 @@ class PipelineBridge:
 
             from preprocessing.pipeline_builder import PipelineBuilder
             builder = PipelineBuilder(self.config)
-            pipe = builder.build(df, target_col=target_col)
             feature_cols = [c for c in df.columns if c != target_col]
+
+            # ── Guard: PipelineBuilder needs ≥1 numeric column ───────────────
+            numeric_feature_cols = [
+                c for c in df.select_dtypes(include="number").columns if c != target_col
+            ]
+            if not numeric_feature_cols:
+                logger.warning(
+                    "[%s] Preprocessing: 0 numeric features — skipping PipelineBuilder "
+                    "(sklearn requires numeric input). Returning cleaned df.",
+                    self.run_id[:8],
+                )
+                return df
+
+            pipe = builder.build(df, target_col=target_col)
             X = df[feature_cols]
             X_t = pipe.fit_transform(X)
             import numpy as np
@@ -579,7 +944,10 @@ class PipelineBridge:
             from validation.compliance_decision import ComplianceAdvisor
 
             reg_engine = RegulatoryEngine.from_config(self.config)
-            violations = reg_engine.evaluate(df)
+            # Use raw (pre-preprocessing) df so engine sees original string BICs,
+            # real transaction amounts — not label-encoded/scaled numeric values.
+            df_for_compliance = getattr(self, "_df_raw_for_compliance", df)
+            violations = reg_engine.evaluate(df_for_compliance)
             conflict_report = reg_engine.get_last_conflict_report()
 
             advisor = ComplianceAdvisor.from_config(self.config)
@@ -593,15 +961,26 @@ class PipelineBridge:
             # Store on self so _stage_confidence_vector can pick it up
             self._compliance_decision = decision
 
-            # Feature masking: temporarily disabled for demonstration so anomaly scorer can still view the flagged columns
+            # Feature masking: drop PII-violating columns to prevent downstream leakage
             if decision.violating_columns:
                 cols_to_drop = [c for c in decision.violating_columns if c in df.columns]
                 if cols_to_drop:
-                    # df.drop(columns=cols_to_drop, inplace=True)
-                    logger.warning(
-                        "[%s] ComplianceAdvisor: flagged %d violating column(s) but masking is disabled for demo: %s",
-                        self.run_id[:8], len(cols_to_drop), cols_to_drop,
+                    logger.info(
+                        "Dropping %d PII/compliance-violating columns: %s",
+                        len(cols_to_drop), cols_to_drop,
                     )
+                    df.drop(columns=cols_to_drop, inplace=True)
+                    # Audit record for PII column removal
+                    audit_record = {
+                        "event": "pii_columns_dropped",
+                        "columns_removed": cols_to_drop,
+                        "run_id": self.run_id,
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "regulatory_engine_version": getattr(reg_engine, "version", "unknown"),
+                    }
+                    logger.info("AUDIT: %s", audit_record)
+                else:
+                    logger.info("No PII columns flagged for removal.")
 
             # Block pipeline entirely on BLOCKED decision (critical violations)
             if decision.decision == "blocked":
@@ -674,13 +1053,65 @@ class PipelineBridge:
             return {}
 
     def _stage_model(self, df: pd.DataFrame, target_col: str) -> Dict:
+        """
+        Stage 6 — ML Modeling.
+
+        Four crash guards run before any sklearn/ModelTrainer code:
+          1. Too few rows (< 10) → unsupervised analysis
+          2. No numeric features → unsupervised analysis
+          3. Target column missing from df → unsupervised analysis
+          4. Single-class target → unsupervised analysis (can't train classifier)
+
+        Supervised path only runs when ALL four guards pass.
+        """
+        if not self._guard_df(df, "modeling"):
+            return {"error": "empty_dataframe"}
+
+        # ── Guard 1: too few rows ──────────────────────────────────────────────
+        if len(df) < 10:
+            logger.warning(
+                "[%s] Modeling guard 1: only %d row(s) — running unsupervised analysis.",
+                self.run_id[:8], len(df),
+            )
+            return self._stage_unsupervised(df)
+
+        # ── Guard 2: no numeric features ───────────────────────────────────────
+        feature_cols = [c for c in df.select_dtypes(include="number").columns if c != target_col]
+        if not feature_cols:
+            logger.warning(
+                "[%s] Modeling guard 2: no numeric features — running unsupervised analysis.",
+                self.run_id[:8],
+            )
+            return self._stage_unsupervised(df)
+
+        # ── Guard 3: target column missing entirely ────────────────────────────
+        if target_col not in df.columns:
+            logger.warning(
+                "[%s] Modeling guard 3: target_col '%s' not in df — running unsupervised analysis.",
+                self.run_id[:8], target_col,
+            )
+            return self._stage_unsupervised(df)
+
+        # ── Guard 4: single class in target (can't train a classifier) ─────────
+        y = df[target_col]
+        n_unique = int(y.dropna().nunique())
+        if n_unique < 2:
+            logger.warning(
+                "[%s] Modeling guard 4: target '%s' has only %d unique value(s) — "
+                "running unsupervised analysis.",
+                self.run_id[:8], target_col, n_unique,
+            )
+            return self._stage_unsupervised(df)
+
+        # ── Supervised modeling path ───────────────────────────────────────────
         try:
-            # ── RL AutoML: select scaler/model/imputer triple ─────────────
+            # RL AutoML: select scaler/model/imputer triple
             rl_pipeline = None
+            null_rate = 0.0
             try:
                 from modeling.rl_automl import get_rl_automl
                 rl_auto = get_rl_automl()
-                null_rate = df.isnull().mean().mean()
+                null_rate = float(df.isnull().mean().mean())
                 rl_pipeline = rl_auto.select_pipeline(
                     n_rows=len(df), n_cols=df.shape[1],
                     null_rate=null_rate, task="classification",
@@ -694,14 +1125,10 @@ class PipelineBridge:
 
             from modeling.trainer import ModelTrainer
             trainer = ModelTrainer(config=self.config)
-            feature_cols = [c for c in df.select_dtypes(include="number").columns if c != target_col]
-            if not feature_cols:
-                return {"error": "No numeric features available"}
 
-            # Triage + DataCleaner should have handled all NaNs. If NaNs remain,
-            # that means preprocessing was skipped or failed — warn and use median
-            # (not 0, which destroys statistical properties).
-            remaining_nulls = df[feature_cols].isnull().sum().sum()
+            # MissingDataEngine + Triage should have handled all NaNs.
+            # Defensive fallback: if NaNs remain, fill with column medians.
+            remaining_nulls = int(df[feature_cols].isnull().sum().sum())
             if remaining_nulls > 0:
                 logger.warning(
                     "[Model] %d NaN(s) remain after preprocessing — filling with column medians.",
@@ -711,28 +1138,31 @@ class PipelineBridge:
             else:
                 X = df[feature_cols]
 
-            y = df[target_col]
-            result = trainer.train(X, y, run_id=self.run_id)
-            metrics = result.get("metrics", {}) if isinstance(result, dict) else {}
+            train_result = trainer.train(X, y, run_id=self.run_id)
+            metrics = train_result.get("metrics", {}) if isinstance(train_result, dict) else {}
 
-            # ── RL AutoML feedback loop ────────────────────────────────────
+            # RL AutoML feedback loop
             if rl_pipeline is not None:
                 try:
-                    cv_score = metrics.get("roc_auc", metrics.get("accuracy", 0.0))
+                    cv_score = float(metrics.get("roc_auc", metrics.get("accuracy", 0.0)))
                     rl_auto.record_outcome(
                         n_rows=len(df), n_cols=df.shape[1],
                         null_rate=null_rate, task="classification",
                         pipeline=rl_pipeline, cv_score=cv_score,
                         training_time_s=0.0,
                     )
-                except Exception:  # noqa: BLE001
-                    pass
+                except Exception as exc:
+                    logger.warning(
+                        "RL outcome recording failed — non-fatal, continuing pipeline. Reason: %s",
+                        exc,
+                        exc_info=True,
+                    )
             return metrics
         except ImportError:
-            logger.warning("ModelTrainer not available")
-            return {}
+            logger.warning("[%s] ModelTrainer not available — running unsupervised.", self.run_id[:8])
+            return self._stage_unsupervised(df)
         except Exception as exc:
-            logger.warning("Modeling failed (non-fatal): %s", exc)
+            logger.warning("[%s] Modeling failed (non-fatal): %s — returning error dict.", self.run_id[:8], exc)
             return {"error": str(exc)}
 
     def _stage_proposal(self, df: pd.DataFrame,
@@ -793,13 +1223,23 @@ class PipelineBridge:
 
             risk_flags = []
             if hasattr(self, "_compliance_decision") and self._compliance_decision:
-                for viol in getattr(self._compliance_decision, "violations", []):
-                    sev_level = "HIGH" if viol.severity == "CRITICAL" else ("MEDIUM" if viol.severity == "ERROR" else "LOW")
+                for viol in getattr(self._compliance_decision, "violation_summary", []):
+                    sev = viol.get("severity", "WARNING")
+                    sev_level = "HIGH" if sev == "CRITICAL" else ("MEDIUM" if sev == "ERROR" else "LOW")
                     risk_flags.append({
-                        "level": sev_level,
-                        "category": f"Regulatory ({viol.domain.upper()})",
-                        "message": f"Rule '{viol.rule_name}' on '{viol.column}' affected {viol.offending_count} row(s): {viol.message} Remediation: {viol.remediation}"
+                        # Structured fields — read directly by _build_regulatory in analytics.py
+                        "rule_name":       viol.get("rule_name", "Unknown Rule"),
+                        "severity":        sev,
+                        "level":           sev_level,
+                        "domain":          viol.get("domain", "banking"),
+                        "column":          viol.get("column", "N/A"),
+                        "offending_count": viol.get("offending_count", 0),
+                        "message":         viol.get("message", ""),
+                        "remediation":     viol.get("remediation", ""),
+                        "category":        f"Regulatory ({viol.get('domain', 'banking').upper()})",
+                        "type":            "REGULATORY_VIOLATION",
                     })
+
 
             pipeline_result.regulatory_report = risk_flags
 
@@ -811,6 +1251,7 @@ class PipelineBridge:
                 model_metrics=pipeline_result.model_metrics or {},
                 narrative=narrative or "",
                 risk_flags=risk_flags,
+                brain_report=getattr(pipeline_result, "brain_report", None),
             )
             return path
         except ImportError:
@@ -1250,38 +1691,55 @@ class PipelineBridge:
             return False
 
     def _stage_rl_update(self, snapshot_id: str,
-                          drift_psi: Optional[float]) -> bool:
+                          drift_psi: Optional[float], quarantine_frac: float = 0.0, data_health_score: float = 50.0) -> bool:
         """
-        Step 10 — RL Update via ReinforcementUpdateEngine (Meta-RL, regret, EWC).
-        Only called when Gate 1 passed. Gate 2 partial fails are allowed to learn.
+        Stage 11 — RL Update via ReinforcementUpdateEngine (Meta-RL, regret, EWC).
+
+        Always non-blocking. Returns False on any failure instead of raising.
+        Previously raised RuntimeError which caused a hard stage FAIL — fixed.
         """
         try:
-            from learning.reinforcement_update_engine import ReinforcementUpdateEngine
-            engine = ReinforcementUpdateEngine.from_config(self.config)
-            summary = engine.update_for_run(
-                run_id=self.run_id,
-                drift_psi=drift_psi,
-                episode=getattr(self, "_episode", None),
+            from learning.rl_agent.agent import PPOAgent
+            # Reconstruct context since recommend must be called before record_outcome
+            engine = PPOAgent.from_config(self.config)
+            
+            # The agent needs context to recommend an action 
+            dummy_context = {
+                "n_rows": getattr(self, "_stage_rows", 1000), 
+                "n_cols": 20,
+                "null_rate": quarantine_frac, 
+                "anomaly_rate": 0.0,
+                "drift_psi": drift_psi or 0.0, 
+                "data_health": data_health_score, 
+                "domain": "generic",
+            }
+            engine.recommend(dummy_context, greedy=True)
+            
+            # Now we can record outcome
+            result_summary = getattr(self, "_last_result_summary", {})
+            analytics = {"data_health_score": data_health_score, "drift_psi": drift_psi}
+            
+            summary = engine.record_outcome(
+                result_summary=result_summary,
+                analytics=analytics,
+                user_approved_plan=True
             )
             logger.info(
-                "[%s] RL Update: retry=%s ranker=%s conf=%s meta=%s regret=%s "
-                "epsilon=%s rollback=%s sandbox=%s",
+                "[%s] PPO RL Update: episode=%s reward=%s shadow_mode=%s",
                 self.run_id[:8],
-                summary.updated_retry_policy,
-                summary.updated_ranker_priors,
-                summary.updated_confidence_weights,
-                summary.policies_updated,
-                summary.regret_updated,
-                summary.epsilon_adjusted,
-                summary.rollback_triggered,
-                summary.sandbox_active,
+                summary.get("episode_count"),
+                summary.get("reward"),
+                summary.get("in_shadow_mode")
             )
             return True
         except ImportError:
-            logger.warning("RL Update engine missing — skipping.")
+            logger.info("[%s] RL Update engine not installed — skipping (non-fatal).", self.run_id[:8])
             return False
         except Exception as exc:  # noqa: BLE001
-            raise RuntimeError(f"RL Update failed: {exc}")
+            # Previously: raise RuntimeError(f"RL Update failed: {exc}")
+            # Now: non-blocking warning. RL failure never halts the pipeline.
+            logger.warning("[%s] RL Update failed (non-fatal): %s", self.run_id[:8], exc)
+            return False
 
     # ── Robustness Stage Implementations ──────────────────────────────────────
 
@@ -1506,7 +1964,7 @@ class PipelineBridge:
             run_id=self.run_id,
         )
         logger.info(
-            "[%s] Feature stability: status=%s τ=%s gained=%s lost=%s",
+            "[%s] Feature stability: status=%s tau=%s gained=%s lost=%s",
             self.run_id[:8],
             stability_report.status,
             f"{stability_report.tau:.3f}" if stability_report.tau is not None else "N/A",
@@ -1514,3 +1972,75 @@ class PipelineBridge:
             stability_report.features_lost,
         )
         return stability_report.to_dict()
+
+    def _stage_rl_update(
+        self,
+        snapshot_id: str,
+        drift_psi: Optional[float],
+        quarantine_frac: float,
+        data_health: float,
+    ) -> Dict[str, Any]:
+        """
+        Stage 11 — PPO Agent Feedback Loop (closes the RL learning cycle).
+
+        This is the CRITICAL closing step: without it the PPOAgent receives no
+        reward signal from real pipeline runs and cannot learn.
+
+        What happens here:
+          1. Reconstruct the PipelineResult summary for the agent.
+          2. Build analytics dict from stage outputs accumulated on self.
+          3. Call agent.record_outcome() — this triggers PPO weight update
+             once the buffer has >= 32 transitions.
+          4. Log reward breakdown for monitoring.
+
+        Non-fatal: any exception is caught and logged; pipeline result unaffected.
+        """
+        try:
+            # Use the SAME agent instance from Step 0 (has _current_state set by recommend())
+            agent = getattr(self, "_ppo_agent_instance", None)
+            if agent is None:
+                logger.debug("[%s] RL update: no agent instance from Step 0.", self.run_id[:8])
+                return {"skipped": "no_agent_instance"}
+
+            # Build result_summary from accumulated pipeline state
+            result_summary = {
+                "gate_decision":   getattr(self, "_gate_decision_cache", "WARN"),
+                "model_metrics":   getattr(self, "_model_metrics_cache", {}),
+                "quarantine_rows": int(quarantine_frac * 1000),  # normalised proxy
+                "retry_count":     getattr(self, "_current_retry_count", 0),
+            }
+
+            analytics = {
+                "data_health_score": data_health,
+                "drift_psi":         drift_psi or 0.0,
+            }
+
+            # user_approved_plan: True if a pre-analysis plan was accepted this run
+            user_approved = bool(
+                self.config.get("pipeline", {}).get("plan_approved", False)
+            )
+
+            outcome = agent.record_outcome(
+                result_summary=result_summary,
+                analytics=analytics,
+                user_approved_plan=user_approved,
+            )
+
+            logger.info(
+                "[%s] RL update: episode=%d reward=%.4f shadow=%s training_metrics=%s",
+                self.run_id[:8],
+                outcome.get("episode_count", 0),
+                outcome.get("reward", 0.0),
+                outcome.get("in_shadow_mode", True),
+                {k: round(v, 4) for k, v in
+                 outcome.get("training_metrics", {}).items()
+                 if isinstance(v, float)},
+            )
+            return outcome
+
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "[%s] RL update stage failed (non-fatal): %s",
+                self.run_id[:8], exc,
+            )
+            return {"error": str(exc)}

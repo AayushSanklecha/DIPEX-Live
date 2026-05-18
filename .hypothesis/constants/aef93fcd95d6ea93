@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\proposal\ml_confidence_scorer.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.05, 0.1, 0.2, 0.3, 0.5, 0.99, 1.0, 1000.0, '..', '_ml_confidence', 'anomaly', 'anomaly_count', 'columns_drifted', 'confidence', 'correlation', 'cv_score', 'drift_flag', 'drifted', 'feature', 'flag_severity_max', 'heuristic', 'high_confidence', 'hypothesis', 'join', 'label', 'low_confidence', 'method', 'ml', 'model', 'models', 'n_cols', 'n_columns', 'null_rate', 'optimization', 'proposer_type', 'proposer_type_enc', 'quality_score', 'rag', 'rows', 'sample_size', 'sample_size_k', 'unknown']

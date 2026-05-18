@@ -138,7 +138,12 @@ class ConfidenceCalibrator:
             )
             return None, report
 
-        if y_train.nunique() != 2:
+        try:
+            n_unique = y_train.nunique()
+        except Exception: # noqa: BLE001
+            n_unique = y_train.astype(str).nunique()
+            
+        if n_unique != 2:
             report.warnings.append(
                 "Calibration currently supports binary classification only."
             )

@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\connectors\factory.py
-# hypothesis_version: 6.151.9
-
-['.', 'api', 'clickhouse', 'duckdb', 'elastic', 'elasticsearch', 'graph', 'graphql', 'kafka', 'mongo', 'mongodb', 'mssql', 'mysql', 'neo4j', 'opensearch', 'oracle', 'postgres', 'postgresql', 'rest', 'source_type', 'sql', 'sqlite', 'type']

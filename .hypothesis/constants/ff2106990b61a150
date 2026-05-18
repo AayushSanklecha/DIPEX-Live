@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\cognitive\sanity_checker.py
-# hypothesis_version: 6.151.9
-
-[0.01, 0.25, 0.5, 0.75, 0.8, 0.85, 0.95, 1.0, 3.0, 100, 120, '0 negative values', '0 violations', '<', '<=', '==', '>', '>=', 'CRITICAL', 'WARNING', 'age', 'all values in [0, 1]', 'amount', 'churn', 'cognitive', 'column', 'confidence', 'conversion', 'cost', 'count', 'cross_metric', 'cross_metric_rules', 'custom_max', 'custom_min', 'data_layers', 'detail', 'duration', 'expected', 'heuristics', 'iqr_fence', 'max', 'max_null_rate', 'max_zero_rate', 'min', 'min_row_count', 'non_negative', 'non_negative_cols', 'number', 'pct', 'pct_sum', 'percent', 'price', 'probability', 'proportion', 'quantity', 'rate', 'rate_cols', 'rate_in_range', 'ratio', 'retention', 'revenue', 'row_sum ≈ 100', 'rule', 'sales', 'score', 'severity', 'share', 'value']

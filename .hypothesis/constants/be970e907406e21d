@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\connectors\sql_connector.py
-# hypothesis_version: 6.151.9
-
-[1.0, 10000, ':memory:', 'DB_HOST', 'DB_NAME', 'DB_PASS', 'DB_PORT', 'DB_USER', 'SELECT 1', 'chunk_size', 'columns', 'database', 'description', 'dialect', 'dipex.connectors.sql', 'dsn', 'dtypes', 'error', 'estimated_row_count', 'host', 'localhost', 'name', 'nullable', 'password', 'pool_size', 'port', 'query', 'schema', 'sqlite', 'table', 'tables', 'type', 'username', 'watermark_col', 'watermark_value']

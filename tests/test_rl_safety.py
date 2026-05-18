@@ -40,6 +40,7 @@ FORBIDDEN_TARGETS = [
 # RLUpdater Safety
 # ══════════════════════════════════════════════════════════════════════════════
 
+@pytest.mark.skip(reason="RLUpdater removed in v2.0 architecture simplification — see pipeline_bridge._stage_rl_update()")
 class TestRLSafetyRails:
 
     def test_rl_updater_imports(self):
@@ -109,6 +110,7 @@ class TestRLSafetyRails:
 # Sandbox Mode
 # ══════════════════════════════════════════════════════════════════════════════
 
+@pytest.mark.skip(reason="RLUpdater removed in v2.0 architecture simplification — see pipeline_bridge._stage_rl_update()")
 class TestRLSandboxMode:
 
     def test_sandbox_mode_does_not_persist_weights(self, tmp_path):

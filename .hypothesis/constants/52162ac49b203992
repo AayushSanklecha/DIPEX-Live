@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\validation\regulatory\__init__.py
-# hypothesis_version: 6.151.9
-
-['AMLThresholdRule', 'AgeRangeRule', 'BaseRegulatoryRule', 'LoanRatioRule', 'PHIPresenceRule', 'PositiveAmountRule', 'RegulatoryEngine', 'RegulatoryViolation', 'VitalSignsRule']

@@ -226,8 +226,13 @@ class TemporalSplitter:
         if info.strategy == "standard_kfold":
             # Return proper sklearn object
             from sklearn.model_selection import StratifiedKFold, KFold
-            if target_col and df[target_col].nunique() < 20:
-                return StratifiedKFold(n_splits=self.n_splits, shuffle=False)
+            if target_col and target_col in df.columns:
+                try:
+                    _target_nuniq = df[target_col].nunique()
+                except Exception:  # noqa: BLE001 — unhashable
+                    _target_nuniq = 20  # force KFold
+                if _target_nuniq < 20:
+                    return StratifiedKFold(n_splits=self.n_splits, shuffle=False)
             return KFold(n_splits=self.n_splits, shuffle=False)
         return splits  # sklearn accepts list of (train_idx, test_idx) directly
 
@@ -268,10 +273,15 @@ class TemporalSplitter:
         """Standard sklearn k-fold as fallback."""
         try:
             from sklearn.model_selection import StratifiedKFold, KFold
-            if target_col and target_col in df.columns and df[target_col].nunique() < 20:
-                cv = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=42)
-                y = df[target_col]
-                return list(cv.split(np.zeros(n), y))
+            if target_col and target_col in df.columns:
+                try:
+                    _target_nuniq = df[target_col].nunique()
+                except Exception:  # noqa: BLE001 — unhashable
+                    _target_nuniq = 20  # force KFold
+                if _target_nuniq < 20:
+                    cv = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=42)
+                    y = df[target_col]
+                    return list(cv.split(np.zeros(n), y))
             else:
                 cv = KFold(n_splits=self.n_splits, shuffle=True, random_state=42)
                 return list(cv.split(np.zeros(n)))

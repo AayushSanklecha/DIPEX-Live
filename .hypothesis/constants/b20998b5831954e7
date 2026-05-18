@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\validation\drift_detector.py
-# hypothesis_version: 6.151.9
-
-[1e-06, 0.2, 0.25, 0.5, 0.75, 'ERROR', 'SchemaDriftDetector', 'WARNING', 'column', 'column_added', 'column_removed', 'current_dtype', 'data', 'dataset_id', 'details', 'distribution_drift', 'drift', 'drift_type', 'dtype', 'dtype_changed', 'evaluated_at', 'expected_dtype', 'has_errors', 'hist_bins', 'hist_pcts', 'is_first_run', 'max', 'mean', 'message', 'min', 'n', 'p25', 'p50', 'p75', 'previous_dtype', 'psi', 'psi_bins', 'psi_threshold', 'registry_dir', 'retrain_required', 'run_id', 'schema', 'schema_registry', 'schema_written', 'severity', 'statistics', 'std', 'threshold', 'track_distribution', 'utf-8', 'validation', 'violations', 'w', 'written_at']

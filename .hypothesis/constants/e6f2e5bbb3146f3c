@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\validation\integrity_checker.py
-# hypothesis_version: 6.151.9
-
-['ALL', 'DUPLICATE_ROWS', 'ERROR', 'WARNING', 'allowed_values', 'check_duplicates', 'column', 'cross_column_rules', 'id_columns', 'if_col', 'if_value', 'integrity', 'is_null', 'message', 'non_negative', 'not_null', 'positive', 'referential', 'severity', 'then_col', 'then_condition', 'type', 'validation']

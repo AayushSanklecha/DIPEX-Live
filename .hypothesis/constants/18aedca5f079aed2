@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\reporting_service\risk_communicator.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.4, 0.6, 0.75, 'BLOCK', 'CRITICAL', 'Compliance', 'Confidence Dimension', 'Confidence Vector', 'DRIFT', 'Data Completeness', 'Data Drift', 'Data Quality', 'Governance', 'Governance Engine', 'HIGH', 'Hard Gate 1', 'Hard Gate 2', 'LOW', 'MEDIUM', 'MINIMAL', 'Model Confidence', 'Model Verification', 'NULL', 'PASS', 'Pipeline Stability', 'Profiling Engine', 'REJECT', 'Retry Engine', 'RiskCommunicator', 'WARN', 'category', 'confidence_score', 'flag', 'flags', 'high_count', 'level', 'low_count', 'medium_count', 'message', 'narrative', 'overall_risk_level', 'policy_id', 'recommendation', 'run_id', 'severity', 'source']

@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\proposal\proposal_engine.py
-# hypothesis_version: 6.151.9
-
-['CANDIDATES_COLLECTED', 'aggregation', 'anomaly', 'automl', 'bandit', 'candidates', 'encoding', 'error', 'pipeline', 'ranker', 'run_id', 'status', 'target_col', 'target_column', 'transformation', 'unknown', 'window']

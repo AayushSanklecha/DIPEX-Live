@@ -292,8 +292,12 @@ class Profiler:
     def _profile_categorical(
         series: pd.Series, profile: Dict[str, Any], n_rows: int
     ) -> None:
-        vc = series.value_counts(dropna=False)
-        non_null_vc = series.value_counts(dropna=True)
+        try:
+            vc = series.value_counts(dropna=False)
+            non_null_vc = series.value_counts(dropna=True)
+        except Exception:
+            vc = series.astype(str).value_counts(dropna=False)
+            non_null_vc = series.astype(str).value_counts(dropna=True)
 
         profile["top_values"] = {
             str(k): int(v) for k, v in non_null_vc.head(10).items()

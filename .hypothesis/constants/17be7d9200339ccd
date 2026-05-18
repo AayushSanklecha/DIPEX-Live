@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\api\routes\stats.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.05, 400, 404, '.csv', '/describe', '/hypotheses', '/regression', '/stats', 'Statistical Analysis', '_cleaned.csv', '_sample.csv', 'anova', 'columns', 'data/uploads', 'dataset_summary', 'dipex.api.stats', 'kruskal', 'lasso', 'logistic', 'mann_whitney', 'ols', 'one_sample_t', 'pearson', 'records', 'ridge', 'spearman', 'summary_table', 'two_sample_t']

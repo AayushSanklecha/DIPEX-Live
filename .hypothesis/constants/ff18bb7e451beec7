@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\preprocessing\temporal_splitter.py
-# hypothesis_version: 6.151.9
-
-[0.2, 0.5, 'TemporalSplitter', 'auto', 'auto_detect_patterns', 'coerce', 'created', 'date', 'day', 'dt', 'max_test_size', 'min_train_fraction', 'min_train_size', 'month', 'n_splits', 'preprocessing', 'raise', 'reason', 'sliding_window', 'sliding_window_size', 'standard_kfold', 'strategy', 'temporal', 'temporal_col', 'test_fraction', 'time', 'timestamp', 'updated', 'walk_forward', 'warnings']

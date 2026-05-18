@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\snapshot.py
-# hypothesis_version: 6.151.9
-
-['Snapshot saved: %s', 'cols', 'data/snapshots', 'fingerprint', 'path', 'pyarrow', 'r', 'registry.json', 'rows', 'source', 'timestamp', 'w']

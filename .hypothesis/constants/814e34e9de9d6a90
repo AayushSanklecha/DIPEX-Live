@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\proposal\proposers\automl_proposer.py
-# hypothesis_version: 6.151.9
-
-[0.2, 0.8, 100, 'RandomForest', 'X_train', 'accuracy', 'artifacts', 'candidates', 'classification', 'coerce', 'confidence', 'error', 'estimator', 'features', 'metric_name', 'metric_value', 'model_type', 'mse', 'primary_task', 'regression', 'target_col', 'task', 'time_column', 'train_index', 'val_index', 'y_pred_val', 'y_train', 'y_true_val']

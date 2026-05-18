@@ -98,6 +98,26 @@ export const ResultsService = {
       console.error(`Error fetching intelligence for run ${runId}:`, error);
       return null;
     }
+  },
+
+  getCompliance: async (runId) => {
+    try {
+      const response = await cachedGet(`/api/results/${runId}/compliance`);
+      return response;
+    } catch (error) {
+      console.error(`Error fetching compliance for run ${runId}:`, error);
+      return null;
+    }
+  },
+
+  getLineage: async (runId) => {
+    try {
+      const response = await cachedGet(`/api/results/${runId}/lineage`);
+      return response;
+    } catch (error) {
+      console.error(`Error fetching lineage for run ${runId}:`, error);
+      return null;
+    }
   }
 };
 

@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\validation\hard_gate.py
-# hypothesis_version: 6.151.9
-
-['CRITICAL', 'ERROR', 'HardGate', 'N/A', 'PASS', 'REJECT', 'decision', 'evaluated_at', 'failures', 'reason', 'run_id', 'schema', 'severity', 'suppress_learning', 'total_violations', 'total_warnings', 'validation', 'warnings']

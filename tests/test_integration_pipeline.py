@@ -26,12 +26,7 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 
-@pytest.fixture(scope="module")
-def client():
-    from api.app import app
-    from fastapi.testclient import TestClient
-    with TestClient(app, raise_server_exceptions=False) as c:
-        yield c
+# client fixture is provided by tests/conftest.py (auth-aware)
 
 
 @pytest.fixture(scope="module")

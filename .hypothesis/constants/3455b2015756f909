@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\immutability_guard.py
-# hypothesis_version: 6.151.9
-
-[10000, 65536, '>QQ', 'DataFrameSignature', 'MutationProbe', 'analyst_orchestrator', 'bronze', 'checksum', 'cognitive', 'columns', 'dashboard', 'dataset_id', 'excel_transform', 'feature_engineering', 'gold', 'ingestion', 'junior_analyst', 'layer', 'mid_analyst', 'modeling', 'normaliser', 'preprocessing', 'profiling', 'rb', 'replace', 'reporting', 'schema_registry', 'senior_analyst', 'shape', 'silver', 'sql_transform', 'statistics', 'streaming', '|']

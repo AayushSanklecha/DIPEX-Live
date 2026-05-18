@@ -55,7 +55,10 @@ class EncodingProposer(BaseProposer):
             if series.empty:
                 continue
 
-            cardinality = int(series.nunique())
+            try:
+                cardinality = int(series.nunique())
+            except Exception: # noqa: BLE001
+                cardinality = int(series.astype(str).nunique())
             ratio = cardinality / float(n_rows) if n_rows else 0.0
 
             if cardinality <= 10 and ratio <= 0.1:

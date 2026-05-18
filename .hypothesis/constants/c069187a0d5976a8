@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\proposal\proposers\anomaly_proposer.py
-# hypothesis_version: 6.151.9
-
-[100, 'IsolationForest', 'PROPOSED', 'anomaly', 'anomaly_candidates', 'auto', 'contamination', 'detected_outlier_pct', 'error', 'method', 'n_estimators', 'proposal', 'status', 'suggested_threshold']

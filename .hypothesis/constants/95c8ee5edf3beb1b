@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\profiling\drift_detector.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-12, 1e-06, 0.05, 0.1, 0.25, 2.0, 100, 300, '..', '7D', 'DRIFT_DETECTED', 'SIGNIFICANT_DRIFT', 'STABLE', 'UTC', 'WATCH', '[MULTIVARIATE]', 'adam', 'alert', 'alert_windows', 'analyst_flags', 'coerce', 'colab_artifact', 'column', 'columns', 'detail', 'drift', 'drift_scaler.pkl', 'drifted', 'drifted_columns', 'drifted_ratio', 'enabled', 'error', 'exception', 'feature_names_in_', 'flag', 'global_mean', 'global_std', 'in_memory_fit', 'js_divergence', 'js_drifted', 'ks_drifted', 'ks_p_value', 'ks_p_value_threshold', 'ks_statistic', 'mean', 'mean_current_error', 'median', 'method', 'models', 'multivariate', 'n', 'n_features_in_', 'number', 'period', 'profiling', 'psi', 'psi_stable_threshold', 'psi_status', 'psi_watch_threshold', 'reason', 'relu', 'skipped', 'skipped_no_sklearn', 'std', 'temporal', 'threshold_error', 'timestamp_column', 'window', 'windows']

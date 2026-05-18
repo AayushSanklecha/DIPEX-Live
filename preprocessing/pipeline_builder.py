@@ -126,7 +126,13 @@ class PipelineBuilder:
             _MAX_OHE_CARDINALITY = 50
             safe_cat_cols = []
             for c in categorical_cols:
-                n_uniq = df[c].nunique(dropna=True)
+                try:
+                    n_uniq = df[c].nunique(dropna=True)
+                except Exception:  # noqa: BLE001 — unhashable types
+                    try:
+                        n_uniq = df[c].astype(str).nunique(dropna=True)
+                    except Exception:  # noqa: BLE001
+                        n_uniq = _MAX_OHE_CARDINALITY + 1  # skip OHE
                 if n_uniq <= _MAX_OHE_CARDINALITY:
                     safe_cat_cols.append(c)
                 else:

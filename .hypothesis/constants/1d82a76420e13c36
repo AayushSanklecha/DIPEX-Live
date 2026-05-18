@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\validation\regulatory\banking_rules.py
-# hypothesis_version: 6.151.9
-
-[0.9, 10000.0, '> 0', '>= 0', 'ERROR', 'WARNING', 'aml_threshold', 'banking', 'loan_ratio', 'nan', 'positive_amount']

@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\analyst\experiment_designer.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.001, 0.01, 0.05, 0.8, 0.999, 0.9999, 1.2, 100, 5000, 'Adequate power ✓', 'Chi-square', 'Group balance', 'Metric distribution', 'Novelty effect risk', 'Welch t-test', 'achieved_power', 'alpha', 'baseline_rate', 'check', 'checks', 'coerce', 'cohen_h', 'column', 'ctrl_mean', 'days', 'detail', 'detected', 'duration_days', 'effect_size_absolute', 'inf', 'leakage_detected', 'leaky_columns', 'lift_pct', 'n_per_group', 'name', 'note', 'notes', 'overall_valid', 'p_value', 'passed', 'power', 'primary_metric', 'recommendation', 'runtime_days', 'significant', 'split_ratio', 'test', 'test_results', 'total_n', 'treatment_mean', 'utf-8', 'variant_rate', 'w', 'warnings', 'z_alpha', 'z_beta']

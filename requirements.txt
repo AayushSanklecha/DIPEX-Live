@@ -53,7 +53,7 @@ requests==2.32.3
 requests-toolbelt==1.0.0
 rfc3986==2.0.0
 rich==14.0.0
-scikit-learn==1.5.2
+scikit-learn>=1.6.1
 scipy==1.14.1
 seaborn==0.13.2
 setuptools==75.6.0
@@ -62,15 +62,17 @@ SimpleWebSocketServer==0.1.2
 six==1.16.0
 sympy==1.14.0
 threadpoolctl==3.5.0
-torch==2.8.0
-torchaudio==2.8.0
-torchvision==0.23.0
+# PyTorch — optional, excluded from Docker image per README (saves ~900MB)
+# Install locally for deep learning: pip install torch==2.10.0 torchaudio==2.10.0 torchvision==0.25.0
+# torch==2.10.0
+# torchaudio==2.10.0
+# torchvision==0.25.0
 tqdm==4.67.1
 twine==6.1.0
 typing==3.7.4.3
 typing_extensions==4.14.1
 tzdata==2024.2
-urllib3==2.4.0
+urllib3>=1.26.0,<2.1
 ushlex==0.99.1
 uuid==1.30
 websocket-client==1.8.0
@@ -95,7 +97,9 @@ uvicorn[standard]>=0.27.0
 
 
 # ── Authentication & Security ──────────────────────────────────────────────────
-python-jose[cryptography]>=3.3.0
+# python-jose removed Sprint 3 — JWT auth not yet implemented.
+# Re-add with: pip install python-jose[cryptography]>=3.3.0
+# python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
 cryptography>=42.0.0
 python-multipart>=0.0.9

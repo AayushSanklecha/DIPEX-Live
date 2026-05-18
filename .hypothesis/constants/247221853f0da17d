@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\ingestion\readers\db_reader.py
-# hypothesis_version: 6.151.9
-
-[1000, 5000, 6379, 50000, 100000, '$gt', '*', '-', ':', 'CALL db.labels()', 'ExclusiveStartKey', 'Items', 'LastEvaluatedKey', 'TableNames', '_', '_id', '_key', 'account', 'authentication', 'bigquery', 'boto3 not installed', 'cassandra', 'clickhouse', 'columns', 'connect', 'constrained_columns', 'couchdb', 'dynamodb', 'hash', 'list', 'localhost', 'mariadb', 'mongo', 'mongodb', 'mssql', 'mysql', 'name', 'neo4j', 'neo4j not installed', 'nullable', 'oracle', 'postgres', 'postgresql', 'primary_keys', 'redis', 'redis not installed', 'redshift', 'refused', 'region_name', 'snowflake', 'sqlalchemy', 'sqlite', 'sqlserver', 'string', 'type', 'us-east-1', 'value', 'values']

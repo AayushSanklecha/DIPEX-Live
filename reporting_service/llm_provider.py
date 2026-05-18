@@ -203,6 +203,35 @@ class LLMProvider:
             + "\n\n*Set `HF_API_KEY` to enable LLM-generated domain-specific remediation guidance.*"
         )
 
+    def extract_image_context(
+        self,
+        image_data: str,
+        context_hint: str = "",
+        run_id: str = "",
+    ) -> str:
+        """
+        Rule-based fallback: extract plain-language context from an image.
+
+        When the HuggingFace Vision API is unavailable this returns a generic
+        description reminding the analyst to interpret the image themselves.
+        The HuggingFaceProvider overrides this with actual vision API calls.
+
+        Parameters
+        ----------
+        image_data    : Base64-encoded image string OR a public URL
+        context_hint  : Optional analyst hint about what the image shows
+        run_id        : Pipeline run identifier for audit logging
+        """
+        if context_hint and context_hint.strip():
+            return (
+                f"[Rule-based image context] Analyst-provided hint: {context_hint.strip()}. "
+                "No automated vision analysis available — set HF_API_KEY for AI image analysis."
+            )
+        return (
+            "Image uploaded by analyst. Automated image analysis requires HF_API_KEY. "
+            "Please describe the key insight from the image in the 'Analyst Context' field."
+        )
+
 
 # ── HuggingFace Provider ──────────────────────────────────────────────────────
 
@@ -390,6 +419,98 @@ class HuggingFaceProvider(LLMProvider):
             text = " ".join(words[:max_words]) + "…"
         return text
 
+    def extract_image_context(
+        self,
+        image_data: str,
+        context_hint: str = "",
+        run_id: str = "",
+    ) -> str:
+        """
+        HuggingFace Vision API implementation of extract_image_context().
+
+        Uses the Idefics3 multimodal model via the HF Inference API to extract
+        a plain-language description of the image. Falls back to the rule-based
+        base class if the API key is absent or the call fails.
+
+        Parameters
+        ----------
+        image_data    : Base64-encoded image string OR a public URL.
+                        If base64, pass the raw base64 string (without the data: prefix).
+        context_hint  : Optional analyst hint about what the image contains.
+        run_id        : Pipeline run identifier for audit logging.
+        """
+        if not self._api_key:
+            return super().extract_image_context(image_data, context_hint, run_id)
+
+        # Detect URL vs base64
+        is_url = image_data.startswith("http://") or image_data.startswith("https://")
+        if is_url:
+            image_ref = {"type": "image_url", "image_url": {"url": image_data}}
+        else:
+            # Assume raw base64 PNG/JPEG
+            image_ref = {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/png;base64,{image_data}"
+                }
+            }
+
+        hint_str = (
+            f" Focus particularly on: {context_hint.strip()}." if context_hint and context_hint.strip()
+            else ""
+        )
+        question = (
+            f"You are an expert data analyst. Describe what you see in this chart or image. "
+            f"Focus on trends, anomalies, key statistics, and business-relevant insights.{hint_str} "
+            "Be concise (max 150 words). Do not speculate beyond what is visually clear."
+        )
+
+        payload = {
+            "model": "HuggingFaceM4/idefics3-8b-llama3",
+            "messages": [{
+                "role": "user",
+                "content": [image_ref, {"type": "text", "text": question}],
+            }],
+            "max_tokens": 250,
+            "temperature": 0.2,
+        }
+
+        headers = {
+            "Authorization": f"Bearer {self._api_key}",
+            "Content-Type": "application/json",
+        }
+
+        try:
+            import requests as _req
+            resp = _req.post(
+                self._ENDPOINT, json=payload, headers=headers, timeout=60
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            text = (
+                data.get("choices", [{}])[0]
+                    .get("message", {})
+                    .get("content", "")
+                or ""
+            )
+            text = redact_pii(str(text).strip())
+            if text:
+                if context_hint:
+                    text = f"[Image Analysis] {text}\n[Analyst hint: {context_hint.strip()}]"
+                _audit_prompt(
+                    prompt_hash="image_context",
+                    prompt_tokens=len(question.split()),
+                    response=text,
+                    response_tokens=len(text.split()),
+                    provider="huggingface_vision",
+                    run_id=run_id,
+                )
+                return text
+        except Exception as exc:
+            logger.warning("HuggingFaceProvider.extract_image_context failed: %s", exc)
+
+        return super().extract_image_context(image_data, context_hint, run_id)
+
 
 # ── Factory ───────────────────────────────────────────────────────────────────
 
@@ -399,3 +520,4 @@ def get_llm_provider(config: Optional[Dict] = None) -> LLMProvider:
     Falls back to rule-based LLMProvider if HF_API_KEY is not set.
     """
     return HuggingFaceProvider(config)
+

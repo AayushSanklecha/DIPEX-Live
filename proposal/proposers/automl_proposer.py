@@ -45,7 +45,11 @@ class AutoMLProposer(BaseProposer):
         if len(df) < _MIN_SAMPLES:
             return {"error": f"Insufficient data: {len(df)} rows < {_MIN_SAMPLES}"}
 
-        is_classification = y.nunique() < 10 or pd.api.types.is_object_dtype(y)
+        try:
+            n_unique = y.nunique()
+        except Exception: # noqa: BLE001
+            n_unique = y.astype(str).nunique()
+        is_classification = n_unique < 10 or pd.api.types.is_object_dtype(y)
         task = "classification" if is_classification else "regression"
 
         try:

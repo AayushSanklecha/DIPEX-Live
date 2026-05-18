@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\connectors\mongo_connector.py
-# hypothesis_version: 6.151.9
-
-[100, 1000, 5000, 27017, '$gt', 'MONGO_DB', 'MONGO_HOST', 'MONGO_PASS', 'MONGO_URI', 'MONGO_USER', '_id', 'admin', 'batch_size', 'collection', 'columns', 'database', 'description', 'dtypes', 'error', 'estimated_row_count', 'filter_query', 'host', 'localhost', 'password', 'port', 'projection', 'sample_size', 'uri', 'username', 'watermark_col', 'watermark_value']

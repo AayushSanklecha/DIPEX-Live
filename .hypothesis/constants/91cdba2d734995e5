@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\reporting_service\config.py
-# hypothesis_version: 6.151.9
-
-[0.75, 1200, 1500, 'HF_MODEL_NAME', 'LLM_PROVIDER', 'OLLAMA_MODEL', 'analytics-llm', 'llm_usage_log.json', 'local']

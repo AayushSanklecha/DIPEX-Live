@@ -1,0 +1,978 @@
+{
+  "unknown::id": {
+    "full": 20.49531,
+    "basic": 11.252929
+  },
+  "unknown::val": {
+    "full": 1.964175,
+    "basic": 0.0
+  },
+  "unknown::age": {
+    "full": 7.556126,
+    "basic": -0.185055
+  },
+  "unknown::arrival_delay_in_minutes": {
+    "full": 31.44166,
+    "basic": 0.0
+  },
+  "unknown::baggage_handling": {
+    "full": -1.084758,
+    "basic": -0.962425
+  },
+  "unknown::checkin_service": {
+    "full": 0.593806,
+    "basic": 0.596194
+  },
+  "unknown::cleanliness": {
+    "full": -1.077752,
+    "basic": -0.920457
+  },
+  "unknown::customer_type_Loyal Customer": {
+    "full": 19.729471,
+    "basic": 1.6648
+  },
+  "unknown::customer_type_disloyal Customer": {
+    "full": 19.866953,
+    "basic": 1.710255
+  },
+  "unknown::departure_delay_in_minutes": {
+    "full": 29.96571,
+    "basic": 0.0
+  },
+  "unknown::departurearrival_time_convenient": {
+    "full": -0.967385,
+    "basic": -1.050811
+  },
+  "unknown::ease_of_online_booking": {
+    "full": -1.166277,
+    "basic": -0.765768
+  },
+  "unknown::flight_distance": {
+    "full": -1.24655,
+    "basic": -1.052465
+  },
+  "unknown::food_and_drink": {
+    "full": -1.259518,
+    "basic": -0.863004
+  },
+  "unknown::gate_location": {
+    "full": -0.99964,
+    "basic": -0.936647
+  },
+  "unknown::gender_Female": {
+    "full": -0.514834,
+    "basic": -0.49231
+  },
+  "unknown::gender_Male": {
+    "full": -0.480184,
+    "basic": -0.532095
+  },
+  "unknown::inflight_entertainment": {
+    "full": -1.015559,
+    "basic": -0.91068
+  },
+  "unknown::inflight_wifi_service": {
+    "full": -1.07279,
+    "basic": -1.013377
+  },
+  "unknown::leg_room_service": {
+    "full": -1.199809,
+    "basic": -0.920139
+  },
+  "unknown::on_board_service": {
+    "full": 1.552042,
+    "basic": 1.25599
+  },
+  "unknown::online_boarding": {
+    "full": -1.071469,
+    "basic": -0.928069
+  },
+  "unknown::online_support": {
+    "full": -1.038935,
+    "basic": -0.941727
+  },
+  "unknown::satisfaction_dissatisfied": {
+    "full": -0.369955,
+    "basic": -0.375182
+  },
+  "unknown::satisfaction_satisfied": {
+    "full": -0.399919,
+    "basic": -0.308646
+  },
+  "unknown::seat_comfort": {
+    "full": -0.941582,
+    "basic": -0.864107
+  },
+  "unknown::type_of_travel_Business travel": {
+    "full": -0.205304,
+    "basic": -0.263463
+  },
+  "unknown::type_of_travel_Personal Travel": {
+    "full": -0.322072,
+    "basic": -0.189547
+  },
+  "unknown::class": {
+    "full": -1.536187,
+    "basic": -1.526502
+  },
+  "unknown::name_alice": {
+    "full": 5.563055,
+    "basic": 0.0
+  },
+  "unknown::name_bob": {
+    "full": 5.564673,
+    "basic": 0.0
+  },
+  "unknown::name_charlie": {
+    "full": 5.558241,
+    "basic": 0.0
+  },
+  "unknown::name_david": {
+    "full": 0.2,
+    "basic": 1.795038
+  },
+  "unknown::value": {
+    "full": 45.070681,
+    "basic": 20.733388
+  },
+  "unknown::target": {
+    "full": 1.426642,
+    "basic": 1.269149
+  },
+  "unknown::class_Business": {
+    "full": 0.036014,
+    "basic": 0.0
+  },
+  "unknown::class_Eco": {
+    "full": 0.2,
+    "basic": -0.135706
+  },
+  "unknown::class_Eco Plus": {
+    "full": 5.411555,
+    "basic": 0.0
+  },
+  "unknown::high_cardinality_cat": {
+    "full": 24.190995,
+    "basic": 1.787276
+  },
+  "unknown::mixed_obj_col": {
+    "full": 12.044526,
+    "basic": -0.015955
+  },
+  "unknown::normal_num": {
+    "full": 11.23703,
+    "basic": 1.788787
+  },
+  "unknown::satisfaction": {
+    "full": -0.485281,
+    "basic": -0.424329
+  },
+  "unknown::gender": {
+    "full": -0.537779,
+    "basic": -0.479105
+  },
+  "unknown::customer_type": {
+    "full": 20.978796,
+    "basic": 1.755543
+  },
+  "unknown::type_of_travel": {
+    "full": -0.308125,
+    "basic": -0.259492
+  },
+  "unknown::departure_delay_in_minutes_auto_log1p": {
+    "full": -0.551825,
+    "basic": 0.377579
+  },
+  "unknown::arrival_delay_in_minutes_auto_log1p": {
+    "full": -0.661456,
+    "basic": 0.139127
+  },
+  "unknown::category": {
+    "full": -0.069434,
+    "basic": -0.082455
+  },
+  "unknown::x": {
+    "full": -0.029614,
+    "basic": -0.038673
+  },
+  "unknown::income": {
+    "full": 36.432442,
+    "basic": 15.125196
+  },
+  "unknown::score": {
+    "full": 29.874312,
+    "basic": 7.981709
+  },
+  "unknown::flag": {
+    "full": 14.732607,
+    "basic": -0.025085
+  },
+  "unknown::y": {
+    "full": -0.084358,
+    "basic": -0.056657
+  },
+  "unknown::status": {
+    "full": -0.064839,
+    "basic": -0.08389
+  },
+  "unknown::region": {
+    "full": -0.048886,
+    "basic": -0.073325
+  },
+  "unknown::satisfaction_fallback_hash": {
+    "full": -0.630539,
+    "basic": -0.579583
+  },
+  "unknown::gender_fallback_hash": {
+    "full": 2.953991,
+    "basic": -0.361169
+  },
+  "unknown::customer_type_fallback_hash": {
+    "full": 1.726743,
+    "basic": -0.208961
+  },
+  "unknown::type_of_travel_fallback_hash": {
+    "full": -0.493765,
+    "basic": -0.489304
+  },
+  "unknown::anomaly_flag": {
+    "full": 58.739399,
+    "basic": 5.977832
+  },
+  "unknown::anomaly_score": {
+    "full": 27.250965,
+    "basic": 6.535087
+  },
+  "unknown::amount": {
+    "full": 16.40699,
+    "basic": 4.935898
+  },
+  "unknown::currency_fallback_hash": {
+    "full": 13.125997,
+    "basic": 0.0
+  },
+  "unknown::status_fallback_hash": {
+    "full": 9.624309,
+    "basic": -0.009542
+  },
+  "unknown::tx_id": {
+    "full": 3.752231,
+    "basic": 0.0
+  },
+  "unknown::user_id": {
+    "full": 6.65889,
+    "basic": 0.0
+  },
+  "unknown::address_city_fallback_hash": {
+    "full": 10.656457,
+    "basic": 1.779097
+  },
+  "unknown::address_geo_lat": {
+    "full": 10.125168,
+    "basic": 1.790698
+  },
+  "unknown::address_geo_lng": {
+    "full": 10.151384,
+    "basic": 0.0
+  },
+  "unknown::address_street_fallback_hash": {
+    "full": -0.05022,
+    "basic": -0.033406
+  },
+  "unknown::address_suite": {
+    "full": 7.986324,
+    "basic": 3.373117
+  },
+  "unknown::address_zipcode": {
+    "full": 7.094329,
+    "basic": 4.761916
+  },
+  "unknown::company_bs_fallback_hash": {
+    "full": -0.036315,
+    "basic": -0.008623
+  },
+  "unknown::company_catchphrase_fallback_hash": {
+    "full": -0.038641,
+    "basic": -0.023217
+  },
+  "unknown::company_name_fallback_hash": {
+    "full": -0.02525,
+    "basic": -0.015306
+  },
+  "unknown::email_fallback_hash": {
+    "full": 9.554218,
+    "basic": 0.0
+  },
+  "unknown::name_fallback_hash": {
+    "full": -0.009192,
+    "basic": -0.010963
+  },
+  "unknown::phone": {
+    "full": 10.554678,
+    "basic": 0.0
+  },
+  "unknown::username_fallback_hash": {
+    "full": 1.801706,
+    "basic": -0.019894
+  },
+  "unknown::website_fallback_hash": {
+    "full": -0.020833,
+    "basic": -0.005348
+  },
+  "unknown::body_fallback_hash": {
+    "full": 4.853942,
+    "basic": 0.0
+  },
+  "unknown::title_fallback_hash": {
+    "full": 4.847541,
+    "basic": 0.0
+  },
+  "unknown::userid": {
+    "full": 4.867384,
+    "basic": 0.0
+  },
+  "unknown::category_fallback_hash": {
+    "full": 1.947372,
+    "basic": 0.0
+  },
+  "unknown::description_fallback_hash": {
+    "full": 0.154392,
+    "basic": 0.0
+  },
+  "unknown::image": {
+    "full": 1.950277,
+    "basic": 0.0
+  },
+  "unknown::device_ip": {
+    "full": 0.2,
+    "basic": 1.787155
+  },
+  "unknown::event_time_auto_log1p": {
+    "full": 5.082606,
+    "basic": 0.0
+  },
+  "unknown::status_fallback_hash_auto_log1p": {
+    "full": 0.104722,
+    "basic": 0.0
+  },
+  "unknown::tx_id_auto_log1p": {
+    "full": 3.756409,
+    "basic": 0.0
+  },
+  "unknown::balance": {
+    "full": 0.108906,
+    "basic": 0.0
+  },
+  "unknown::creditscore": {
+    "full": 7.025129,
+    "basic": 0.0
+  },
+  "unknown::customerid": {
+    "full": 1.95093,
+    "basic": 1.786482
+  },
+  "unknown::estimatedsalary": {
+    "full": 1.948122,
+    "basic": 1.787154
+  },
+  "unknown::exited": {
+    "full": -0.021797,
+    "basic": -0.017669
+  },
+  "unknown::geography_fallback_hash": {
+    "full": 4.818799,
+    "basic": -0.007244
+  },
+  "unknown::hascrcard": {
+    "full": 5.982408,
+    "basic": 0.0
+  },
+  "unknown::isactivemember": {
+    "full": 4.806442,
+    "basic": -0.020308
+  },
+  "unknown::numofproducts": {
+    "full": 4.79783,
+    "basic": -0.011417
+  },
+  "unknown::rownumber": {
+    "full": 1.956818,
+    "basic": 0.0
+  },
+  "unknown::surname_fallback_hash": {
+    "full": 5.974246,
+    "basic": 0.0
+  },
+  "unknown::tenure": {
+    "full": 11.990402,
+    "basic": 0.0
+  },
+  "unknown::mixed_obj_col_fallback_hash": {
+    "full": 14.893763,
+    "basic": -0.015102
+  },
+  "unknown::device_type_fallback_hash": {
+    "full": 1.9552,
+    "basic": -0.004725
+  },
+  "unknown::pages_visited": {
+    "full": 1.966383,
+    "basic": 0.0
+  },
+  "unknown::user_agent": {
+    "full": 1.966869,
+    "basic": 0.0
+  },
+  "unknown::capsules_fallback_hash_auto_log1p": {
+    "full": 0.084799,
+    "basic": 0.0
+  },
+  "unknown::crew_fallback_hash_auto_log1p": {
+    "full": 0.155682,
+    "basic": 0.0
+  },
+  "unknown::date_precision_fallback_hash_auto_log1p": {
+    "full": 0.161896,
+    "basic": 0.0
+  },
+  "unknown::failures_fallback_hash_auto_log1p": {
+    "full": 0.162754,
+    "basic": 0.0
+  },
+  "unknown::fairings_recovered": {
+    "full": 1.958302,
+    "basic": 0.0
+  },
+  "unknown::fairings_recovery_attempt": {
+    "full": 1.961634,
+    "basic": 0.0
+  },
+  "unknown::fairings_reused": {
+    "full": 1.963585,
+    "basic": 0.0
+  },
+  "unknown::fairings_ships_fallback_hash": {
+    "full": 1.964573,
+    "basic": 0.0
+  },
+  "unknown::launch_library_id_auto_log1p": {
+    "full": 1.963957,
+    "basic": 0.0
+  },
+  "unknown::ships_fallback_hash": {
+    "full": 1.964289,
+    "basic": 0.0
+  },
+  "unknown::static_fire_date_unix": {
+    "full": 3.752321,
+    "basic": 0.0
+  },
+  "unknown::success_auto_log1p": {
+    "full": 0.159336,
+    "basic": 0.0
+  },
+  "unknown::window": {
+    "full": 7.359066,
+    "basic": 0.0
+  },
+  "unknown::accounts_receivable_turnover_auto_log1p": {
+    "full": 22.535075,
+    "basic": 0.0
+  },
+  "unknown::after_tax_net_interest_rate_auto_log1p": {
+    "full": 10.739687,
+    "basic": -0.007781
+  },
+  "unknown::average_collection_days_auto_log1p": {
+    "full": 11.251992,
+    "basic": 0.0
+  },
+  "unknown::bankrupt_auto_log1p": {
+    "full": -0.034545,
+    "basic": -0.019667
+  },
+  "unknown::borrowing_dependency_auto_log1p": {
+    "full": 21.572569,
+    "basic": -0.006867
+  },
+  "unknown::cash_flow_per_share_auto_log1p": {
+    "full": 22.582595,
+    "basic": 0.0
+  },
+  "unknown::cash_flow_rate": {
+    "full": 9.580427,
+    "basic": -0.030611
+  },
+  "unknown::cash_reinvestment_auto_log1p": {
+    "full": 22.591837,
+    "basic": 0.0
+  },
+  "unknown::cash_turnover_rate": {
+    "full": 22.49073,
+    "basic": 0.0
+  },
+  "unknown::contingent_liabilitiesnet_worth_auto_log1p": {
+    "full": -0.03887,
+    "basic": -0.029118
+  },
+  "unknown::continuous_interest_rate_after_tax_auto_log1p": {
+    "full": 11.22964,
+    "basic": 0.0
+  },
+  "unknown::current_ratio_auto_log1p": {
+    "full": 22.509257,
+    "basic": 0.0
+  },
+  "unknown::debt_ratio_auto_log1p": {
+    "full": 10.156216,
+    "basic": -0.022847
+  },
+  "unknown::equity_to_long_term_liability_auto_log1p": {
+    "full": 21.569294,
+    "basic": -0.007517
+  },
+  "unknown::fixed_assets_turnover_frequency_auto_log1p": {
+    "full": 33.839759,
+    "basic": 0.0
+  },
+  "unknown::interest_bearing_debt_interest_rate_auto_log1p": {
+    "full": 10.743013,
+    "basic": -0.006129
+  },
+  "unknown::interest_expense_ratio": {
+    "full": 22.545672,
+    "basic": 0.0
+  },
+  "unknown::inventory_and_accounts_receivablenet_value_auto_log1p": {
+    "full": 10.744998,
+    "basic": -0.007609
+  },
+  "unknown::inventory_turnover_rate_times": {
+    "full": 10.702367,
+    "basic": -0.006014
+  },
+  "unknown::liability_assets_flag_auto_log1p": {
+    "full": -0.080686,
+    "basic": -0.033941
+  },
+  "unknown::long_term_liability_to_current_assets_auto_log1p": {
+    "full": 30.708863,
+    "basic": 3.359894
+  },
+  "unknown::net_value_growth_rate_auto_log1p": {
+    "full": 22.533701,
+    "basic": 0.0
+  },
+  "unknown::net_value_per_share_a_auto_log1p": {
+    "full": 11.213442,
+    "basic": 0.0
+  },
+  "unknown::net_value_per_share_b_auto_log1p": {
+    "full": 22.551891,
+    "basic": 0.0
+  },
+  "unknown::net_value_per_share_c_auto_log1p": {
+    "full": 22.547293,
+    "basic": 0.0
+  },
+  "unknown::net_worth_turnover_rate_times_auto_log1p": {
+    "full": 11.171508,
+    "basic": 0.0
+  },
+  "unknown::net_worthassets_auto_log1p": {
+    "full": 10.176923,
+    "basic": -0.020781
+  },
+  "unknown::non_industry_income_and_expenditurerevenue_auto_log1p": {
+    "full": 21.54868,
+    "basic": 1.790538
+  },
+  "unknown::operating_expense_rate_auto_log1p": {
+    "full": 22.546767,
+    "basic": 0.0
+  },
+  "unknown::operating_gross_margin_auto_log1p": {
+    "full": 22.570861,
+    "basic": 0.0
+  },
+  "unknown::operating_profit_per_person_auto_log1p": {
+    "full": 10.744765,
+    "basic": -0.004622
+  },
+  "unknown::operating_profit_per_share_yuan_auto_log1p": {
+    "full": 10.157318,
+    "basic": -0.017221
+  },
+  "unknown::operating_profit_rate_auto_log1p": {
+    "full": 10.735739,
+    "basic": -0.011572
+  },
+  "unknown::per_share_net_profit_before_tax_yuan_auto_log1p": {
+    "full": 22.570754,
+    "basic": 0.0
+  },
+  "unknown::persistent_eps_in_the_last_four_seasons_auto_log1p": {
+    "full": 11.159111,
+    "basic": 0.0
+  },
+  "unknown::pre_tax_net_interest_rate_auto_log1p": {
+    "full": 21.515092,
+    "basic": 0.0
+  },
+  "unknown::quick_asset_turnover_rate": {
+    "full": 19.143807,
+    "basic": -0.018355
+  },
+  "unknown::quick_ratio_auto_log1p": {
+    "full": 21.503113,
+    "basic": 0.0
+  },
+  "unknown::realized_sales_gross_margin_auto_log1p": {
+    "full": 10.127677,
+    "basic": -0.007121
+  },
+  "unknown::realized_sales_gross_profit_growth_rate_auto_log1p": {
+    "full": 20.467986,
+    "basic": 0.0
+  },
+  "unknown::research_and_development_expense_rate_auto_log1p": {
+    "full": 20.453785,
+    "basic": 0.0
+  },
+  "unknown::revenue_per_person_auto_log1p": {
+    "full": 20.413866,
+    "basic": 0.0
+  },
+  "unknown::revenue_per_share_yuan_auto_log1p": {
+    "full": 9.553821,
+    "basic": -0.005241
+  },
+  "unknown::roaa_before_interest_and_after_tax": {
+    "full": 10.183339,
+    "basic": 0.0
+  },
+  "unknown::roab_before_interest_and_depreciation_after_tax": {
+    "full": 10.166211,
+    "basic": 0.0
+  },
+  "unknown::roac_before_interest_and_depreciation_before_interest": {
+    "full": 9.550557,
+    "basic": -0.012962
+  },
+  "unknown::tax_rate_a_auto_log1p": {
+    "full": 19.179848,
+    "basic": -0.017255
+  },
+  "unknown::total_asset_growth_rate": {
+    "full": 8.840121,
+    "basic": -0.021043
+  },
+  "unknown::total_asset_return_growth_rate_ratio_auto_log1p": {
+    "full": 9.52461,
+    "basic": -0.005371
+  },
+  "unknown::total_asset_turnover_auto_log1p": {
+    "full": 0.2,
+    "basic": 10.198411
+  },
+  "unknown::total_debttotal_net_worth_auto_log1p": {
+    "full": 19.176028,
+    "basic": -0.006811
+  },
+  "unknown::event_time": {
+    "full": 3.48536,
+    "basic": 0.0
+  },
+  "unknown::volume_auto_log1p": {
+    "full": 3.758533,
+    "basic": 0.0
+  },
+  "unknown::category_id": {
+    "full": 1.96176,
+    "basic": 0.0
+  },
+  "unknown::category_name_fallback_hash": {
+    "full": 1.962985,
+    "basic": 0.0
+  },
+  "unknown::city_fallback_hash": {
+    "full": 1.890916,
+    "basic": 0.0
+  },
+  "unknown::customer_id": {
+    "full": 3.732996,
+    "basic": 0.0
+  },
+  "unknown::order_date": {
+    "full": 0.130068,
+    "basic": 0.0
+  },
+  "unknown::payment_method_fallback_hash": {
+    "full": 0.2,
+    "basic": -0.012338
+  },
+  "unknown::price": {
+    "full": 3.731121,
+    "basic": 0.0
+  },
+  "unknown::product_id": {
+    "full": 1.960118,
+    "basic": 0.0
+  },
+  "unknown::product_name_fallback_hash": {
+    "full": 1.963667,
+    "basic": 0.0
+  },
+  "unknown::quantity": {
+    "full": 1.964872,
+    "basic": 0.0
+  },
+  "unknown::review_score": {
+    "full": 3.75817,
+    "basic": 0.0
+  },
+  "unknown::class_fallback_hash": {
+    "full": -0.096337,
+    "basic": -0.182842
+  },
+  "unknown::departure_arrival_time_convenient": {
+    "full": -0.188846,
+    "basic": -0.083126
+  },
+  "unknown::account_id": {
+    "full": 1.880834,
+    "basic": 0.0
+  },
+  "unknown::customer_age": {
+    "full": 1.944478,
+    "basic": 0.0
+  },
+  "unknown::customer_name_fallback_hash": {
+    "full": 1.956105,
+    "basic": 0.0
+  },
+  "unknown::transaction_id": {
+    "full": 16.008289,
+    "basic": 0.0
+  },
+  "unknown::patient_age": {
+    "full": 1.959509,
+    "basic": 0.0
+  },
+  "unknown::patient_id": {
+    "full": 3.753529,
+    "basic": 0.0
+  },
+  "unknown::cat_b_fallback_hash": {
+    "full": 1.959394,
+    "basic": 0.0
+  },
+  "unknown::score_x": {
+    "full": 1.961127,
+    "basic": 0.0
+  },
+  "unknown::sys_id": {
+    "full": 1.961678,
+    "basic": 0.0
+  },
+  "unknown::usr_nm": {
+    "full": 0.2,
+    "basic": -0.00677
+  },
+  "unknown::val_flt": {
+    "full": 1.962454,
+    "basic": 0.0
+  },
+  "unknown::department_fallback_hash": {
+    "full": 1.964279,
+    "basic": 0.0
+  },
+  "unknown::first_name_fallback_hash": {
+    "full": 1.964117,
+    "basic": 0.0
+  },
+  "unknown::job_title_fallback_hash": {
+    "full": 3.760239,
+    "basic": 0.0
+  },
+  "unknown::last_name_fallback_hash": {
+    "full": 1.944837,
+    "basic": 0.0
+  },
+  "unknown::event_id_auto_log1p": {
+    "full": 0.2,
+    "basic": -0.019935
+  },
+  "unknown::location_fallback_hash": {
+    "full": 3.761602,
+    "basic": 0.0
+  },
+  "unknown::merchant_fallback_hash": {
+    "full": 1.966722,
+    "basic": 0.0
+  },
+  "unknown::address_address": {
+    "full": 3.748726,
+    "basic": 0.0
+  },
+  "unknown::address_coordinates_lat": {
+    "full": 3.765278,
+    "basic": 0.0
+  },
+  "unknown::address_coordinates_lng": {
+    "full": 3.766818,
+    "basic": 0.0
+  },
+  "unknown::address_postalcode": {
+    "full": 3.766381,
+    "basic": 0.0
+  },
+  "unknown::address_state_fallback_hash": {
+    "full": 1.966907,
+    "basic": 0.0
+  },
+  "unknown::address_statecode_fallback_hash": {
+    "full": 1.927598,
+    "basic": 0.0
+  },
+  "unknown::bank_cardexpire": {
+    "full": 1.964468,
+    "basic": 0.0
+  },
+  "unknown::bank_cardnumber": {
+    "full": 5.547477,
+    "basic": 0.0
+  },
+  "unknown::bank_cardtype_fallback_hash": {
+    "full": 1.957732,
+    "basic": 0.0
+  },
+  "unknown::bank_currency_fallback_hash": {
+    "full": 1.963961,
+    "basic": 0.0
+  },
+  "unknown::bank_iban_auto_log1p": {
+    "full": 1.962976,
+    "basic": 0.0
+  },
+  "unknown::bloodgroup_fallback_hash": {
+    "full": 1.961149,
+    "basic": 0.0
+  },
+  "unknown::company_address_address": {
+    "full": 3.764168,
+    "basic": 0.0
+  },
+  "unknown::company_address_city_fallback_hash": {
+    "full": 1.965317,
+    "basic": 0.0
+  },
+  "unknown::company_address_coordinates_lat": {
+    "full": 3.765488,
+    "basic": 0.0
+  },
+  "unknown::company_address_coordinates_lng": {
+    "full": 3.717451,
+    "basic": 0.0
+  },
+  "unknown::company_address_postalcode": {
+    "full": 3.753465,
+    "basic": 0.0
+  },
+  "unknown::company_address_state_fallback_hash": {
+    "full": 1.955378,
+    "basic": 0.0
+  },
+  "unknown::company_address_statecode_fallback_hash": {
+    "full": 1.929656,
+    "basic": 0.0
+  },
+  "unknown::company_department_fallback_hash": {
+    "full": 1.952004,
+    "basic": 0.0
+  },
+  "unknown::company_title_fallback_hash": {
+    "full": 1.908889,
+    "basic": 0.0
+  },
+  "unknown::ein": {
+    "full": 3.757343,
+    "basic": 0.0
+  },
+  "unknown::eyecolor_fallback_hash": {
+    "full": 1.961027,
+    "basic": 0.0
+  },
+  "unknown::firstname_fallback_hash": {
+    "full": 1.943448,
+    "basic": 0.0
+  },
+  "unknown::hair_color_fallback_hash": {
+    "full": 1.960348,
+    "basic": 0.0
+  },
+  "unknown::hair_type_fallback_hash": {
+    "full": 1.963266,
+    "basic": 0.0
+  },
+  "unknown::height": {
+    "full": 3.766302,
+    "basic": 0.0
+  },
+  "unknown::ip": {
+    "full": 3.715586,
+    "basic": 0.0
+  },
+  "unknown::lastname_fallback_hash": {
+    "full": 1.952462,
+    "basic": 0.0
+  },
+  "unknown::macaddress": {
+    "full": 5.563616,
+    "basic": 0.0
+  },
+  "unknown::password_fallback_hash": {
+    "full": 1.962163,
+    "basic": 0.0
+  },
+  "unknown::role_fallback_hash": {
+    "full": 0.144676,
+    "basic": 0.0
+  },
+  "unknown::ssn": {
+    "full": 3.740389,
+    "basic": 0.0
+  },
+  "unknown::university_fallback_hash": {
+    "full": 1.939865,
+    "basic": 0.0
+  },
+  "unknown::weight": {
+    "full": 3.752256,
+    "basic": 0.0
+  },
+  "unknown::beneficiary_account": {
+    "full": 9.511185,
+    "basic": 0.0
+  },
+  "unknown::is_aml_flagged_auto_log1p": {
+    "full": -0.034684,
+    "basic": -0.025266
+  },
+  "unknown::remitter_account": {
+    "full": 8.767709,
+    "basic": 0.0
+  },
+  "unknown::risk_score": {
+    "full": 8.009357,
+    "basic": 0.0
+  },
+  "unknown::swift_bic_code": {
+    "full": 7.099318,
+    "basic": -0.013113
+  },
+  "unknown::transaction_amount_usd_auto_log1p": {
+    "full": 14.125423,
+    "basic": 0.0
+  }
+}

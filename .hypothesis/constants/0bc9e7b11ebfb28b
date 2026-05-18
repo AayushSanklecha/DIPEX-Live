@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\auth\jwt_auth.py
-# hypothesis_version: 6.151.9
-
-[0.3, 401, 403, 260000, '$', '/auth/token', '1', '24', '60', 'ADMIN', 'ANALYST', 'Account disabled', 'Bearer', 'DIPEX Administrator', 'DIPEX_AUTH_STRICT', 'Data Analyst', 'HS256', 'JWT_ALGORITHM', 'JWT_EXPIRE_MINS', 'JWT_SECRET_KEY', 'Read-Only Viewer', 'VIEWER', 'WWW-Authenticate', 'access', 'admin', 'analyst', 'anonymous', 'auto', 'bcrypt', 'dipex.auth.jwt', 'disabled', 'exp', 'fail_streak', 'false', 'full_name', 'hashed_password', 'iat', 'max_attempts', 'mfa_required', 'new_device', 'pbkdf2$', 'python-jose required', 'refresh', 'risk_score', 'rl_policy', 'role', 'secret', 'session_timeout_min', 'sha256', 'sub', 'true', 'type', 'username', 'viewer', 'yes']

@@ -29,19 +29,73 @@ logger = logging.getLogger("dipex.analytics.orchestrator")
 
 @dataclass
 class AnalyticsResult:
-    """Combined output from all 5 AI & Analytics sub-components."""
+    """
+    Combined output from all AI & Analytics sub-components.
+    Extended with comprehensive analytics fields for professional reporting.
+    """
     run_id: str = ""
+    # ── Core (existing) ────────────────────────────────────────────────────────
     eda_report: Dict = field(default_factory=dict)
     feature_manifest: Dict = field(default_factory=dict)
     enriched_df: Optional[pd.DataFrame] = None
     insights: List[str] = field(default_factory=list)
     insight_ranking: Dict = field(default_factory=dict)
     llm_summary: str = ""
-    eda_html_report_path: Optional[str] = None    # path to generated EDA HTML report
-    actions_log: Dict = field(default_factory=dict) # transformations applied
+    eda_html_report_path: Optional[str] = None
+    actions_log: Dict = field(default_factory=dict)
     elapsed_ms: float = 0.0
     errors: Dict[str, str] = field(default_factory=dict)
-    retrain_required: bool = False # New field for drift detection
+    retrain_required: bool = False
+
+    # ── NEW: Pipeline Stage Timeline ───────────────────────────────────────────
+    pipeline_stage_log: List[Dict] = field(default_factory=list)
+    # Each entry: {stage, status, duration_ms, rows_in, rows_out, action_summary, timestamp}
+
+    # ── NEW: Ingestion Metrics ─────────────────────────────────────────────────
+    ingestion_metrics: Dict = field(default_factory=dict)
+    # {source_type, bytes_ingested, total_gb, chunks_processed, schema_drift,
+    #  null_rate, duplicate_rate, processing_speed_mbps, is_partial, file_size_mb}
+
+    # ── NEW: Feature Importance ────────────────────────────────────────────────
+    feature_importance: Dict = field(default_factory=dict)
+    # {feature_name: importance_score, ...} — top-15 sorted by importance
+
+    # ── NEW: Data Governance Summary ───────────────────────────────────────────
+    governance_summary: Dict = field(default_factory=dict)
+    # {pii_detected: int, redactions: int, pii_columns: [], governance_decision,
+    #  bronze_checksum, silver_checksum, gold_checksum, compliance_status}
+
+    # ── NEW: Data Lineage ──────────────────────────────────────────────────────
+    data_lineage: Dict = field(default_factory=dict)
+    # {raw: {rows, cols, checksum},
+    #  bronze: {rows, cols, checksum, transforms: []},
+    #  silver: {rows, cols, checksum, transforms: []},
+    #  gold:   {rows, cols, checksum, transforms: []}}
+
+    # ── NEW: Cross-Domain Rule Violations ─────────────────────────────────────
+    cross_domain_flags: List[Dict] = field(default_factory=list)
+    # [{rule_name, severity, domain, description, affected_columns, recommended_action}]
+
+    # ── NEW: Statistical Significance Tests ────────────────────────────────────
+    statistical_tests: Dict = field(default_factory=dict)
+    # {normality: [{col, statistic, p_value, is_normal, interpretation}],
+    #  stationarity: [{col, adf_stat, p_value, is_stationary}],
+    #  homogeneity: [{group_col, levene_stat, p_value, equal_variance}]}
+
+    # ── NEW: Bias & Fairness Report ────────────────────────────────────────────
+    bias_fairness_report: Dict = field(default_factory=dict)
+    # {checked: bool, groups_analyzed: [], results: [
+    #   {group_col, group_value, sample_size, positive_rate, parity_ratio, disparate_impact,
+    #    status: PASS|WARN|FAIL, interpretation}]}
+
+    # ── NEW: Anomaly Deep Dive ─────────────────────────────────────────────────
+    anomaly_deep_dive: Dict = field(default_factory=dict)
+    # {if_contamination, per_column: [{col, anomaly_count, z_score_max, if_score_mean}]}
+
+    # ── NEW: Regulatory Summary ────────────────────────────────────────────────
+    regulatory_summary: Dict = field(default_factory=dict)
+    # {domains_checked: [], rules_total, rules_passed, rules_warned, rules_failed,
+    #  domain_results: {domain: {status, rules_checked, violations: []}}}
 
     def to_dict(self, include_df: bool = False) -> Dict:
         out = {
@@ -55,11 +109,24 @@ class AnalyticsResult:
             "actions_log": self.actions_log,
             "elapsed_ms": round(self.elapsed_ms, 2),
             "errors": self.errors,
-            "retrain_required": self.retrain_required, # Include new field
+            "retrain_required": self.retrain_required,
+            # New fields:
+            "pipeline_stage_log": self.pipeline_stage_log,
+            "ingestion_metrics": self.ingestion_metrics,
+            "feature_importance": self.feature_importance,
+            "governance_summary": self.governance_summary,
+            "data_lineage": self.data_lineage,
+            "cross_domain_flags": self.cross_domain_flags,
+            "statistical_tests": self.statistical_tests,
+            "bias_fairness_report": self.bias_fairness_report,
+            "anomaly_deep_dive": self.anomaly_deep_dive,
+            "regulatory_summary": self.regulatory_summary,
         }
         if include_df and self.enriched_df is not None:
             out["enriched_shape"] = list(self.enriched_df.shape)
         return out
+
+
 
 
 # ── Analytics Orchestrator ────────────────────────────────────────────────────
@@ -145,12 +212,80 @@ class AnalyticsOrchestrator:
         # ── Stage E: Enrich eda_report with histogram bins (for exec report charts) ──
         result.eda_report = self._enrich_eda_with_histograms(result.eda_report, df)
 
+        # ── Stage F: Statistical Significance Tests ────────────────────────────
+        try:
+            from analytics.advanced_analytics import run_statistical_tests
+            result.statistical_tests = run_statistical_tests(working_df, target_col=target_col)
+            logger.debug("[AnalyticsOrchestrator] Stage F: stat tests done — %d normality, %d stationarity",
+                         len(result.statistical_tests.get("normality", [])),
+                         len(result.statistical_tests.get("stationarity", [])))
+        except Exception as exc:
+            logger.warning("[AnalyticsOrchestrator] Stage F (stat tests) failed (non-fatal): %s", exc)
+            result.statistical_tests = {}
+
+        # ── Stage G: Feature Importance ────────────────────────────────────────
+        try:
+            from analytics.advanced_analytics import compute_feature_importance
+            result.feature_importance = compute_feature_importance(working_df, target_col=target_col)
+            logger.debug("[AnalyticsOrchestrator] Stage G: feature importance — %d features ranked",
+                         len(result.feature_importance))
+        except Exception as exc:
+            logger.warning("[AnalyticsOrchestrator] Stage G (feature importance) failed (non-fatal): %s", exc)
+            result.feature_importance = {}
+
+        # ── Stage H: Bias & Fairness Analysis ──────────────────────────────────
+        try:
+            from analytics.advanced_analytics import run_bias_fairness_analysis
+            result.bias_fairness_report = run_bias_fairness_analysis(working_df, target_col=target_col)
+            logger.debug("[AnalyticsOrchestrator] Stage H: bias/fairness done — %d group results",
+                         len(result.bias_fairness_report.get("results", [])))
+        except Exception as exc:
+            logger.warning("[AnalyticsOrchestrator] Stage H (bias/fairness) failed (non-fatal): %s", exc)
+            result.bias_fairness_report = {}
+
+        # ── Stage I: Anomaly Deep Dive ─────────────────────────────────────────
+        try:
+            from analytics.advanced_analytics import run_anomaly_deep_dive
+            result.anomaly_deep_dive = run_anomaly_deep_dive(working_df)
+            logger.debug("[AnalyticsOrchestrator] Stage I: anomaly deep dive — %d total anomalies, %d columns",
+                         result.anomaly_deep_dive.get("total_anomalies", 0),
+                         len(result.anomaly_deep_dive.get("per_column", [])))
+        except Exception as exc:
+            logger.warning("[AnalyticsOrchestrator] Stage I (anomaly deep dive) failed (non-fatal): %s", exc)
+            result.anomaly_deep_dive = {}
+
+        # ── Stage J: Auto-Domain Regulatory Summary ────────────────────────────
+        try:
+            from validation.regulatory.auto_domain_detector import detect_domains
+            detected_domains = detect_domains(working_df)
+            # Aggregate violations from cross_domain_flags if populated upstream
+            rules_total = len(result.cross_domain_flags)
+            rules_failed = sum(1 for f in result.cross_domain_flags if f.get("severity") in ("CRITICAL", "ERROR"))
+            rules_warned = sum(1 for f in result.cross_domain_flags if f.get("severity") == "WARNING")
+            result.regulatory_summary = {
+                "domains_checked": detected_domains,
+                "rules_total": rules_total,
+                "rules_passed": max(0, rules_total - rules_failed - rules_warned),
+                "rules_warned": rules_warned,
+                "rules_failed": rules_failed,
+                "auto_detected": True,
+            }
+            logger.debug("[AnalyticsOrchestrator] Stage J: regulatory summary — domains=%s", detected_domains)
+        except Exception as exc:
+            logger.warning("[AnalyticsOrchestrator] Stage J (regulatory summary) failed (non-fatal): %s", exc)
+            result.regulatory_summary = {}
+
         result.elapsed_ms = (time.perf_counter() - t0) * 1000
         logger.info(
-            "[AnalyticsOrchestrator][%s] eda=%d insights, fe=%s, llm=%d chars, elapsed=%.0fms",
+            "[AnalyticsOrchestrator][%s] eda=%d insights, fe=%s, llm=%d chars, "
+            "stat_tests=%d, fi=%d, anomalies=%d, elapsed=%.0fms",
             (run_id or "")[:8], len(result.insights),
             result.feature_manifest.get("final_shape", "n/a"),
-            len(result.llm_summary), result.elapsed_ms,
+            len(result.llm_summary),
+            len(result.statistical_tests.get("normality", [])),
+            len(result.feature_importance),
+            result.anomaly_deep_dive.get("total_anomalies", 0),
+            result.elapsed_ms,
         )
         return result
 

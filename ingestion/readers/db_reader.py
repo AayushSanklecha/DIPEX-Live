@@ -30,6 +30,7 @@ class DBSourceConfig:
     watermark_column: str = ""
     watermark_last_value: Any = None
     chunk_size: int = 50_000
+    fetch_chunk_size: int = 50_000     # server-side cursor batch size (for 50GB DB reads)
     schema: str = ""
     extra_connect_args: Dict[str, Any] = field(default_factory=dict)
     snowflake_warehouse: str = ""
@@ -41,6 +42,7 @@ class DBSourceConfig:
     cassandra_contact_points: List[str] = field(default_factory=lambda: ["localhost"])
     neo4j_uri: str = "bolt://localhost:7687"
     neo4j_cypher: str = ""
+    max_total_gb: float = 50.0         # hard cap for chunked DB reads
 
 @dataclass
 class DBReadResult:
@@ -133,30 +135,174 @@ class DBReader:
 
     def _sql(self, config: DBSourceConfig) -> DBReadResult:
         try:
-            from sqlalchemy import create_engine
+            from sqlalchemy import create_engine, text
         except ImportError:
             raise DBConnectionError("sqlalchemy not installed")
+
         dsn = self._build_dsn(config)
+        last_exc: Optional[Exception] = None
+
+        # ── Connection retry with exponential backoff ─────────────────────
+        for attempt in range(3):
+            try:
+                engine = create_engine(
+                    dsn, pool_size=5, max_overflow=10,
+                    connect_args=config.extra_connect_args,
+                    execution_options={"stream_results": True},
+                )
+                # Test the connection before reading
+                with engine.connect() as _test_conn:
+                    pass
+                break  # Connection succeeded
+            except Exception as exc:  # noqa: BLE001
+                last_exc = exc
+                import random, time as _time
+                wait = (2 ** attempt) + random.uniform(0, 1)
+                logger.warning(
+                    "[DBReader] Connection attempt %d failed (%s) — retrying in %.1fs",
+                    attempt + 1, exc, wait,
+                )
+                _time.sleep(wait)
+        else:
+            raise DBConnectionError(
+                f"DB connection failed after 3 attempts: {last_exc}"
+            ) from last_exc
+
+        df = pd.DataFrame()
+        total_rows = 0
         try:
-            engine = create_engine(dsn, pool_size=5, max_overflow=10,
-                                   connect_args=config.extra_connect_args)
             with engine.connect() as conn:
                 if config.query:
                     sql = config.query
                 else:
-                    tbl = f'"{config.schema}"."{config.table_or_collection}"' if config.schema else f'"{config.table_or_collection}"'
+                    tbl = (f'"{config.schema}"."{config.table_or_collection}"'
+                           if config.schema else f'"{config.table_or_collection}"')
                     sql = f"SELECT * FROM {tbl}"
                     if config.watermark_column and config.watermark_last_value is not None:
                         sql += f" WHERE \"{config.watermark_column}\" > '{config.watermark_last_value}'"
-                chunks = [c for c in pd.read_sql(sql, conn, chunksize=config.chunk_size)]
-                df = pd.concat(chunks, ignore_index=True) if chunks else pd.DataFrame()
-            engine.dispose()
-            wm = df[config.watermark_column].max() if config.watermark_column in df.columns else None
-            return DBReadResult(df, len(df), {c: str(df[c].dtype) for c in df.columns}, [], wm, 0)
+
+                # Use ChunkedParquetWriter for large streaming reads
+                try:
+                    import uuid as _uuid
+                    from ingestion.chunked_writer import ChunkedParquetWriter
+                    run_id = _uuid.uuid4().hex[:12]
+                    writer = ChunkedParquetWriter(
+                        base_dir="data/tmp",
+                        dataset_id=(config.table_or_collection or "db_query")[:32],
+                        run_id=run_id,
+                        max_total_gb=config.max_total_gb,
+                    )
+                    chunked_iter = pd.read_sql(sql, conn, chunksize=config.fetch_chunk_size)
+                    for chunk in chunked_iter:
+                        writer.write_chunk(chunk)
+                    df = writer.merge_to_single(sample_rows=500_000)
+                    total_rows = writer.total_rows
+                    writer.cleanup()
+                except Exception as chi_exc:  # noqa: BLE001
+                    logger.warning("DB ChunkedWriter path failed (%s) — fallback to pd.concat", chi_exc)
+                    try:
+                        chunks = [c for c in pd.read_sql(sql, conn, chunksize=config.chunk_size)]
+                        df = pd.concat(chunks, ignore_index=True) if chunks else pd.DataFrame()
+                        total_rows = len(df)
+                    except Exception as sql_exc:  # noqa: BLE001
+                        # Custom query totally failed — fall back to sampled SELECT *
+                        if config.query:
+                            logger.warning(
+                                "[DBReader] Custom query failed (%s) — falling back to LIMIT 1000 sample",
+                                sql_exc,
+                            )
+                            tbl = (f'"{config.schema}"."{config.table_or_collection}"'
+                                   if config.schema else f'"{config.table_or_collection}"')
+                            fallback_sql = f"SELECT * FROM {tbl} LIMIT 1000"
+                            try:
+                                df = pd.read_sql(fallback_sql, conn)
+                                total_rows = len(df)
+                            except Exception as fb_exc:  # noqa: BLE001
+                                logger.error("[DBReader] Fallback query also failed: %s", fb_exc)
+                        else:
+                            raise
+
         except Exception as exc:
             if any(w in str(exc).lower() for w in ("connect", "refused", "authentication")):
                 raise DBConnectionError(f"DB connection failed: {exc}") from exc
             raise DataFormatError(f"SQL error: {exc}") from exc
+        finally:
+            try:
+                engine.dispose()
+            except Exception:  # noqa: BLE001
+                pass
+
+        # ── Empty result guard ───────────────────────────────────
+        if df is None:
+            df = pd.DataFrame()
+        if df.empty:
+            logger.info("[DBReader] Query returned 0 rows — returning empty result (valid, non-fatal)")
+
+        # ── PostgreSQL ARRAY / JSON column expansion ──────────────────────
+        if not df.empty:
+            df = self._expand_complex_cols(df)
+
+        wm = df[config.watermark_column].max() if config.watermark_column in (df.columns if not df.empty else []) else None
+        logger.info("[DBReader] SQL read complete — %d rows (total_fetched=%d)", len(df), total_rows)
+        return DBReadResult(df, len(df), {c: str(df[c].dtype) for c in df.columns}, [], wm, 0)
+
+    @staticmethod
+    def _expand_complex_cols(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Expand columns that hold PostgreSQL ARRAY values (lists) or
+        JSON strings that were returned as Python dicts/strings.
+        ARRAY columns → join as comma-separated string.
+        JSON/dict columns → pd.json_normalize and merge back.
+        """
+        import json as _json
+        for col in list(df.columns):
+            try:
+                sample = df[col].dropna().head(20)
+                if len(sample) == 0:
+                    continue
+                # Detect list (PostgreSQL ARRAY) columns
+                if all(isinstance(v, list) for v in sample):
+                    df[col] = df[col].apply(
+                        lambda v: ", ".join(str(x) for x in v) if isinstance(v, list) else v
+                    )
+                    logger.info("[DBReader] ARRAY column '%s' — joined as string", col)
+                    continue
+                # Detect dict (pg json/jsonb) columns
+                if all(isinstance(v, dict) for v in sample):
+                    expanded = pd.json_normalize(df[col].apply(
+                        lambda v: v if isinstance(v, dict) else {}
+                    ).tolist())
+                    expanded.columns = [f"{col}.{c}" for c in expanded.columns]
+                    expanded.index = df.index
+                    df = pd.concat([df.drop(columns=[col]), expanded], axis=1)
+                    logger.info("[DBReader] JSON/dict column '%s' — expanded to %d sub-cols", col, len(expanded.columns))
+                    continue
+                # Detect JSON-string columns
+                str_sample = [v for v in sample if isinstance(v, str)]
+                if str_sample:
+                    parsed = []
+                    for v in str_sample[:10]:
+                        try:
+                            obj = _json.loads(v)
+                            if isinstance(obj, (dict, list)):
+                                parsed.append(obj)
+                        except Exception:  # noqa: BLE001
+                            pass
+                    if len(parsed) / len(str_sample) >= 0.7:
+                        def _safe_json(v):
+                            try:
+                                return _json.loads(v) if isinstance(v, str) else v
+                            except Exception:  # noqa: BLE001
+                                return {}
+                        objs = df[col].apply(_safe_json)
+                        expanded = pd.json_normalize(objs.tolist())
+                        expanded.columns = [f"{col}.{c}" for c in expanded.columns]
+                        expanded.index = df.index
+                        df = pd.concat([df.drop(columns=[col]), expanded], axis=1)
+                        logger.info("[DBReader] JSON-string column '%s' expanded", col)
+            except Exception:  # noqa: BLE001
+                pass
+        return df
 
     def _bigquery(self, config: DBSourceConfig) -> DBReadResult:
         try:
@@ -181,9 +327,38 @@ class DBReader:
             filt = {}
             if config.watermark_column and config.watermark_last_value is not None:
                 filt[config.watermark_column] = {"$gt": config.watermark_last_value}
-            records = list(client[config.database][config.table_or_collection].find(filt, {"_id": 0}))
+            # batch_size() prevents buffering the full collection in RAM
+            cursor = (
+                client[config.database][config.table_or_collection]
+                .find(filt, {"_id": 0})
+                .batch_size(config.fetch_chunk_size)
+            )
+            # Stream into ChunkedParquetWriter for large collections
+            try:
+                import uuid as _uuid
+                from ingestion.chunked_writer import ChunkedParquetWriter
+                run_id = _uuid.uuid4().hex[:12]
+                writer = ChunkedParquetWriter(
+                    base_dir="data/tmp",
+                    dataset_id=(config.table_or_collection or "mongo")[:32],
+                    run_id=run_id,
+                    max_total_gb=config.max_total_gb,
+                )
+                batch: list = []
+                for doc in cursor:
+                    batch.append(doc)
+                    if len(batch) >= config.fetch_chunk_size:
+                        writer.write_chunk(pd.json_normalize(batch))
+                        batch.clear()
+                if batch:
+                    writer.write_chunk(pd.json_normalize(batch))
+                df = writer.merge_to_single(sample_rows=500_000)
+                writer.cleanup()
+            except Exception as mchi_exc:  # noqa: BLE001
+                logger.warning("Mongo ChunkedWriter failed (%s) — load all at once", mchi_exc)
+                records = list(cursor)
+                df = pd.json_normalize(records) if records else pd.DataFrame()
             client.close()
-            df = pd.json_normalize(records) if records else pd.DataFrame()
             return DBReadResult(df, len(df), {c: str(df[c].dtype) for c in df.columns}, [], None, 0)
         except ImportError:
             raise DBConnectionError("pymongo not installed")

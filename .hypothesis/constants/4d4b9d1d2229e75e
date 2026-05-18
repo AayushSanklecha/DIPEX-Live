@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\profiling\missingness_analyzer.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.2, 0.25, 0.3, 0.7, 0.75, 1.0, 100, 'COMPLETE', 'CORRELATED_NULLS', 'DATASET', 'MAR', 'MAR_PATTERN_DETECTED', 'MCAR', 'MNAR_SUSPECTED', 'analyst_flags', 'col_a', 'col_b', 'column', 'column_patterns', 'complete_0pct', 'complete_rows_pct', 'detail', 'entirely_null_100pct', 'flag', 'high_75_99pct', 'low_1_25pct', 'mar_correlated_with', 'mcar_threshold', 'missingness', 'moderate_25_75pct', 'null_corr_pairs', 'null_correlation', 'null_pct', 'overall_null_pct', 'pattern', 'pearson', 'profiling']

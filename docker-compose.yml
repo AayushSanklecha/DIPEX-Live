@@ -111,12 +111,14 @@ services:
         condition: service_healthy
     ports:
       - "9092:9092"
+      - "29092:29092"
     volumes:
       - kafka_data:/var/lib/kafka/data
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -126,11 +128,11 @@ services:
       KAFKA_NUM_PARTITIONS: 3
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       # Default topics to create on boot
-      KAFKA_CREATE_TOPICS: "raw_events:3:1,dipex_pipeline:3:1,dipex_results:3:1"
+      KAFKA_CREATE_TOPICS: "raw_events:3:1,cleaned:3:1,gold_outputs:3:1,drift_alerts:3:1,rl_signals:3:1"
     healthcheck:
-      test: kafka-topics --bootstrap-server localhost:9092 --list
-      interval: 30s
-      timeout: 10s
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 5s
       retries: 5
 
   # ─────────────────────────────────────────────────────────────
@@ -172,14 +174,28 @@ services:
       kafka:
         condition: service_healthy
     ports:
-      - "8000:8000"
+      - "8000:7860"
     volumes:
       - .:/app
       - ./data:/app/data
       - ./models:/app/models
       - ./audit:/app/audit
       - ./reports:/app/reports
-    command: [ "uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+    command: [
+      "uvicorn", "api.app:app",
+      "--host", "0.0.0.0",
+      "--port", "7860",
+      "--reload",
+      "--reload-include", "*.py",
+      "--reload-exclude", "data/*",
+      "--reload-exclude", "models/*",
+      "--reload-exclude", "audit/*",
+      "--reload-exclude", "reports/*",
+      "--reload-exclude", "reports_output/*",
+      "--reload-exclude", "output/*",
+      "--reload-exclude", "logs/*",
+      "--reload-exclude", "__pycache__/*"
+    ]
     env_file:
       - .env
     environment:
@@ -197,8 +213,9 @@ services:
       MONGO_DB: ${MONGO_DB:-dipex}
       MONGO_USER: ${MONGO_USER:-dipex}
       MONGO_PASS: ${MONGO_PASS:-dipex_secret}
+      WATCHFILES_FORCE_POLLING: "true"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:7860/health" ]
       interval: 30s
       timeout: 10s
       start_period: 30s

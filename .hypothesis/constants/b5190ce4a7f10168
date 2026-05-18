@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\preprocessing\auto_corrector.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.2, 0.3, 1.0, 2.0, '100% missing values', 'MISSING', 'action', 'column_stats', 'dropped_all_null', 'dropped_constant', 'imput', 'log1p_transform', 'median_imputation', 'min', 'mode_imputation', 'null_pct', 'reason', 'skewness', 'sqrt_transform', 'std', 'zero_pct', 'zero_to_nan_imputed']

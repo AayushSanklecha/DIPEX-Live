@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\connectors\clickhouse_connector.py
-# hypothesis_version: 6.151.9
-
-[300, 8123, 100000, 'CH_DB', 'CH_HOST', 'CH_PASS', 'CH_PORT', 'CH_USER', 'SHOW TABLES', 'chunk_size', 'columns', 'compression', 'connect_timeout', 'database', 'default', 'description', 'dtypes', 'error', 'estimated_row_count', 'host', 'localhost', 'lz4', 'password', 'port', 'query', 'query_timeout', 'secure', 'table', 'tables', 'username', 'verify']

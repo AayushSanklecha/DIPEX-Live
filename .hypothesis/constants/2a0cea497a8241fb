@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\validation\regulatory\conflict_resolver.py
-# hypothesis_version: 6.151.9
-
-['CRITICAL', 'ERROR', 'WARNING', 'advisory_only', 'column', 'conflicting_domains', 'conflicting_rules', 'domain_priority', 'generic', 'meta', 'resolution', 'rule_conflict', 'severities', 'strategy_applied', 'strictest_wins']

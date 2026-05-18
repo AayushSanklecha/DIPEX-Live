@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\readers\stream_reader.py
-# hypothesis_version: 6.151.9
-
-[0.05, 0.1, 1.0, 5.0, 30.0, 60.0, 1000.0, 100, 1000, 1883, 30000, 50000, 100000, 500000, '#', '$Default', '/', 'AZURE_EH_CONN_STRING', 'IOT_PASSWORD', 'IOT_USERNAME', 'PLAINTEXT', 'UTF-8', '_eh_enqueued_time', '_eh_sequence_number', '_event_time', '_ingestion_ts', '_mqtt_topic', '_poll_ts', '_raw', 'auto.offset.reset', 'bootstrap.servers', 'device_id', 'dipex-consumer', 'earliest', 'enable.auto.commit', 'group.id', 'localhost', 'localhost:9092', 'mqtt', 'partition', 'raw', 'replace', 'sasl.mechanisms', 'sasl.password', 'sasl.username', 'security.protocol', 'session.timeout.ms', 'sliding', 'tumbling', 'utf-8']

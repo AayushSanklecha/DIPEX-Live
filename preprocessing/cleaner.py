@@ -398,12 +398,22 @@ class DataCleaner:
 
     def _cap_outliers(self, df: pd.DataFrame, report: CleaningReport) -> pd.DataFrame:
         num_cols = df.select_dtypes(include=[np.number]).columns
-        method = self.outlier_capping.lower()
+        default_method = self.outlier_capping.lower() if self.outlier_capping else "none"
+        brain_decisions = df.attrs.get("column_decisions", {})
 
         for col in num_cols:
             series = df[col].dropna()
             if len(series) < 4:
                 continue
+
+            # Read brain hint if available, else fallback to global config
+            brain_strat = brain_decisions.get(col, {}).get("outlier_strategy")
+            method = brain_strat if brain_strat and brain_strat != "none" else default_method
+
+            if method == "none":
+                continue
+
+            lower, upper = None, None
 
             if method == "iqr":
                 q1, q3 = series.quantile(0.25), series.quantile(0.75)
@@ -416,19 +426,32 @@ class DataCleaner:
                     continue
                 lower = mean - self.zscore_threshold * std
                 upper = mean + self.zscore_threshold * std
+            elif method == "winsorise":
+                # Clip to 1st and 99th percentiles
+                lower = series.quantile(0.01)
+                upper = series.quantile(0.99)
+            elif method == "flag":
+                # Flag strategy means we just add an indicator, we don't truncate
+                q1, q3 = series.quantile(0.25), series.quantile(0.75)
+                upper_bound = q3 + self.iqr_multiplier * (q3 - q1)
+                flag_col = f"{col}_outlier_flag"
+                df[flag_col] = (df[col] > upper_bound).astype(int)
+                report.capping_log.append({
+                    "column": col, "method": method, "flagged": int(df[flag_col].sum())
+                })
+                continue
             else:
                 continue
 
-            capped_low = int((df[col] < lower).sum())
-            capped_high = int((df[col] > upper).sum())
-            if capped_low + capped_high == 0:
-                continue
-
-            df[col] = df[col].clip(lower=lower, upper=upper)
-            report.capping_log.append({
-                "column": col, "method": method,
-                "lower_fence": float(lower), "upper_fence": float(upper),
-                "capped_low": capped_low, "capped_high": capped_high,
-            })
+            if lower is not None and upper is not None:
+                capped_low = int((df[col] < lower).sum())
+                capped_high = int((df[col] > upper).sum())
+                if capped_low + capped_high > 0:
+                    df[col] = df[col].clip(lower=lower, upper=upper)
+                    report.capping_log.append({
+                        "column": col, "method": method,
+                        "lower_fence": float(lower), "upper_fence": float(upper),
+                        "capped_low": capped_low, "capped_high": capped_high,
+                    })
 
         return df

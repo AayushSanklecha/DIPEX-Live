@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\connectors\neo4j_connector.py
-# hypothesis_version: 6.151.9
-
-[3600, 10000, 'NEO4J_DATABASE', 'NEO4J_PASS', 'NEO4J_URI', 'NEO4J_USER', 'chunk_size', 'columns', 'connection_timeout', 'database', 'description', 'dtypes', 'error', 'estimated_row_count', 'label', 'max_conn_lifetime', 'neo4j', 'node_labels', 'params', 'password', 'propertyKey', 'property_keys', 'query', 'relationshipType', 'relationship_types', 'uri', 'username']

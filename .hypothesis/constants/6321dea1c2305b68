@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\validation\schema_validator.py
-# hypothesis_version: 6.151.9
-
-[0.1, '1970-01-01', 'CRITICAL', 'ERROR', 'FUTURE_TIMESTAMP', 'PRE_EPOCH_TIMESTAMP', 'TYPE_MISMATCH', 'UNIQUE_KEY_VIOLATION', 'UTC', 'VALUE_OUT_OF_RANGE', 'WARNING', 'bool', 'category', 'column', 'datetime', 'datetime64', 'datetime64[ns, UTC]', 'datetime64[ns]', 'float', 'float16', 'float32', 'float64', 'int', 'int16', 'int32', 'int64', 'int8', 'max', 'message', 'min', 'null_threshold', 'object', 'pipeline', 'qa_gate', 'raise', 'ranges', 'required_columns', 'severity', 'str', 'string', 'timestamp_columns', 'type', 'types', 'uint16', 'uint32', 'uint64', 'uint8', 'unique_keys']

@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\proposal\proposers\encoding_proposer.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.1, 0.5, 100, 'CANDIDATES_COLLECTED', 'NO_CANDIDATES', 'alternatives', 'cardinality', 'cardinality_ratio', 'category', 'column', 'encoding_candidates', 'error', 'frequency_encoding', 'hashing', 'object', 'one_hot', 'ordinal', 'rationale', 'recommended_encoding', 'status', 'target_encoding']

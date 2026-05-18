@@ -1,0 +1,126 @@
+-- ─────────────────────────────────────────────────────────────────
+-- DIPEX Demo — PostgreSQL Seed Data
+-- E-Commerce Sales Orders — realistic data with nulls & anomalies
+-- Auto-runs on container startup via docker-entrypoint-initdb.d
+-- ─────────────────────────────────────────────────────────────────
+
+-- Customers table
+CREATE TABLE IF NOT EXISTS customers (
+    customer_id   SERIAL PRIMARY KEY,
+    full_name     VARCHAR(100) NOT NULL,
+    email         VARCHAR(150),
+    country       VARCHAR(50),
+    signup_date   DATE,
+    is_premium    BOOLEAN DEFAULT FALSE
+);
+
+-- Sales orders table
+CREATE TABLE IF NOT EXISTS sales_orders (
+    order_id      SERIAL PRIMARY KEY,
+    customer_id   INTEGER REFERENCES customers(customer_id),
+    product_name  VARCHAR(200) NOT NULL,
+    category      VARCHAR(50),
+    quantity       INTEGER CHECK(quantity > 0),
+    unit_price    NUMERIC(10, 2),
+    total_amount  NUMERIC(12, 2),
+    order_date    TIMESTAMP NOT NULL DEFAULT NOW(),
+    shipping_city VARCHAR(100),
+    status        VARCHAR(20) DEFAULT 'completed',
+    discount_pct  NUMERIC(5, 2),
+    notes         TEXT
+);
+
+-- ── Seed Customers ─────────────────────────────────────────────────
+INSERT INTO customers (full_name, email, country, signup_date, is_premium) VALUES
+('Alice Johnson',    'alice@example.com',     'United States', '2023-01-15', TRUE),
+('Bob Martinez',     'bob.m@example.com',     'Mexico',        '2023-02-20', FALSE),
+('Chandra Patel',    'chandra.p@example.com', 'India',         '2023-03-10', TRUE),
+('Diana Müller',     'diana.m@example.com',   'Germany',       '2023-04-05', FALSE),
+('Emeka Okafor',     'emeka@example.com',     'Nigeria',       '2023-05-18', TRUE),
+('Fatima Al-Rashid', 'fatima@example.com',     'UAE',           '2023-06-01', FALSE),
+('George Kim',       'george.k@example.com',  'South Korea',   '2023-07-12', TRUE),
+('Hannah Berg',      NULL,                     'Sweden',        '2023-08-25', FALSE),
+('Ivan Petrov',      'ivan.p@example.com',    'Russia',        '2023-09-30', FALSE),
+('Julia Santos',     'julia.s@example.com',   'Brazil',        '2023-10-14', TRUE),
+('Kenji Tanaka',     'kenji@example.com',     'Japan',         '2023-11-01', TRUE),
+('Lena Schmidt',     'lena.s@example.com',    'Germany',       '2023-12-05', FALSE),
+('Marco Rossi',      'marco@example.com',     'Italy',         '2024-01-10', TRUE),
+('Nadia Kowalski',   NULL,                     'Poland',        '2024-02-14', FALSE),
+('Oscar Nguyen',     'oscar.n@example.com',   'Vietnam',       '2024-03-01', FALSE);
+
+-- ── Seed Sales Orders (100 rows) ───────────────────────────────────
+INSERT INTO sales_orders (customer_id, product_name, category, quantity, unit_price, total_amount, order_date, shipping_city, status, discount_pct, notes) VALUES
+(1,  'MacBook Pro 16"',         'Electronics',  1,  2499.99, 2499.99, '2024-01-05 10:30:00', 'New York',      'completed',  0.00,  NULL),
+(2,  'iPhone 15 Pro',           'Electronics',  2,   999.00, 1998.00, '2024-01-06 14:15:00', 'Mexico City',   'completed',  5.00,  'Gift wrapping requested'),
+(3,  'Dell XPS 15',             'Electronics',  1,  1799.00, 1799.00, '2024-01-07 09:00:00', 'Mumbai',        'completed',  0.00,  NULL),
+(4,  'Samsung Galaxy S24',      'Electronics',  1,   899.99,  899.99, '2024-01-08 16:45:00', 'Berlin',        'completed', 10.00,  NULL),
+(5,  'Sony WH-1000XM5',        'Audio',        3,   349.99, 1049.97, '2024-01-09 11:00:00', 'Lagos',         'completed',  0.00,  'Bulk order'),
+(6,  'iPad Air M2',             'Electronics',  1,   799.00,  799.00, '2024-01-10 13:30:00', 'Dubai',         'completed',  0.00,  NULL),
+(7,  'LG OLED C3 65"',         'Electronics',  1,  1799.99, 1799.99, '2024-01-11 08:00:00', 'Seoul',         'shipped',    0.00,  NULL),
+(8,  'Dyson V15 Detect',       'Home',         1,   749.99,  749.99, '2024-01-12 15:20:00', 'Stockholm',     'completed',  0.00,  NULL),
+(9,  'Nike Air Max 90',        'Fashion',      2,   129.99,  259.98, '2024-01-13 10:10:00', 'Moscow',        'completed',  0.00,  NULL),
+(10, 'Canon EOS R6 II',        'Photography',  1,  2499.00, 2499.00, '2024-01-14 17:00:00', 'São Paulo',     'completed', 15.00,  'Professional discount'),
+(1,  'AirPods Pro 2',          'Audio',        1,   249.00,  249.00, '2024-01-15 12:00:00', 'New York',      'completed',  0.00,  NULL),
+(2,  'Logitech MX Master 3S',  'Peripherals',  1,    99.99,   99.99, '2024-01-16 09:30:00', 'Guadalajara',   'completed',  0.00,  NULL),
+(3,  'Samsung 990 Pro SSD 2TB','Storage',      2,   169.99,  339.98, '2024-01-17 14:00:00', 'Delhi',         'completed',  5.00,  NULL),
+(4,  'Bose QC Ultra',          'Audio',        1,   429.00,  429.00, '2024-01-18 11:45:00', 'Munich',        'shipped',    0.00,  NULL),
+(5,  'PlayStation 5 Slim',     'Gaming',       1,   449.99,  449.99, '2024-01-19 16:30:00', 'Abuja',         'completed',  0.00,  NULL),
+(6,  'Kindle Paperwhite',      'Electronics',  2,   149.99,  299.98, '2024-01-20 10:00:00', 'Abu Dhabi',     'completed',  0.00,  NULL),
+(7,  'Razer BlackWidow V4',    'Peripherals',  1,   169.99,  169.99, '2024-01-21 13:15:00', 'Busan',         'completed',  0.00,  NULL),
+(8,  'Vitamix A3500',          'Home',         1,   649.95,  649.95, '2024-01-22 08:30:00', 'Gothenburg',    'completed', 10.00,  NULL),
+(9,  'Adidas Ultraboost 23',   'Fashion',      1,   189.99,  189.99, '2024-01-23 15:00:00', 'St Petersburg', 'returned',   0.00,  'Wrong size'),
+(10, 'GoPro Hero 12',          'Photography',  1,   399.99,  399.99, '2024-01-24 12:30:00', 'Rio de Janeiro','completed',  0.00,  NULL),
+(11, 'Mechanical Keyboard K8',  'Peripherals',  1,   109.00,  109.00, '2024-01-25 09:00:00', 'Tokyo',         'completed',  0.00,  NULL),
+(12, 'Standing Desk Pro',       'Furniture',    1,   599.00,  599.00, '2024-01-26 14:45:00', 'Hamburg',       'completed',  0.00,  NULL),
+(13, 'Espresso Machine Pro',    'Home',         1,   899.99,  899.99, '2024-01-27 11:00:00', 'Rome',          'completed', 20.00,  'Loyalty discount'),
+(14, 'Wireless Charger Pad',    'Peripherals',  3,    39.99,  119.97, '2024-01-28 16:00:00', 'Warsaw',        'completed',  0.00,  NULL),
+(15, 'Dji Mini 3 Pro',         'Photography',  1,   759.00,  759.00, '2024-01-29 10:30:00', 'Hanoi',         'shipped',    0.00,  NULL),
+(1,  'Apple Watch Ultra 2',    'Wearables',    1,   799.00,  799.00, '2024-01-30 13:00:00', 'Los Angeles',   'completed',  0.00,  NULL),
+(3,  'ThinkPad X1 Carbon',     'Electronics',  1,  1649.00, 1649.00, '2024-01-31 09:15:00', 'Bangalore',     'completed', 12.00,  'Corporate order'),
+(5,  'JBL Flip 6',             'Audio',        2,   129.95,  259.90, '2024-02-01 15:30:00', 'Lagos',         'completed',  0.00,  NULL),
+(7,  'Ring Video Doorbell Pro', 'Smart Home',   1,   229.99,  229.99, '2024-02-02 08:45:00', 'Incheon',       'completed',  0.00,  NULL),
+(9,  'Puma RS-X',              'Fashion',      1,   109.99,  109.99, '2024-02-03 12:00:00', 'Moscow',        'cancelled',  0.00,  'Customer request'),
+(11, 'Nintendo Switch OLED',   'Gaming',       1,   349.99,  349.99, '2024-02-04 14:00:00', 'Osaka',         'completed',  0.00,  NULL),
+(13, 'Nespresso Vertuo Next',  'Home',         1,   179.00,  179.00, '2024-02-05 10:30:00', 'Milan',         'completed',  0.00,  NULL),
+(2,  'Google Pixel 8 Pro',     'Electronics',  1,   999.00,  999.00, '2024-02-06 16:15:00', 'Cancún',        'completed',  8.00,  NULL),
+(4,  'Sonos Beam Gen 2',       'Audio',        1,   449.00,  449.00, '2024-02-07 11:30:00', 'Frankfurt',     'completed',  0.00,  NULL),
+(6,  'Philips Hue Starter Kit','Smart Home',   1,   199.99,  199.99, '2024-02-08 09:00:00', 'Sharjah',       'completed',  0.00,  NULL),
+(8,  'IKEA JÄRVFJÄLLET Chair', 'Furniture',    1,   399.00,  399.00, '2024-02-09 13:45:00', 'Malmö',         'completed',  0.00,  NULL),
+(10, 'Fujifilm X-T5',          'Photography',  1,  1699.00, 1699.00, '2024-02-10 15:00:00', 'Brasília',      'completed',  0.00,  NULL),
+(12, 'Ergonomic Monitor Arm',  'Furniture',    2,    89.99,  179.98, '2024-02-11 08:00:00', 'Dresden',       'completed',  0.00,  NULL),
+(14, 'USB-C Hub 12-in-1',      'Peripherals',  1,    79.99,   79.99, '2024-02-12 12:30:00', 'Kraków',        'completed',  0.00,  NULL),
+(15, 'Insta360 X3',            'Photography',  1,   449.99,  449.99, '2024-02-13 14:15:00', 'Ho Chi Minh',   'completed',  0.00,  NULL),
+(1,  'Bose SoundLink Flex',    'Audio',        1,   149.00,  149.00, '2024-02-14 10:00:00', 'Chicago',       'completed',  0.00,  'Valentine gift'),
+(3,  'OnePlus 12',             'Electronics',  1,   799.99,  799.99, '2024-02-15 16:30:00', 'Hyderabad',     'completed',  0.00,  NULL),
+(5,  'Xbox Series X',          'Gaming',       1,   499.99,  499.99, '2024-02-16 11:00:00', 'Port Harcourt', 'completed',  0.00,  NULL),
+(7,  'Ecovacs Deebot X2',      'Smart Home',   1,   999.00,  999.00, '2024-02-17 09:30:00', 'Seoul',         'completed',  5.00,  NULL),
+(9,  'North Face Jacket',      'Fashion',      1,   279.00,  279.00, '2024-02-18 14:00:00', 'Moscow',        'completed',  0.00,  NULL),
+(11, 'Sony PS VR2',            'Gaming',       1,   549.99,  549.99, '2024-02-19 13:00:00', 'Nagoya',        'completed',  0.00,  NULL),
+(13, 'Le Creuset Dutch Oven',  'Home',         1,   379.95,  379.95, '2024-02-20 10:45:00', 'Florence',      'completed',  0.00,  NULL),
+(2,  'Meta Quest 3',           'Gaming',       1,   499.99,  499.99, '2024-02-21 15:30:00', 'Monterrey',     'completed',  0.00,  NULL),
+(4,  'Sennheiser HD 660S2',    'Audio',        1,   499.95,  499.95, '2024-02-22 12:00:00', 'Cologne',       'completed',  0.00,  NULL),
+(6,  'TP-Link Deco XE75 Pro',  'Smart Home',   1,   349.99,  349.99, '2024-02-23 08:15:00', 'Dubai',         'completed',  0.00,  NULL),
+(8,  'Theragun Pro Plus',      'Health',       1,   599.00,  599.00, '2024-02-24 11:45:00', 'Uppsala',       'completed',  0.00,  NULL),
+(10, 'Tamron 28-75mm f/2.8',   'Photography',  1,   879.00,  879.00, '2024-02-25 16:00:00', 'São Paulo',     'completed', 10.00,  NULL),
+(12, 'Secretlab Titan Evo',    'Furniture',    1,   519.00,  519.00, '2024-02-26 09:30:00', 'Berlin',        'shipped',    0.00,  NULL),
+(14, 'Anker 737 Power Bank',   'Peripherals',  2,    99.99,  199.98, '2024-02-27 14:00:00', 'Gdańsk',        'completed',  0.00,  NULL),
+(15, 'DJI Action 4',           'Photography',  1,   399.00,  399.00, '2024-02-28 10:30:00', 'Da Nang',       'completed',  0.00,  NULL),
+(1,  'HomePod Mini',           'Audio',        2,    99.00,  198.00, '2024-03-01 12:00:00', 'San Francisco', 'completed',  0.00,  NULL),
+(3,  'Samsung Galaxy Tab S9',  'Electronics',  1,   849.99,  849.99, '2024-03-02 15:15:00', 'Chennai',       'completed',  0.00,  NULL),
+(5,  'Garmin Venu 3',          'Wearables',    1,   449.99,  449.99, '2024-03-03 09:00:00', 'Kano',          'completed',  0.00,  NULL),
+(7,  'LG Gram 17"',            'Electronics',  1,  1499.99, 1499.99, '2024-03-04 11:30:00', 'Daegu',         'completed',  7.00,  NULL),
+(9,  'Levi 501 Originals',    'Fashion',      3,    79.50,  238.50, '2024-03-05 14:45:00', 'St Petersburg', 'completed',  0.00,  NULL),
+(11, 'Razer Blade 16',         'Gaming',       1,  2799.99, 2799.99, '2024-03-06 16:00:00', 'Tokyo',         'completed',  0.00,  NULL),
+(13, 'KitchenAid Stand Mixer', 'Home',         1,   449.99,  449.99, '2024-03-07 10:00:00', 'Naples',        'completed',  0.00,  NULL),
+(2,  'Beats Studio Pro',       'Audio',        1,   349.99,  349.99, '2024-03-08 13:30:00', 'Puebla',        'returned',   0.00,  'Defective unit'),
+(4,  'Bosch Smart Lock',       'Smart Home',   1,   249.00,  249.00, '2024-03-09 08:45:00', 'Stuttgart',     'completed',  0.00,  NULL),
+(6,  'Roborock S8 Pro Ultra',  'Smart Home',   1,  1599.99, 1599.99, '2024-03-10 15:00:00', 'Abu Dhabi',     'completed',  0.00,  NULL),
+(8,  'Oura Ring Gen 3',        'Wearables',    1,   299.00,  299.00, '2024-03-11 11:00:00', 'Stockholm',     'completed',  0.00,  NULL),
+(10, 'Peak Design Travel Bag', 'Travel',       1,   299.95,  299.95, '2024-03-12 14:30:00', 'Curitiba',      'completed',  0.00,  NULL),
+(12, 'BenQ ScreenBar Halo',    'Peripherals',  1,   179.00,  179.00, '2024-03-13 09:15:00', 'Leipzig',       'completed',  0.00,  NULL),
+(14, 'Jabra Elite 85t',        'Audio',        1,   229.99,  229.99, '2024-03-14 12:45:00', 'Wrocław',       'completed',  0.00,  NULL),
+(15, 'Zhiyun Crane M3S',       'Photography',  1,   299.00,  299.00, '2024-03-15 16:30:00', 'Hanoi',         'completed',  0.00,  NULL),
+-- Intentional data quality issues for demo
+(1,  'Mystery Product',        NULL,           1,    NULL,     NULL,  '2024-03-16 10:00:00', NULL,            'pending',    NULL, 'Missing data — test quality gate'),
+(3,  'Test Order',             'Test',         1,     0.01,    0.01, '2024-03-17 10:00:00', 'Test City',     'completed',  0.00,  'Anomalous low price'),
+(NULL,'Orphan Order',          'Electronics',  1,   999.00,  999.00, '2024-03-18 10:00:00', 'Unknown',       'completed',  0.00,  'No customer — FK violation');

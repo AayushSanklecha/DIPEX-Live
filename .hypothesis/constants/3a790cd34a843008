@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\verifier\confidence_vector.py
-# hypothesis_version: 6.151.9
-
-[-1.0, 0.0, 0.05, 0.07, 0.1, 0.15, 0.2, 0.35, 0.4, 0.49, 0.5, 0.6, 0.65, 0.7, 0.85, 0.92, 1.0, 'CRITICAL', 'ConfidenceVector', 'PASS', 'REJECT', 'allowed', 'banking', 'base_quality', 'classification', 'completeness', 'compliance_decision', 'compliance_penalty', 'components', 'confidence_score', 'consistency', 'de_identification', 'decision', 'default', 'domain', 'finance', 'gate2_passed', 'gdpr_data_residency', 'healthcare', 'min_auc_applied', 'mode', 'model_boost', 'n/a', 'n_critical', 'n_error', 'phi_presence', 'pipeline', 'quality_score', 'reason', 'retry_penalty', 'roc_auc', 'rule_name', 'severity', 'unsupervised', 'violation_summary']

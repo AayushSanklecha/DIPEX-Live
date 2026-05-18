@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Shell from './components/layout/Shell';
-import Dashboard from './pages/Dashboard';
 import RunPipeline from './pages/RunPipeline';
-import Reports from './pages/Reports';
 import ApiDocs from './pages/ApiDocs';
+import Analytics from './pages/Analytics';
+import { PipelineSessionProvider } from './context/PipelineSessionContext';
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -32,17 +32,19 @@ class ErrorBoundary extends React.Component {
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Shell />}>
-          <Route index element={<ErrorBoundary><Dashboard /></ErrorBoundary>} />
-          <Route path="run" element={<ErrorBoundary><RunPipeline /></ErrorBoundary>} />
-          <Route path="reports" element={<ErrorBoundary><Reports /></ErrorBoundary>} />
-          <Route path="docs" element={<ErrorBoundary><ApiDocs /></ErrorBoundary>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <PipelineSessionProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Shell />}>
+            <Route index element={<ErrorBoundary><Analytics /></ErrorBoundary>} />
+            <Route path="run" element={<ErrorBoundary><RunPipeline /></ErrorBoundary>} />
+            <Route path="analytics" element={<Navigate to="/" replace />} />
+            <Route path="docs" element={<ErrorBoundary><ApiDocs /></ErrorBoundary>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </PipelineSessionProvider>
   );
 };
 

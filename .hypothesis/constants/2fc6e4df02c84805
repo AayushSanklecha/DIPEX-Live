@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\readers\api_reader.py
-# hypothesis_version: 6.151.9
-
-[0.0, 2.0, 30.0, 100, 429, 500, 1000, 3600, ',', '.', ';', '<>', 'API_RESPONSE_ERROR', 'Authorization', 'DATA_FORMAT_ERROR', 'DIPEX/3.0 DataIntake', 'ERROR', 'GET', 'Link', 'PARTIAL_DATA_ERROR', 'POST', 'Retry-After', 'SCHEMA_ERROR', 'Timeout', 'User-Agent', 'WARN', 'X-API-Key', 'X-Correlation-ID', 'access_token', 'api_key', 'bearer', 'client_credentials', 'client_id', 'client_secret', 'cursor', 'expires_in', 'grant_type', 'link', 'next_cursor', 'none', 'oauth2', 'offset', 'page', 'page_size', 'pagination', 'query', 'rel="next"', 'rel=next', 'replace', 'scope', 'url', 'utf-8', 'variables']

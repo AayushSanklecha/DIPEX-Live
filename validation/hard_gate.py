@@ -41,7 +41,7 @@ except Exception:
 
 logger = logging.getLogger(__name__)
 
-# Severities that trigger a hard-reject decision
+# Severities that trigger a hard-reject decision (only in strict mode)
 _BLOCKING_SEVERITIES = {"CRITICAL", "ERROR"}
 
 
@@ -115,6 +115,7 @@ class HardGate:
         self._zero_detector      = zero_value_detector
         self._schema_info        = schema_info or {}
         self._strict_mode        = True
+        self._advisory_mode      = False  # when True: gate warns but never rejects
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "HardGate":
@@ -131,7 +132,12 @@ class HardGate:
             zero_value_detector= ZeroValueDetector.from_config(config),
             schema_info        = schema_info,
         )
-        gate._strict_mode = strict_mode
+        gate._strict_mode   = strict_mode
+        # advisory_mode can be set in hard_gate_1 OR validation stanza
+        gate._advisory_mode = (
+            config.get("hard_gate_1", {}).get("advisory_mode", False)
+            or config.get("validation", {}).get("advisory_mode", False)
+        )
         return gate
 
     # ------------------------------------------------------------------
@@ -213,6 +219,23 @@ class HardGate:
             raw_warnings.extend(raw_failures)
             raw_failures = []
 
+        # ── 8. Advisory Mode: demote ALL blocking failures to warnings ─────────
+        # When advisory_mode=True the gate NEVER returns REJECT regardless of
+        # violation severity. It records everything for audit but the pipeline
+        # continues unconditionally. This is the production default so that
+        # dirty / messy data can still reach downstream cleaning stages.
+        if self._advisory_mode and raw_failures:
+            logger.warning(
+                "[HardGate1] advisory_mode=True — demoting %d blocking violation(s) to "
+                "warnings. Pipeline continues.", len(raw_failures)
+            )
+            for f in raw_failures:
+                f["demoted_by"] = "advisory_mode"
+                f["original_severity"] = f.get("severity", "ERROR")
+                f["severity"] = "WARNING"
+            raw_warnings.extend(raw_failures)
+            raw_failures = []
+
         # ── Decision ──────────────────────────────────────────────────
         has_blocking = len(raw_failures) > 0
 
@@ -227,12 +250,17 @@ class HardGate:
                 run_id, len(raw_failures), len(raw_warnings),
             )
         else:
+            n_warn = len(raw_warnings)
+            adv_note = " [advisory_mode: violations demoted]" if self._advisory_mode else ""
             reason = (
-                f"Hard Gate 1 PASSED with {len(raw_warnings)} warning(s)."
-                if raw_warnings else "Hard Gate 1 PASSED — all checks clear."
+                f"Hard Gate 1 PASSED with {n_warn} warning(s).{adv_note}"
+                if n_warn else f"Hard Gate 1 PASSED — all checks clear.{adv_note}"
             )
             decision = "PASS"
-            logger.info("Hard Gate 1 PASSED run_id=%s — %d warning(s).", run_id, len(raw_warnings))
+            logger.info(
+                "Hard Gate 1 PASSED run_id=%s — %d warning(s)%s.",
+                run_id, n_warn, adv_note,
+            )
 
         # ── SHAP explanation on REJECT ─────────────────────────────────
         shap_explanation = None

@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\proposal\__init__.py
-# hypothesis_version: 6.151.9
-
-['AnomalyFlagger', 'FeatureProposer', 'InsightRanker', 'ProposalRouter', 'RAGRecall', 'RAGRetriever']

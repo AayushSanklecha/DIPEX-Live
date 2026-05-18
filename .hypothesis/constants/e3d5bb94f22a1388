@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\proposal\rag_retriever.py
-# hypothesis_version: 6.151.9
-
-['all-MiniLM-L6-v2', 'data/chroma_db', 'distances', 'metadata', 'metadatas', 'relevance_score', 'verified_runs']

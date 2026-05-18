@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\preprocessing\missing_pattern_analyzer.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-09, 0.01, 0.05, 0.1, 0.3, 1.0, 200, '?', 'COMPLETE', 'MAR', 'MCAR', 'MNAR', 'add_mnar_indicators', 'average', 'bottom', 'column', 'details', 'indicator+mice', 'indicator_added', 'mar_columns', 'mar_r2', 'mcar_columns', 'median', 'mice', 'min_rows_for_test', 'missing_patterns', 'mnar_columns', 'mnar_null_threshold', 'mnar_rank_corr', 'none', 'null_pct', 'pattern', 'preprocessing', 'profiles', 'reason', 'recommended_strategy', 'run_id', 'warnings']

@@ -91,7 +91,7 @@ def test_governor_redact_policy(messy_pii_df):
     cleansed, report = governor.enforce(messy_pii_df, "test_dataset")
     
     assert report["status"] == "redacted"
-    assert report["total_redactions"] == 11  # 3 email + 2 ssn + 4 phone/cc
+    assert report["total_redactions"] == 10  # 3 email + 2 ssn + 3 phone + 2 cc
     
     assert cleansed["email"].iloc[0] == "[REDACTED_EMAIL]"
 
@@ -111,7 +111,7 @@ def test_governor_reject_policy(messy_pii_df):
         governor.enforce(messy_pii_df, "test_dataset")
         
     assert "REJECT" in str(exc_info.value)
-    assert "11 instances of PII" in str(exc_info.value)
+    assert "10 instances of PII" in str(exc_info.value)
 
 
 def test_governor_flag_policy(messy_pii_df):

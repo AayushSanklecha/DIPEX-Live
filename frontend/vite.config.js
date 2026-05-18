@@ -33,7 +33,7 @@ export default defineConfig({
         target: 'http://dipex-api:8000',
         changeOrigin: true,
       },
-      '/report': {
+      '^/report/': {
         target: 'http://dipex-api:8000',
         changeOrigin: true,
       },

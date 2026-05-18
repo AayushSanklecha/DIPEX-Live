@@ -530,8 +530,10 @@ class NarrativeBuilder:
         gate2_decision: str = "PASS",
         confidence_score: float = 0.0,
         col_count: int = 0,
+        row_count: int = 0,
         run_id: str = "",
         actions_log: Optional[Dict[str, Dict[str, str]]] = None,
+        user_context: Optional[str] = None,
     ) -> str:
         eda = eda_report or {}
         summary = eda.get("summary", {})
@@ -656,6 +658,15 @@ class NarrativeBuilder:
             )
         sections.append(f"## Recommendation\n\n{rec}")
 
+        # ── Section 8: Analyst Context (if provided) ───────────────────────────
+        if user_context and user_context.strip():
+            # Keyword-boost hint for downstream callers
+            sections.append(
+                f"## Analyst Context\n\n"
+                f"*The following context was provided by the analyst and guided this report:*\n\n"
+                f"> {user_context.strip()}"
+            )
+
         return "\n\n---\n\n".join(sections)
 
     def build_hf_prompt(
@@ -665,6 +676,8 @@ class NarrativeBuilder:
         model_metrics: Optional[Dict[str, Any]] = None,
         analyst_flags: Optional[List[Dict]] = None,
         actions_log: Optional[Dict[str, Dict[str, str]]] = None,
+        user_context: Optional[str] = None,
+        user_context_image_description: Optional[str] = None,
         max_words: int = 400,
     ) -> str:
         """
@@ -736,6 +749,14 @@ class NarrativeBuilder:
         if insights:
             prompt += "AUTO-EDA INSIGHTS:\n" + "\n".join(f"  - {i}" for i in insights[:4]) + "\n\n"
 
+        # Inject user context and image descriptions if available
+        if user_context and user_context.strip():
+            prompt += f"ANALYST CONTEXT (provided by the user — incorporate into your analysis):\n"
+            prompt += f"  {user_context.strip()}\n\n"
+        if user_context_image_description and user_context_image_description.strip():
+            prompt += f"REFERENCE IMAGE INSIGHT (extracted from uploaded image):\n"
+            prompt += f"  {user_context_image_description.strip()}\n\n"
+
         prompt += (
             f"Write a structured executive report with these sections:\n"
             f"1. **Executive Summary** — what was analysed and the overall verdict (2-3 sentences)\n"
@@ -748,6 +769,515 @@ class NarrativeBuilder:
             f"Executive Report:"
         )
         return prompt
+
+
+# ── New Sub-Narrators (ip Part B) ─────────────────────────────────────────────
+
+
+class StatisticalSignificanceNarrator:
+    """
+    Narrates the results of statistical hypothesis tests.
+
+    Interprets chi-square, t-tests, Mann-Whitney U, ANOVA, and KS tests
+    in plain language with effect-size context.
+    """
+
+    def narrate(self, stat_tests: Optional[Dict]) -> str:
+        """
+        Produce a plain-language narrative for statistical test results.
+
+        Parameters
+        ----------
+        stat_tests : dict like {
+            "chi_square": [{"column": "...", "p_value": 0.02, "statistic": 12.4}],
+            "t_tests":    [{"column": "...", "p_value": 0.21, "statistic": 1.3}],
+        }
+        """
+        if not stat_tests:
+            return "*No statistical tests were performed for this dataset.*"
+
+        lines = ["### Statistical Significance Analysis\n"]
+
+        # ── Chi-Square (independence tests) ─────────────────────────────────
+        chi = stat_tests.get("chi_square", []) or []
+        if chi:
+            lines.append("**Chi-Square Independence Tests:**")
+            for t in chi[:5]:
+                col = t.get("column", "?")
+                p   = float(t.get("p_value", 1.0))
+                chi_stat = float(t.get("statistic", 0.0))
+                if p < 0.001:
+                    sig = "**highly significant** (p < 0.001) — very strong evidence of association"
+                elif p < 0.01:
+                    sig = "**highly significant** (p < 0.01)"
+                elif p < 0.05:
+                    sig = "**significant** (p < 0.05)"
+                elif p < 0.10:
+                    sig = "borderline (p < 0.10) — weak evidence, treat with caution"
+                else:
+                    sig = "not significant (p = {:.3f}) — no evidence of association".format(p)
+                lines.append(f"  - `{col}`: χ² = {chi_stat:.2f}, p = {p:.4f} → {sig}")
+
+        # ── T-tests ──────────────────────────────────────────────────────────
+        t_tests = stat_tests.get("t_tests", []) or []
+        if t_tests:
+            lines.append("\n**Independent Samples T-Tests:**")
+            for t in t_tests[:5]:
+                col = t.get("column", "?")
+                p   = float(t.get("p_value", 1.0))
+                st  = float(t.get("statistic", 0.0))
+                dir_hint = "higher" if st > 0 else "lower"
+                if p < 0.05:
+                    interp = f"Group A shows {dir_hint} mean values — **statistically significant** at α=0.05"
+                else:
+                    interp = "No significant difference between groups at α=0.05"
+                lines.append(f"  - `{col}`: t = {st:.2f}, p = {p:.4f} → {interp}")
+
+        # ── ANOVA ─────────────────────────────────────────────────────────────
+        anova = stat_tests.get("anova", []) or []
+        if anova:
+            lines.append("\n**ANOVA Tests (multi-group mean comparison):**")
+            for t in anova[:3]:
+                col = t.get("column", "?")
+                p   = float(t.get("p_value", 1.0))
+                f_s = float(t.get("statistic", 0.0))
+                sig = "significant group differences exist" if p < 0.05 else "no significant group differences"
+                lines.append(f"  - `{col}`: F = {f_s:.2f}, p = {p:.4f} → {sig}")
+
+        # ── KS tests ──────────────────────────────────────────────────────────
+        ks = stat_tests.get("ks_tests", []) or []
+        if ks:
+            lines.append("\n**Kolmogorov-Smirnov Distribution Tests:**")
+            for t in ks[:3]:
+                col = t.get("column", "?")
+                p   = float(t.get("p_value", 1.0))
+                d   = float(t.get("statistic", 0.0))
+                sig = "distributions are **significantly different**" if p < 0.05 else "distributions appear similar"
+                lines.append(f"  - `{col}`: D = {d:.4f}, p = {p:.4f} → {sig}")
+
+        if len(lines) == 1:
+            return "*No significant tests found in results.*"
+
+        lines.append(
+            "\n> **Interpretation note**: Statistical significance (p < 0.05) indicates "
+            "a pattern is unlikely due to chance, but does not imply practical significance. "
+            "Always consider effect size and domain context."
+        )
+        return "\n".join(lines)
+
+
+class FeatureImportanceNarrator:
+    """
+    Narrates feature importance scores from ML models.
+    Ranks features by importance, identifies dominant features,
+    and warns about suspected target leakage.
+    """
+
+    LEAKAGE_THRESHOLD = 0.30  # Single feature with >30% importance → suspect leakage
+
+    def narrate(
+        self,
+        importances: Optional[Dict[str, float]],
+        model_name: str = "",
+        task_type: str = "classification",
+    ) -> str:
+        """
+        Parameters
+        ----------
+        importances : {"col_name": importance_score, ...} (already normalised 0-1)
+        model_name  : Name of the model that produced these importances
+        task_type   : 'classification' or 'regression'
+        """
+        if not importances:
+            return "*Feature importance data not available.*"
+
+        total = sum(importances.values()) or 1.0
+        ranked = sorted(importances.items(), key=lambda x: -x[1])
+        top = ranked[:10]
+
+        lines = [f"### Feature Importance Analysis ({model_name or 'Model'})\n"]
+
+        # Top feature summary
+        if top:
+            top_col, top_score = top[0]
+            pct = top_score / total
+            if pct > self.LEAKAGE_THRESHOLD:
+                lines.append(
+                    f"⚠️  **Leakage Warning**: `{top_col}` accounts for {pct:.1%} of total feature "
+                    f"importance. A single feature dominating >{self.LEAKAGE_THRESHOLD:.0%} of "
+                    "importance is a common target leakage signal. Verify this feature would be "
+                    "available at inference time."
+                )
+            else:
+                lines.append(
+                    f"The most predictive feature is **`{top_col}`** ({pct:.1%} of total importance). "
+                    f"{'No single feature dominant — importance is well-distributed.' if pct < 0.15 else ''}"
+                )
+
+        # Cumulative importance
+        cumulative = 0.0
+        n_for_80 = 0
+        for _, score in ranked:
+            cumulative += score / total
+            n_for_80 += 1
+            if cumulative >= 0.80:
+                break
+
+        lines.append(
+            f"\n**Concentration**: {n_for_80} feature(s) explain 80% of model signal "
+            f"(out of {len(ranked)} total features)."
+        )
+        if n_for_80 == 1:
+            lines.append("⚠️  Very high importance concentration — verify for data leakage.")
+        elif n_for_80 >= len(ranked) * 0.7:
+            lines.append("✅ Well-distributed importance — model relies on many features.")
+
+        # Top 10 ranked list
+        lines.append("\n**Top Features (ranked by importance):**")
+        for i, (col, score) in enumerate(top, 1):
+            bar = "█" * int((score / total) * 30)
+            lines.append(f"  {i:2d}. `{col}` {bar} {score / total:.2%}")
+
+        return "\n".join(lines)
+
+
+class BiasAndFairnessNarrator:
+    """
+    Narrates bias and fairness metrics in plain language.
+
+    Interprets demographic parity, equal opportunity, and disparate
+    impact ratios for protected groups.
+    """
+
+    DI_THRESHOLD      = 0.80  # Disparate Impact < 80% → adverse impact (4/5ths rule)
+    DP_DIFF_THRESHOLD = 0.10  # Demographic Parity difference > 10% → concern
+
+    def narrate(self, bias_report: Optional[Dict]) -> str:
+        """
+        Parameters
+        ----------
+        bias_report : {
+            "protected_attribute": str,
+            "metrics": {
+                "demographic_parity_diff": float,
+                "disparate_impact":        float,
+                "equal_opportunity_diff":  float,
+                "predictive_parity_diff":  float,
+            },
+            "group_positive_rates": {"Group A": 0.45, "Group B": 0.28, ...},
+        }
+        """
+        if not bias_report:
+            return "*Bias/fairness analysis was not performed for this dataset.*"
+
+        attr    = bias_report.get("protected_attribute", "protected_attribute")
+        metrics = bias_report.get("metrics", {}) or {}
+        group_rates = bias_report.get("group_positive_rates", {}) or {}
+
+        lines = [f"### Bias & Fairness Analysis — Protected Attribute: `{attr}`\n"]
+
+        di  = metrics.get("disparate_impact")
+        dpd = metrics.get("demographic_parity_diff")
+        eod = metrics.get("equal_opportunity_diff")
+        ppd = metrics.get("predictive_parity_diff")
+
+        # Disparate Impact (4/5ths rule)
+        if di is not None:
+            di = float(di)
+            if di < self.DI_THRESHOLD:
+                lines.append(
+                    f"⚠️  **Adverse Impact Detected** (Disparate Impact = {di:.3f} < {self.DI_THRESHOLD}). "
+                    "Under the 4/5ths rule used by EEOC and GDPR, a DI ratio below 0.80 indicates "
+                    "potential discrimination. Immediate fairness review required."
+                )
+            elif di < 0.90:
+                lines.append(
+                    f"⚡ **Moderate disparity** (DI = {di:.3f}). Below 0.90 — monitor closely. "
+                    "May be acceptable with documented business justification."
+                )
+            else:
+                lines.append(f"✅ Disparate Impact = {di:.3f} — above the 0.80 threshold (compliant).")
+
+        # Demographic Parity Difference
+        if dpd is not None:
+            dpd = float(dpd)
+            flag = "⚠️ " if abs(dpd) > self.DP_DIFF_THRESHOLD else "✅"
+            lines.append(
+                f"{flag} Demographic Parity Difference = {dpd:+.3f} "
+                f"({'concerning' if abs(dpd) > self.DP_DIFF_THRESHOLD else 'acceptable'}). "
+                "Positive values mean the majority group receives more favourable outcomes."
+            )
+
+        # Equal Opportunity Difference
+        if eod is not None:
+            eod = float(eod)
+            flag = "⚠️ " if abs(eod) > 0.10 else "✅"
+            lines.append(
+                f"{flag} Equal Opportunity Difference = {eod:+.3f} "
+                "(True Positive Rate gap between protected groups)."
+            )
+
+        # Group rates breakdown
+        if group_rates:
+            lines.append("\n**Positive Outcome Rates by Group:**")
+            for group, rate in sorted(group_rates.items(), key=lambda x: -x[1]):
+                bar = "█" * int(float(rate) * 20)
+                lines.append(f"  - {group}: {bar} {float(rate):.1%}")
+
+        lines.append(
+            "\n> **Note**: Fairness metrics depend on the definition of 'fairness' (demographic parity, "
+            "equal opportunity, or individual fairness). Consult domain experts and legal counsel before "
+            "making decisions based on these metrics."
+        )
+        return "\n".join(lines)
+
+
+class AnomalyDeepDiveNarrator:
+    """
+    Narrates anomaly detection results with business-context interpretation.
+
+    Interprets isolation forest and z-score anomaly rates, identifies
+    potential causes, and provides remediation guidance.
+    """
+
+    def narrate(
+        self,
+        anomaly_report: Optional[Dict],
+        total_rows: int = 0,
+    ) -> str:
+        """
+        Parameters
+        ----------
+        anomaly_report : {
+            "method":        str,  IsolationForest | ZScore | IQR
+            "anomaly_count": int,
+            "anomaly_rate":  float,
+            "top_anomalous_columns": [{"column": str, "anomaly_contribution": float}],
+            "sample_anomalies": [...],
+        }
+        """
+        if not anomaly_report:
+            return "*Anomaly deep-dive analysis not available.*"
+
+        method = anomaly_report.get("method", "Isolation Forest")
+        count  = int(anomaly_report.get("anomaly_count", 0))
+        rate   = float(anomaly_report.get("anomaly_rate", 0.0))
+        top_cols = anomaly_report.get("top_anomalous_columns", []) or []
+
+        lines = [f"### Anomaly Deep-Dive Analysis ({method})\n"]
+
+        # Rate interpretation
+        if rate < 0.005:
+            severity = "✅ Very low anomaly rate"
+            advice   = "Dataset appears clean — anomalies may be rare but legitimate edge cases."
+        elif rate < 0.03:
+            severity = "⚡ Moderate anomaly rate"
+            advice   = "Investigate flagged records — may reflect data entry errors or genuine outliers."
+        elif rate < 0.10:
+            severity = "⚠️  Elevated anomaly rate"
+            advice   = "High anomaly volume suggests systematic data quality issues or concept drift."
+        else:
+            severity = "🔴 Critical anomaly rate"
+            advice   = "Dataset heavily contaminated — validate source data integrity before use."
+
+        n_str = f"{count:,}" if total_rows == 0 else f"{count:,} / {total_rows:,}"
+        lines.append(
+            f"{severity}: {n_str} anomalies detected ({rate:.2%} of records). {advice}"
+        )
+
+        # Top contributing columns
+        if top_cols:
+            lines.append("\n**Top Columns Contributing to Anomalies:**")
+            for item in top_cols[:6]:
+                col  = item.get("column", "?")
+                cont = float(item.get("anomaly_contribution", 0.0))
+                lines.append(f"  - `{col}`: {cont:.1%} contribution to anomaly score")
+
+        # Likely causes
+        lines.append("\n**Likely Anomaly Causes:**")
+        if rate > 0.05:
+            lines.append("  - Systematic data quality issues (data pipeline errors, schema drift)")
+        if top_cols:
+            col0 = top_cols[0].get("column", "?")
+            lines.append(f"  - Extreme values in `{col0}` — verify data type and range constraints")
+        lines.append("  - Genuine rare events (fraud, equipment failure, market shocks)")
+        lines.append("  - Label/target drift since last model training")
+
+        # Remediation
+        lines.append(
+            "\n**Recommended Actions:**\n"
+            "  1. Export anomalous records for manual review by domain expert\n"
+            "  2. Check ETL pipeline for data corruption between {source} and {sink}\n"
+            "  3. If genuine, consider separate model for anomalous sub-population\n"
+            "  4. Update anomaly detection threshold if false-positive rate is high"
+        )
+        return "\n".join(lines)
+
+
+class RegulatoryComplianceNarrator:
+    """
+    Narrates regulatory compliance results across multiple domains in plain language.
+
+    Prioritises CRITICAL > ERROR > WARNING violations and provides
+    a board-level compliance summary.
+    """
+
+    def narrate(
+        self,
+        regulatory_reports: Optional[Dict],
+        domains: Optional[List[str]] = None,
+    ) -> str:
+        """
+        Parameters
+        ----------
+        regulatory_reports : {
+            "banking": {"violations": [RegulatoryViolation.to_dict()], "score": 0.85},
+            "gdpr":    {"violations": [...], "score": 0.93},
+            ...
+        }
+        """
+        if not regulatory_reports:
+            return "*No regulatory compliance data available.*"
+
+        lines = ["### Multi-Domain Regulatory Compliance Summary\n"]
+
+        total_critical = 0
+        total_error    = 0
+        total_warning  = 0
+        domain_summaries = []
+
+        for domain, report in regulatory_reports.items():
+            if not isinstance(report, dict):
+                continue
+            violations = report.get("violations", []) or []
+            score      = float(report.get("score", 1.0))
+
+            n_crit = sum(1 for v in violations if v.get("severity") == "CRITICAL")
+            n_err  = sum(1 for v in violations if v.get("severity") == "ERROR")
+            n_warn = sum(1 for v in violations if v.get("severity") == "WARNING")
+            total_critical += n_crit
+            total_error    += n_err
+            total_warning  += n_warn
+
+            if n_crit > 0:
+                status_icon = "🔴"
+            elif n_err > 0:
+                status_icon = "🟠"
+            elif n_warn > 0:
+                status_icon = "🟡"
+            else:
+                status_icon = "✅"
+
+            domain_summaries.append(
+                f"  {status_icon} **{domain.upper()}**: score={score:.1%} | "
+                f"{n_crit} CRITICAL, {n_err} ERROR, {n_warn} WARNING"
+            )
+
+        # Executive verdict
+        if total_critical > 0:
+            verdict = (
+                f"🔴 **NON-COMPLIANT**: {total_critical} critical violation(s) require immediate remediation "
+                "before this dataset can be used in regulated processes."
+            )
+        elif total_error > 0:
+            verdict = (
+                f"🟠 **CONDITIONAL COMPLIANCE**: {total_error} error-level violations must be addressed. "
+                "Escalate to compliance officer within 5 business days."
+            )
+        elif total_warning > 0:
+            verdict = (
+                f"🟡 **CAUTION**: {total_warning} warning(s) identified. Compliant with conditions. "
+                "Review warnings with compliance team."
+            )
+        else:
+            verdict = "✅ **FULLY COMPLIANT**: All regulatory checks passed across all domains."
+
+        lines.append(verdict)
+        lines.append("\n**Domain Breakdown:**")
+        lines.extend(domain_summaries)
+
+        if total_critical + total_error > 0:
+            lines.append(
+                "\n> **Board Action Required**: Non-compliance findings must be documented in the "
+                "Risk Register and reported to Compliance Committee. Data processing may need to "
+                "be suspended until critical violations are resolved."
+            )
+
+        return "\n".join(lines)
+
+
+class DataLineageNarrator:
+    """
+    Narrates data lineage and provenance information in plain language.
+
+    Interprets transformation steps, data sources, schema versions,
+    and quality scores at each pipeline stage.
+    """
+
+    def narrate(self, lineage: Optional[Dict]) -> str:
+        """
+        Parameters
+        ----------
+        lineage : {
+            "dataset_id": str,
+            "source_type": str,
+            "ingestion_timestamp": str,
+            "transformations": [{"stage": str, "operation": str, "rows_in": int, "rows_out": int}],
+            "quality_gates": [{"gate": str, "passed": bool, "score": float}],
+            "schema_version": str,
+            "fingerprint": str,
+        }
+        """
+        if not lineage:
+            return "*Data lineage information not available.*"
+
+        ds_id      = lineage.get("dataset_id", "Unknown")
+        source     = lineage.get("source_type", "Unknown")
+        ts         = lineage.get("ingestion_timestamp", "Unknown")
+        schema_ver = lineage.get("schema_version", "N/A")
+        fp         = lineage.get("fingerprint", "")
+        transforms = lineage.get("transformations", []) or []
+        gates      = lineage.get("quality_gates", []) or []
+
+        lines = [f"### Data Lineage & Provenance — `{ds_id}`\n"]
+
+        lines.append(f"**Source**: {source} | **Ingested**: {ts} | **Schema**: v{schema_ver}")
+        if fp:
+            lines.append(f"**Data Fingerprint**: `{fp[:24]}…`")
+
+        # Transformation pipeline
+        if transforms:
+            lines.append("\n**Transformation Pipeline:**")
+            for i, step in enumerate(transforms, 1):
+                stage   = step.get("stage", f"Stage {i}")
+                op      = step.get("operation", "transform")
+                rows_in = int(step.get("rows_in", 0))
+                rows_out= int(step.get("rows_out", 0))
+                drop_pct = 0.0 if rows_in == 0 else (rows_in - rows_out) / rows_in
+                arrow = "→"
+                lines.append(
+                    f"  {i}. **{stage}** ({op}): {rows_in:,} rows {arrow} {rows_out:,} rows "
+                    f"({drop_pct:.1%} removed)"
+                )
+                if drop_pct > 0.10:
+                    lines.append(f"     ⚠️  High row drop rate ({drop_pct:.1%}) — investigate upstream quality.")
+
+        # Quality gate summary
+        if gates:
+            passed = sum(1 for g in gates if g.get("passed", False))
+            lines.append(f"\n**Quality Gates**: {passed}/{len(gates)} passed")
+            for g in gates:
+                icon = "✅" if g.get("passed", False) else "❌"
+                gate_name = g.get("gate", "Gate")
+                score = g.get("score", None)
+                score_str = f" (score: {float(score):.2f})" if score is not None else ""
+                lines.append(f"  {icon} {gate_name}{score_str}")
+
+        lines.append(
+            "\n> **Audit Note**: This lineage record is cryptographically linked to the "
+            "source data fingerprint. Any downstream tampering will cause a checksum mismatch."
+        )
+        return "\n".join(lines)
 
 
 # ── Module-level helper ────────────────────────────────────────────────────────

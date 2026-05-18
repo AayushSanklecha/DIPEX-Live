@@ -75,7 +75,14 @@ def _extract_features(
     cat_ratio = len(cat_cols) / max(n_cols, 1)
 
     # Cardinality of first categorical column
-    first_cat_card = df[cat_cols[0]].nunique() / max(n_rows, 1) if cat_cols else 0.0
+    if cat_cols:
+        try:
+            uniq = df[cat_cols[0]].nunique()
+        except Exception: # noqa: BLE001
+            uniq = df[cat_cols[0]].astype(str).nunique()
+        first_cat_card = uniq / max(n_rows, 1)
+    else:
+        first_cat_card = 0.0
 
     # Skewness of first numeric column
     skew = float(df[num_cols[0]].skew()) if num_cols else 0.0
@@ -155,9 +162,13 @@ def _heuristic_rank(
         scores["histogram"] += 0.6
         scores["box"]       += 0.4
     if cat_ratio > 0.3 and len(cat_cols) > 0:
-        card = df[cat_cols[0]].nunique()
-        if card <= 10:
-            scores["pie"] += 0.5
+        if cat_cols:
+            try:
+                card = df[cat_cols[0]].nunique()
+            except Exception: # noqa: BLE001
+                card = df[cat_cols[0]].astype(str).nunique()
+            if card <= 10:
+                scores["pie"] += 0.5
 
     total = sum(scores.values()) or 1.0
     return sorted(

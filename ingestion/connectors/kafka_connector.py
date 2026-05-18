@@ -57,6 +57,7 @@ class KafkaConnector(BaseConnector):
     def __init__(self, config: Dict[str, Any]) -> None:
         super().__init__(config)
         self._consumer = None
+        self._producer = None
         self._use_confluent: bool = False
         self._lag_stats: Dict[str, int] = {}
 
@@ -64,9 +65,17 @@ class KafkaConnector(BaseConnector):
         return os.environ.get("KAFKA_BROKERS", self.config.get("bootstrap_servers", "kafka:29092"))
 
     def _get_consumer(self):
-        """Create consumer — tries confluent-kafka first, falls back to kafka-python."""
+        """Create consumer — checks broker health first, then tries confluent-kafka, falls back to kafka-python."""
         if self._consumer is not None:
             return self._consumer
+
+        # Fast-fail if broker is unreachable (avoids long connection timeout)
+        from utils.kafka_health import kafka_is_available
+        if not kafka_is_available(timeout_ms=3000):
+            raise ConnectorError(
+                "Kafka broker is not reachable. "
+                "Start it with: docker-compose up -d kafka"
+            )
 
         group_id = self.config.get("group_id", "dipex-consumer")
         brokers = self._get_brokers()
@@ -125,6 +134,57 @@ class KafkaConnector(BaseConnector):
         except Exception as exc:
             raise ConnectorError(f"KafkaConnector: failed to create consumer — {exc}") from exc
 
+    def _get_producer(self):
+        """Create producer — tries confluent-kafka, falls back to kafka-python."""
+        if self._producer is not None:
+            return self._producer
+
+        brokers = self._get_brokers()
+        security = self.config.get("security_protocol", "PLAINTEXT")
+
+        # -- Try confluent-kafka -------------------------------------------------
+        try:
+            from confluent_kafka import Producer as ConfluentProducer  # type: ignore
+
+            conf = {
+                "bootstrap.servers": brokers,
+                "client.id": self.config.get("client_id", "dipex-producer"),
+                "linger.ms": self.config.get("linger_ms", 5),
+            }
+            if security != "PLAINTEXT":
+                conf["security.protocol"] = security
+                conf["sasl.mechanisms"] = self.config.get("sasl_mechanism", "PLAIN")
+                conf["sasl.username"] = os.environ.get("KAFKA_SASL_USER",
+                                                        self.config.get("sasl_username", ""))
+                conf["sasl.password"] = os.environ.get("KAFKA_SASL_PASS",
+                                                        self.config.get("sasl_password", ""))
+
+            self._producer = ConfluentProducer(conf)
+            self._use_confluent = True
+            logger.info("KafkaConnector: created confluent-kafka producer")
+            return self._producer
+
+        except ImportError:
+            logger.info("confluent-kafka not available for producer — falling back")
+
+        # -- Fallback: kafka-python -----------------------------------------------
+        try:
+            from kafka import KafkaProducer  # type: ignore
+            
+            self._producer = KafkaProducer(
+                bootstrap_servers=brokers.split(","),
+                value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+                linger_ms=self.config.get("linger_ms", 5),
+            )
+            self._use_confluent = False
+            logger.info("KafkaConnector: created kafka-python producer")
+            return self._producer
+
+        except ImportError as exc:
+            raise ConnectorError("No Kafka library found for producer.") from exc
+        except Exception as exc:
+            raise ConnectorError(f"KafkaConnector: failed to create producer — {exc}") from exc
+
     def test_connection(self) -> bool:
         try:
             consumer = self._get_consumer()
@@ -176,6 +236,26 @@ class KafkaConnector(BaseConnector):
         df = pd.json_normalize(messages)
         logger.info("KafkaConnector: consumed %d messages", len(df))
         return df
+
+    def produce(self, topic: str, value: Any, key: Optional[str] = None) -> None:
+        """Produce a message to the specified topic."""
+        producer = self._get_producer()
+        try:
+            if self._use_confluent:
+                # Confluent producer expects bytes value if no serializer is set (we handle it here)
+                payload = json.dumps(value).encode("utf-8") if not isinstance(value, (bytes, str)) else value
+                producer.produce(topic, key=key, value=payload)
+                producer.poll(0)
+            else:
+                # kafka-python producer uses the serializer set in _get_producer
+                producer.send(topic, key=key.encode("utf-8") if key else None, value=value)
+        except Exception as exc:
+            logger.error("KafkaConnector: produce failed to topic %s — %s", topic, exc)
+
+    def flush(self) -> None:
+        """Wait for all outstanding messages to be delivered."""
+        if self._producer:
+            self._producer.flush()
 
     def stream(self, chunk_size: int = _DEFAULT_BATCH_MSG, **kwargs: Any) -> Iterator[pd.DataFrame]:
         """
@@ -229,6 +309,14 @@ class KafkaConnector(BaseConnector):
             except Exception:
                 pass
             self._consumer = None
+        if self._producer is not None:
+            try:
+                self.flush()
+                if not self._use_confluent:
+                    self._producer.close()
+            except Exception:
+                pass
+            self._producer = None
 
     # ------------------------------------------------------------------
     # Internal helpers

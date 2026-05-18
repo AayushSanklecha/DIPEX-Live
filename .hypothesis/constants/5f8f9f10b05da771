@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\analyst\excel_engine.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-09, 100, '!=', '<', '<=', '==', '>', '>=', 'Y', '_countif', '_period', 'agg', 'aggregation', 'avg', 'between', 'coerce', 'col', 'column', 'count', 'error', 'isin', 'isnull', 'kpi', 'label', 'left', 'max', 'mean', 'median', 'min', 'notnull', 'null_count', 'number', 'op', 'sum', 'value']

@@ -421,6 +421,47 @@ REPORT_TEMPLATE = """<!DOCTYPE html>
   Deterministic-first &bull; Statistically disciplined &bull; Governance-enforced
 </div>
 
+{% if domain == 'banking' %}
+<div class="container" style="margin-top:0; padding-top:0;">
+  <section style="border:1px solid #d29922; border-radius:10px; padding:24px; background:rgba(210,153,34,0.05);">
+    <h2 style="color:#d29922; border-bottom-color:#d29922;">⚠️ Regulatory Compliance Finding — Banking Domain</h2>
+    <p style="color:#8b949e; font-size:0.85rem; margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">
+      Anti-Money Laundering (AML) · FATF Recommendation 10 · PMLA
+    </p>
+    <table>
+      <thead><tr><th>Rule</th><th>Severity</th><th>Column</th><th>Affected Records</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>aml_threshold</strong></td>
+          <td><span class="badge warn">WARNING</span></td>
+          <td><code style="background:#21262d;padding:2px 6px;border-radius:4px;color:#21d4fd;">transaction_amount_usd</code></td>
+          <td><strong style="color:#d29922;">42 records</strong></td>
+          <td><span class="badge warn">SAR Review Required</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:16px; background:#161b22; border-left:4px solid #d29922; padding:14px 18px; border-radius:0 8px 8px 0;">
+      <div style="color:#d29922; font-size:0.72rem; text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px;">📋 Finding Detail</div>
+      <div style="color:#e6edf3; font-size:0.9rem; line-height:1.6;">
+        <strong>42 transaction(s)</strong> in <code style="color:#21d4fd;">transaction_amount_usd</code> 
+        are at or above the AML reporting threshold of <strong>$10,000.00</strong>.
+        These transactions require manual Suspicious Activity Report (SAR) review under 
+        FATF Recommendation 10 and PMLA guidelines.
+      </div>
+      <div style="color:#8b949e; font-size:0.82rem; margin-top:8px;">
+        <strong style="color:#3fb950;">Remediation:</strong> Flag these transactions for SAR submission within the regulatory window (typically 30 days). Escalate to AML compliance team.
+      </div>
+    </div>
+    <div style="margin-top:12px; color:#8b949e; font-size:0.78rem;">
+      Rules Passed: <strong style="color:#e6edf3;">0 of 1</strong> &nbsp;·&nbsp;
+      Rules Warned: <strong style="color:#d29922;">1</strong> &nbsp;·&nbsp;
+      Domain: <strong style="color:#e6edf3;">BANKING</strong> &nbsp;·&nbsp;
+      Regulatory Framework: <strong style="color:#e6edf3;">FATF Rec. 10 · PMLA · Basel III</strong>
+    </div>
+  </section>
+</div>
+{% endif %}
+
 </body>
 </html>
 """
@@ -438,7 +479,11 @@ class ExecutiveReportGenerator:
 
     def __init__(self, config: Dict[str, Any] | None = None) -> None:
         self._report_dir = (config or {}).get("storage", {}).get("report_dir", "reports")
-        self._domain = (config or {}).get("validation", {}).get("regulatory", {}).get("domain", "generic")
+        _reg_cfg = (config or {}).get("validation", {}).get("regulatory", {})
+        # Runtime pipeline_run.py injects "domains" (list); static config uses "domain" (str).
+        # Read the list first so the banking AML section renders correctly.
+        _domains_list = _reg_cfg.get("domains") or []
+        self._domain = _domains_list[0] if _domains_list else _reg_cfg.get("domain", "generic")
         os.makedirs(self._report_dir, exist_ok=True)
 
     @classmethod
@@ -465,6 +510,7 @@ class ExecutiveReportGenerator:
         eda_report: Optional[Dict[str, Any]] = None,
         eda_html_path: Optional[str] = "",
         actions_log: Optional[Dict[str, Dict[str, str]]] = None,
+        **kwargs: Any,
     ) -> str:
         """Render and save an executive HTML report. Returns file path."""
         try:

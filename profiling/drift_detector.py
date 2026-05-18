@@ -208,15 +208,12 @@ class DriftDetector:
         dict with keys: drifted, drifted_ratio, threshold_error,
                         mean_current_error, method
         """
-        _ARTIFACT  = os.path.join(
-            os.path.dirname(__file__), "..", "models", "drift_autoencoder.pkl"
-        )
-        _SCALER_A  = os.path.join(
-            os.path.dirname(__file__), "..", "models", "drift_scaler.pkl"
-        )
-        _PCA_PATH  = os.path.join(
-            os.path.dirname(__file__), "..", "models", "drift_pca.pkl"
-        )
+        _MODELS_DIR = os.path.join(os.path.dirname(__file__), "..", "models")
+        # v7 saves a single combined artifact; v6 and earlier used 3 separate files
+        _PIPELINE   = os.path.join(_MODELS_DIR, "drift_pipeline.pkl")      # v7 (preferred)
+        _ARTIFACT   = os.path.join(_MODELS_DIR, "drift_autoencoder.pkl")   # v6 compat
+        _SCALER_A   = os.path.join(_MODELS_DIR, "drift_scaler.pkl")        # v6 compat
+        _PCA_PATH   = os.path.join(_MODELS_DIR, "drift_pca.pkl")           # v6 compat
 
         # ── Resolve shared numeric columns ────────────────────────────────────
         if shared_cols is None:
@@ -242,19 +239,25 @@ class DriftDetector:
         curr_X = current_df[shared_cols].fillna(0)
 
         try:
-            # ── Tier 1: Load pre-trained artifact (PCA + autoencoder) ─────────
+            # ── Tier 1a: v7 single drift_pipeline.pkl ────────────────────────
+            #   Contains dict: {autoencoder, scaler, pca, n_features, ...}
+            # ── Tier 1b: v6 three-file format (backward compat) ──────────────
+            #   drift_autoencoder.pkl + drift_scaler.pkl + drift_pca.pkl
             #
-            #  Design: the artifact is distribution-agnostic because we use a
-            #  LOCAL StandardScaler fitted on the baseline batch (not the saved
-            #  scaler) for data normalisation.  The saved scaler only carries
-            #  the n_features_in_ metadata (= N_DRIFT_FEATURES = 15) so we
-            #  know how wide to pad/truncate the runtime data before projecting
-            #  through the pre-trained PCA → autoencoder.
-            #
-            #  This means the artifact works on ANY dataset regardless of which
-            #  columns are present — no column-name alignment needed.
+            #  In both cases we use a LOCAL StandardScaler fitted on the
+            #  baseline batch — the saved scaler carries only n_features_in_
+            #  metadata so we know how wide to pad/truncate the runtime data
+            #  before projecting through PCA → autoencoder.
             # ─────────────────────────────────────────────────────────────────
-            if os.path.exists(_ARTIFACT) and os.path.exists(_SCALER_A):
+            if os.path.exists(_PIPELINE):
+                import joblib  # type: ignore
+                pipeline    = joblib.load(_PIPELINE)   # dict artifact
+                ae          = pipeline["autoencoder"]
+                meta_scaler = pipeline.get("scaler")
+                pca         = pipeline.get("pca")
+                method      = "v7_pipeline"
+                logger.debug("DriftDetector: loaded v7 drift_pipeline.pkl.")
+            elif os.path.exists(_ARTIFACT) and os.path.exists(_SCALER_A):
                 import joblib  # type: ignore
                 ae            = joblib.load(_ARTIFACT)
                 meta_scaler   = joblib.load(_SCALER_A)   # metadata only

@@ -136,9 +136,17 @@ class LeakageDetector:
 
         # ── 1. Numeric feature correlation with target ────────────────────────
         y_num: Optional[pd.Series] = None
-        if pd.api.types.is_numeric_dtype(y):
-            y_num = y
-        elif y.nunique() <= 20:
+        y_nunique = 0
+        try:
+            y_nunique = y.nunique()
+        except Exception: # noqa: BLE001
+            y_nunique = y.astype(str).nunique()
+            
+        if pd.api.types.is_numeric_dtype(y) and y_nunique > 20:
+            # If numeric and many unique values, treat as continuous, no label encoding needed.
+            # y_num will be assigned 'y' below.
+            pass
+        elif y_nunique <= 20:
             # Encode categorical target for correlation
             from sklearn.preprocessing import LabelEncoder
             try:
@@ -233,7 +241,7 @@ class LeakageDetector:
                         ),
                     ))
                     logger.warning(
-                        "[LeakageDetector] ID-column suspected: '%s' uniqueness=%.1%", col, uniqueness
+                        "[LeakageDetector] ID-column suspected: '%s' uniqueness=%.4f", col, uniqueness
                     )
             except Exception:
                 continue

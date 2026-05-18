@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+﻿# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -153,6 +153,7 @@ cython_debug/
 # Project specific
 # data/ excluded: snapshots are 168MB+, regenerated at runtime
 data/
+latest_newest_models/
 # audit/ and reports/ are INTENTIONALLY TRACKED:
 # - audit/audit.jsonl  = 540 historical pipeline runs (1.25MB)
 # - reports/*.html     = 199 executive reports (39.8MB)

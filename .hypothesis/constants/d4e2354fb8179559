@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\reporting_service\config.py
-# hypothesis_version: 6.151.9
-
-[0.75, 1200, 1500, 'HF_API_KEY', 'HF_FALLBACK_MODEL', 'HF_MODEL_NAME', 'huggingface']

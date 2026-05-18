@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\api\routes\audit.py
-# hypothesis_version: 6.151.9
-
-['/', '/api/audit', 'audit', 'audit/audit.jsonl', 'entries', 'r', 'total', 'utf-8']

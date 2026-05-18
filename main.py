@@ -1,3 +1,14 @@
+# main.py — MUST BE FIRST EXECUTABLE LINE (Issue 06)
+import sys
+
+_REQUIRED = (3, 12)   # Sprint 3: updated from (3, 11) — Python 3.12.7
+if sys.version_info < _REQUIRED:
+    raise RuntimeError(
+        f"DIPEX v3 requires Python {_REQUIRED[0]}.{_REQUIRED[1]}+. "
+        f"You are running {sys.version}. "
+        f"Upgrade Python and rebuild your virtual environment."
+    )
+
 """
 main.py
 -------
@@ -15,9 +26,12 @@ Sub-commands:
 
 import argparse
 import logging
-import sys
 import os
 import yaml
+
+# Issue 02: NumPy compatibility check — BEFORE any DIPEX module imports
+from utils.numpy_compat import check_numpy_compatibility
+check_numpy_compatibility()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -204,7 +218,7 @@ Examples:
             shutil.copy(args.source, dest)
             logger.info("Source copied to %s", dest)
         logger.info("CLI pipeline run — source=%s  run_id=%s", args.source, run_id)
-        success = orchestrate_pipeline(run_id, target_col=args.target)
+        success = orchestrate_pipeline(run_id, target_col=args.target, source_path=args.source)
         sys.exit(0 if success else 1)
 
     elif args.command == "preprocess":

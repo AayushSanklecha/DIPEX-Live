@@ -165,6 +165,51 @@ class RobustTriage:
         report = TriageReport(run_id=run_id)
         df = df.copy()
 
+        # ── Guard: 0-row DataFrame ──────────────────────────────────
+        if len(df) == 0:
+            logger.warning("[Triage] DataFrame has 0 rows — all triage passes skipped.")
+            report.warnings.append("Input DataFrame has 0 rows — triage skipped.")
+            return df, report
+
+        # ── Guard: sanitise column names before any operation ──────────────
+        import re as _re
+        new_cols = []
+        seen: dict = {}
+        for i, col in enumerate(df.columns):
+            col_str = str(col).strip() if col is not None else ""
+            if not col_str or col_str in ("", "None", "nan"):
+                col_str = f"_col_{i}"
+            # Replace non-word characters
+            col_str = _re.sub(r"[^\w.]", "_", col_str).strip("_") or f"_col_{i}"
+            # Deduplicate
+            if col_str in seen:
+                seen[col_str] += 1
+                col_str = f"{col_str}_{seen[col_str]}"
+            else:
+                seen[col_str] = 0
+            new_cols.append(col_str)
+        if list(df.columns) != new_cols:
+            logger.info("[Triage] Sanitised %d column name(s).",
+                        sum(a != b for a, b in zip(df.columns, new_cols)))
+            df.columns = new_cols
+            # Update target_col if it was renamed
+            if target_col is not None:
+                for old, new in zip(list(df.columns), new_cols):
+                    if old == target_col:
+                        target_col = new
+                        break
+
+        # 0. Honor AnalystBrain's recommendations
+        brain_decisions = df.attrs.get("column_decisions", {})
+        cols_to_drop_from_brain = [col for col, decision in brain_decisions.items() if decision.get("should_drop") and col in df.columns]
+        if cols_to_drop_from_brain:
+            df = df.drop(columns=cols_to_drop_from_brain)
+            report.columns_dropped.extend([
+                {"column": c, "reason": brain_decisions[c].get("reason", "AnalystBrain recommended drop")}
+                for c in cols_to_drop_from_brain
+            ])
+            logger.info("[Triage] Dropped %d column(s) per AnalystBrain's recommendation.", len(cols_to_drop_from_brain))
+
         # 1. Tiered null handling:
         #    >90% null  → drop column
         #    25-90% null → forward/backward fill (or stat fill)
@@ -172,6 +217,9 @@ class RobustTriage:
 
         # 2. High-zero detection + optional zero→NaN coercion
         df = self._handle_high_zeros(df, report, target_col)
+
+        # 2.5 Multivariate Anomaly Detection (ML Isolation Forest)
+        df = self._detect_multivariate_anomalies(df, report, target_col)
 
         # 3. Mixed-type detection + numeric coercion (with regex fallback)
         if self.mixed_coerce:
@@ -211,6 +259,55 @@ class RobustTriage:
         return df, report
 
     # ── Private helpers ───────────────────────────────────────────────────────
+    
+    def _detect_multivariate_anomalies(
+        self, df: pd.DataFrame, report: TriageReport, target_col: Optional[str]
+    ) -> pd.DataFrame:
+        """
+        Applies a pre-trained ML Isolation Forest to detect multivariate corruption.
+        Rows flagged as anomalies are recorded in the report and dropped if severely corrupted.
+        """
+        try:
+            import os
+            import joblib
+            import numpy as np
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            model_path = os.path.join(base_dir, "models", "anomaly_detector.pkl")
+            if not os.path.exists(model_path):
+                return df
+
+            # Get numeric features only (up to 15 to match training)
+            num_df = df.select_dtypes(include="number").copy()
+            if target_col and target_col in num_df.columns:
+                num_df = num_df.drop(columns=[target_col])
+                
+            if num_df.empty or len(num_df.columns) < 2:
+                return df
+                
+            arr = num_df.values.astype(float)
+            if arr.shape[1] < 15:
+                arr = np.pad(arr, ((0,0), (0, 15 - arr.shape[1])))
+            else:
+                arr = arr[:, :15]
+                
+            arr_clean = np.nan_to_num(arr, 0)
+            
+            clf = joblib.load(model_path)
+            preds = clf.predict(arr_clean)
+            
+            anomaly_mask = preds == -1
+            n_anomalies = int(anomaly_mask.sum())
+            
+            if n_anomalies > 0:
+                report.warnings.append(f"ML Anomaly Detector flagged {n_anomalies} heavily corrupted row(s).")
+                logger.warning(f"[Triage] ML Anomaly Detector flagged {n_anomalies} row(s) for removal.")
+                # Drop anomalous rows
+                df = df[~anomaly_mask].copy()
+                
+            return df
+        except Exception as e:
+            logger.debug(f"[Triage] ML Anomaly Detection failed or skipped: {e}")
+            return df
 
     # ─────────────────────────────────────────────────────────────────────────
     # 1. Tiered null handling
@@ -231,6 +328,35 @@ class RobustTriage:
         n = len(df)
         if n == 0:
             return df
+
+        # ── Pre-pass: date-string auto-conversion ──────────────────────────
+        # Detect object columns where ≥70% of non-null values parse as dates.
+        # Convert them BEFORE mixed-type coercion so they aren't misclassified.
+        DATE_DETECT_THRESHOLD = 0.70
+        for col in list(df.select_dtypes(include="object").columns):
+            if col == target_col:
+                continue
+            try:
+                sample = df[col].dropna().head(100)
+                if len(sample) < 5:
+                    continue
+                # Skip columns that look numeric
+                if pd.to_numeric(sample, errors="coerce").notna().mean() > 0.5:
+                    continue
+                parsed = pd.to_datetime(sample, errors="coerce", infer_datetime_format=True)
+                parse_rate = parsed.notna().mean()
+                if parse_rate >= DATE_DETECT_THRESHOLD:
+                    df[col] = pd.to_datetime(df[col], errors="coerce", infer_datetime_format=True)
+                    logger.info(
+                        "[Triage] Column '%s' auto-converted: date-string → datetime64 (%.0f%% parsed)",
+                        col, parse_rate * 100,
+                    )
+                    report.warnings.append(
+                        f"Column '{col}' auto-converted from string to datetime64 ({parse_rate:.0%} parsed)"
+                    )
+            except Exception:  # noqa: BLE001
+                pass
+
         null_rates = df.isnull().mean()
 
         # Detect whether the DataFrame is time-indexed — only then does ffill make sense
@@ -528,7 +654,14 @@ class RobustTriage:
             non_null = df[col].dropna()
             if len(non_null) == 0:
                 continue
-            if non_null.nunique() <= 1:
+            try:
+                n_uniq = non_null.nunique()
+            except Exception:  # noqa: BLE001 — unhashable types
+                try:
+                    n_uniq = non_null.astype(str).nunique()
+                except Exception:  # noqa: BLE001
+                    continue  # can't determine variance, skip
+            if n_uniq <= 1:
                 to_drop.append(col)
                 report.columns_dropped.append({
                     "column": col,

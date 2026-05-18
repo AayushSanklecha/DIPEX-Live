@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\api\routes\cohort.py
-# hypothesis_version: 6.151.9
-
-[400, 404, '.csv', '/cohort', '/ltv', '/retention', 'Cohort Analysis', '_cleaned.csv', '_sample.csv', 'data/uploads', 'dipex.api.cohort', 'error', 'summary']

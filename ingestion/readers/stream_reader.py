@@ -78,7 +78,173 @@ class StreamReadResult:
     errors: List = field(default_factory=list)
 
 
-# ── Tumbling Window ───────────────────────────────────────────────────────────
+# ── Disk-Backed Windows (for 50GB+ streams) ───────────────────────────────────
+
+class DiskBackedTumblingWindow:
+    """
+    Tumbling window that spills records to Parquet temp files when in-memory
+    buffer exceeds `spill_threshold` records. On close() all spilled files
+    are merged and returned as a single DataFrame.
+
+    This prevents OOM for large Kafka windows with millions of events.
+    Disk temp directory defaults to data/tmp/ (same as chunked file readers).
+    """
+
+    def __init__(
+        self,
+        window_size_s: float,
+        watermark_delay_s: float = 5.0,
+        spill_threshold: int = 50_000,
+        tmp_dir: str = "data/tmp",
+    ) -> None:
+        import os
+        self.size_s         = window_size_s
+        self.delay_s        = watermark_delay_s
+        self.spill_threshold = spill_threshold
+        self.tmp_dir        = tmp_dir
+        os.makedirs(tmp_dir, exist_ok=True)
+
+        self._buffer: List[Dict] = []
+        self._spill_files: List[str] = []
+        self._window_start = time.time()
+        self._late_dropped = 0
+        self._total_records = 0
+
+    def add(self, record: Dict, event_time: Optional[float] = None) -> None:
+        ts = event_time or time.time()
+        watermark = time.time() - self.delay_s
+        if ts < watermark:
+            self._late_dropped += 1
+            return
+        self._buffer.append({**record, "_event_time": ts})
+        self._total_records += 1
+        if len(self._buffer) >= self.spill_threshold:
+            self._spill()
+
+    def _spill(self) -> None:
+        """Write in-memory buffer to a Parquet temp file and clear buffer."""
+        if not self._buffer:
+            return
+        import os
+        try:
+            spill_path = os.path.join(
+                self.tmp_dir, f"_stream_spill_{int(time.time()*1000)}_{id(self)}.parquet"
+            )
+            pd.DataFrame(self._buffer).to_parquet(spill_path, index=False, compression="snappy")
+            self._spill_files.append(spill_path)
+            logger.debug(
+                "DiskBackedTumblingWindow: spilled %d records → %s", len(self._buffer), spill_path
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Spill failed (%s) — keeping in memory.", exc)
+        self._buffer.clear()
+
+    def should_close(self) -> bool:
+        return (time.time() - self._window_start) >= self.size_s
+
+    def close(self) -> Tuple[Optional[pd.DataFrame], float, float, int]:
+        """
+        Close window. Returns (DataFrame|None, start, end, late_dropped).
+        DataFrame is None if no records were collected.
+        """
+        import os
+        start = self._window_start
+        end   = time.time()
+        late  = self._late_dropped
+
+        # Flush remaining buffer
+        self._spill()
+
+        # Merge all spill files
+        try:
+            if self._spill_files:
+                dfs = []
+                for fpath in self._spill_files:
+                    try:
+                        dfs.append(pd.read_parquet(fpath))
+                    except Exception as exc:  # noqa: BLE001
+                        logger.warning("Could not read spill file %s: %s", fpath, exc)
+                    finally:
+                        try:
+                            os.unlink(fpath)
+                        except OSError:
+                            pass
+                merged = pd.concat(dfs, ignore_index=True) if dfs else None
+            else:
+                merged = None
+        except Exception as exc:  # noqa: BLE001
+            logger.error("DiskBackedTumblingWindow merge failed: %s", exc)
+            merged = None
+        finally:
+            self._spill_files.clear()
+
+        # Reset for next window
+        self._buffer.clear()
+        self._window_start = end
+        self._late_dropped = 0
+        self._total_records = 0
+
+        logger.debug(
+            "DiskBackedTumblingWindow closed: rows=%d start=%.0f end=%.0f late=%d",
+            len(merged) if merged is not None else 0, start, end, late,
+        )
+        return merged, start, end, late
+
+
+class DiskBackedSlidingWindow:
+    """
+    Sliding window with disk-backed event store for large-volume streams.
+    Events beyond `spill_threshold` are written to a temp Parquet store;
+    only the last `window_size_s` seconds of events are loaded on emit().
+    """
+
+    def __init__(
+        self,
+        window_size_s: float,
+        slide_step_s: float,
+        watermark_delay_s: float = 5.0,
+        spill_threshold: int = 50_000,
+        tmp_dir: str = "data/tmp",
+    ) -> None:
+        import os
+        self.size_s          = window_size_s
+        self.step_s          = slide_step_s
+        self.delay_s         = watermark_delay_s
+        self.spill_threshold = spill_threshold
+        self.tmp_dir         = tmp_dir
+        os.makedirs(tmp_dir, exist_ok=True)
+        self._events: List[Tuple[float, Dict]] = []
+        self._last_emit      = time.time()
+        self._late_dropped   = 0
+
+    def add(self, record: Dict, event_time: Optional[float] = None) -> None:
+        ts = event_time or time.time()
+        if ts < time.time() - self.delay_s:
+            self._late_dropped += 1
+            return
+        self._events.append((ts, record))
+        # Evict very old events to keep memory bounded
+        cutoff = time.time() - self.size_s - self.delay_s
+        if len(self._events) > self.spill_threshold:
+            self._events = [(t, r) for t, r in self._events if t >= cutoff]
+
+    def should_emit(self) -> bool:
+        return (time.time() - self._last_emit) >= self.step_s
+
+    def emit(self) -> Tuple[Optional[pd.DataFrame], float, float, int]:
+        now          = time.time()
+        window_start = now - self.size_s
+        records      = [r for ts, r in self._events if ts >= window_start]
+        # Expire old events
+        cutoff       = window_start - self.delay_s
+        self._events = [(ts, r) for ts, r in self._events if ts >= cutoff]
+        late         = self._late_dropped
+        self._late_dropped = 0
+        self._last_emit    = now
+        df = pd.DataFrame(records) if records else None
+        return df, window_start, now, late
+
+
 
 class TumblingWindow:
     """Collects events into fixed-size, non-overlapping time windows."""
@@ -163,14 +329,174 @@ class StreamReader:
             process(snapshot)
     """
 
-    def read_kafka(
+    def read_kafka(\
         self,
         config: KafkaSourceConfig,
         window_cfg: WindowConfig,
         max_windows: int = 1000,
         transform_fn: Optional[Callable[[bytes], Dict]] = None,
     ) -> Generator[StreamReadResult, None, None]:
-        """Yield one StreamReadResult per closed window."""
+        """
+        Yield one StreamReadResult per closed window.
+
+        For streams with config.max_messages > 500_000 or when
+        config.disk_backed is True, automatically delegates to
+        read_kafka_large() which uses disk-backed window spilling.
+        """
+        disk_backed = getattr(config, "disk_backed", False)
+        if disk_backed or config.max_messages > 500_000:
+            yield from self.read_kafka_large(config, window_cfg, max_windows, transform_fn)
+            return
+        yield from self._read_kafka_core(config, window_cfg, max_windows, transform_fn)
+
+    def read_kafka_large(
+        self,
+        config: KafkaSourceConfig,
+        window_cfg: WindowConfig,
+        max_windows: int = 1000,
+        transform_fn: Optional[Callable[[bytes], Dict]] = None,
+        spill_threshold: int = 50_000,
+        tmp_dir: str = "data/tmp",
+    ) -> Generator[StreamReadResult, None, None]:
+        """
+        Disk-backed Kafka reader for 50GB+ streams.
+
+        Uses DiskBackedTumblingWindow / DiskBackedSlidingWindow to spill
+        window buffers to Parquet temp files, eliminating OOM risk for
+        high-volume Kafka topics.
+        """
+        try:
+            from confluent_kafka import Consumer, KafkaError
+        except ImportError:
+            raise DataFormatError(
+                "confluent-kafka not installed — run: pip install confluent-kafka"
+            )
+        import os
+
+        conf: Dict[str, Any] = {
+            "bootstrap.servers": config.brokers,
+            "group.id": config.group_id,
+            "auto.offset.reset": config.auto_offset_reset,
+            "enable.auto.commit": True,
+            "session.timeout.ms": 30_000,
+            # Performance tuning for large streams
+            "fetch.max.bytes": 52_428_800,      # 50 MB fetch
+            "max.partition.fetch.bytes": 10_485_760,  # 10 MB / partition
+        }
+        if config.security_protocol != "PLAINTEXT":
+            conf["security.protocol"] = config.security_protocol
+        if config.sasl_mechanism:
+            conf["sasl.mechanisms"] = config.sasl_mechanism
+            conf["sasl.username"]   = os.environ.get(config.sasl_username_env, "")
+            conf["sasl.password"]   = os.environ.get(config.sasl_password_env, "")
+
+        consumer = Consumer(conf)
+        consumer.subscribe([config.topic])
+        logger.info(
+            "Kafka large-stream consumer started on '%s' (disk-backed windows, spill=%d records, tmp=%s)",
+            config.topic, spill_threshold, tmp_dir,
+        )
+
+        # Select disk-backed window type
+        if window_cfg.strategy == "sliding":
+            window: Any = DiskBackedSlidingWindow(
+                window_cfg.window_size_s, window_cfg.slide_step_s,
+                window_cfg.watermark_delay_s, spill_threshold, tmp_dir
+            )
+        else:
+            window = DiskBackedTumblingWindow(
+                window_cfg.window_size_s, window_cfg.watermark_delay_s,
+                spill_threshold, tmp_dir
+            )
+
+        messages_consumed = 0
+        windows_emitted   = 0
+        t0 = time.perf_counter()
+
+        try:
+            while windows_emitted < max_windows and messages_consumed < config.max_messages:
+                msg = consumer.poll(config.poll_timeout_s)
+
+                if msg is None:
+                    pass
+                elif msg.error():
+                    if msg.error().code() == KafkaError._PARTITION_EOF:
+                        logger.debug("Partition EOF.")
+                    else:
+                        raise StreamLagError(f"Kafka error: {msg.error()}")
+                else:
+                    raw = msg.value()
+                    try:
+                        if transform_fn:
+                            record = transform_fn(raw)
+                        else:
+                            record = json.loads(raw.decode("utf-8", errors="replace"))
+                    except Exception:  # noqa: BLE001
+                        record = {"_raw": str(raw)}
+
+                    evt_ts: Optional[float] = None
+                    if window_cfg.event_time_field and window_cfg.event_time_field in record:
+                        try:
+                            evt_ts = pd.Timestamp(record[window_cfg.event_time_field]).timestamp()
+                        except Exception:  # noqa: BLE001
+                            pass
+                    if evt_ts is None:
+                        ts_type, ts_val = msg.timestamp()
+                        evt_ts = ts_val / 1000.0 if ts_type != 0 else time.time()
+
+                    window.add(record, event_time=evt_ts)
+                    messages_consumed += 1
+
+                self._check_lag(consumer, config.topic, config)
+
+                time_up = (
+                    window.should_close() if isinstance(window, DiskBackedTumblingWindow)
+                    else window.should_emit()
+                )
+                capacity_reached = messages_consumed >= config.max_messages
+
+                if time_up or capacity_reached:
+                    if isinstance(window, DiskBackedTumblingWindow):
+                        merged_df, w_start, w_end, late = window.close()
+                    else:
+                        merged_df, w_start, w_end, late = window.emit()
+
+                    if merged_df is not None and not merged_df.empty:
+                        elapsed = (time.perf_counter() - t0) * 1000
+                        yield StreamReadResult(
+                            data=merged_df, row_count=len(merged_df),
+                            window_start=datetime.fromtimestamp(w_start, tz=timezone.utc).isoformat(),
+                            window_end=datetime.fromtimestamp(w_end, tz=timezone.utc).isoformat(),
+                            late_dropped=late, consumer_lag=0,
+                            read_time_ms=round(elapsed, 2),
+                        )
+                        windows_emitted += 1
+                        t0 = time.perf_counter()
+                        logger.info(
+                            "[LargeStream] Window %d emitted: %d rows, %d late, %.0fms",
+                            windows_emitted, len(merged_df), late, elapsed,
+                        )
+                    if capacity_reached:
+                        break
+
+        except KeyboardInterrupt:
+            logger.info("Kafka large-stream consumer interrupted.")
+        finally:
+            consumer.close()
+            logger.info(
+                "Kafka large-stream consumer closed. messages=%d windows=%d",
+                messages_consumed, windows_emitted,
+            )
+
+    def _read_kafka_core(
+        self,
+        config: KafkaSourceConfig,
+        window_cfg: WindowConfig,
+        max_windows: int,
+        transform_fn: Optional[Callable[[bytes], Dict]],
+    ) -> Generator[StreamReadResult, None, None]:
+        """Private: standard in-memory Kafka consumer (< 500K messages)."""
+
         try:
             from confluent_kafka import Consumer, KafkaError, TopicPartition
         except ImportError:
@@ -236,13 +562,25 @@ class StreamReader:
                     evt_ts: Optional[float] = None
                     if window_cfg.event_time_field and window_cfg.event_time_field in record:
                         try:
-                            evt_ts = pd.Timestamp(record[window_cfg.event_time_field]).timestamp()
+                            raw_et = record[window_cfg.event_time_field]
+                            # Some sources emit epoch ints, strings, or ISO datetimes
+                            if isinstance(raw_et, (int, float)) and raw_et > 0:
+                                # Handle both second-epoch and ms-epoch
+                                if raw_et > 1e10:   # milliseconds
+                                    evt_ts = raw_et / 1000.0
+                                else:
+                                    evt_ts = float(raw_et)
+                            else:
+                                evt_ts = pd.Timestamp(raw_et).timestamp()
                         except Exception:  # noqa: BLE001
                             evt_ts = None
-                    if evt_ts is None:
-                        # Use Kafka message timestamp
+                    if evt_ts is None or evt_ts <= 0:
+                        # Repair sentinel/invalid Kafka timestamps
                         ts_type, ts_val = msg.timestamp()
-                        evt_ts = ts_val / 1000.0 if ts_type != 0 else time.time()
+                        if ts_type != 0 and ts_val is not None and ts_val > 0:
+                            evt_ts = ts_val / 1000.0
+                        else:
+                            evt_ts = time.time()  # wall-clock fallback
 
                     window.add(record, event_time=evt_ts)
                     messages_consumed += 1
@@ -270,10 +608,11 @@ class StreamReader:
                         df = pd.DataFrame()
 
                     elapsed = (time.perf_counter() - t0) * 1000
+                    # Always yield — even empty windows — so pipeline can track window cadence
                     yield StreamReadResult(
                         data=df, row_count=len(df),
-                        window_start=datetime.fromtimestamp(w_start, tz=timezone.utc).isoformat(),
-                        window_end=datetime.fromtimestamp(w_end, tz=timezone.utc).isoformat(),
+                        window_start=datetime.fromtimestamp(max(w_start, 0), tz=timezone.utc).isoformat(),
+                        window_end=datetime.fromtimestamp(max(w_end, 0), tz=timezone.utc).isoformat(),
                         late_dropped=late, consumer_lag=0,
                         read_time_ms=round(elapsed, 2),
                     )

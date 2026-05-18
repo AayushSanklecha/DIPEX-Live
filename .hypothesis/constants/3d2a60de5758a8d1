@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\api\routes\preprocess.py
-# hypothesis_version: 6.151.9
-
-[404, '/preprocess', 'CLEANED', 'Preprocessing', 'cleaning_operations', 'config.yaml', 'dipex.api.preprocess', 'duplicates_removed', 'features_added', 'output_path', 'r', 'rows_after', 'rows_before', 'run_id', 'status', 'target']

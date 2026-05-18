@@ -1,0 +1,212 @@
+[
+  {
+    "sku": "ELEC-001",
+    "name": "MacBook Pro 16\" M3 Max",
+    "brand": "Apple",
+    "price": 3499.00,
+    "currency": "USD",
+    "category": "Laptops",
+    "specs": {
+      "cpu": "Apple M3 Max",
+      "ram_gb": 36,
+      "storage_gb": 1000,
+      "display_inches": 16.2,
+      "battery_hours": 22
+    },
+    "tags": ["premium", "professional", "creative"],
+    "in_stock": true,
+    "rating": 4.8,
+    "reviews_count": 1247,
+    "warehouse": {"location": "Cupertino, CA", "zone": "US-WEST"}
+  },
+  {
+    "sku": "ELEC-002",
+    "name": "Samsung Galaxy S24 Ultra",
+    "brand": "Samsung",
+    "price": 1299.99,
+    "currency": "USD",
+    "category": "Smartphones",
+    "specs": {
+      "cpu": "Snapdragon 8 Gen 3",
+      "ram_gb": 12,
+      "storage_gb": 256,
+      "display_inches": 6.8,
+      "battery_mah": 5000,
+      "camera_mp": 200
+    },
+    "tags": ["flagship", "AI-powered"],
+    "in_stock": true,
+    "rating": 4.6,
+    "reviews_count": 3421,
+    "warehouse": {"location": "Suwon, South Korea", "zone": "APAC"}
+  },
+  {
+    "sku": "AUDIO-001",
+    "name": "Sony WH-1000XM5",
+    "brand": "Sony",
+    "price": 349.99,
+    "currency": "USD",
+    "category": "Headphones",
+    "specs": {
+      "driver_mm": 30,
+      "noise_cancelling": true,
+      "bluetooth_version": "5.2",
+      "battery_hours": 30
+    },
+    "tags": ["noise-cancelling", "wireless", "premium"],
+    "in_stock": true,
+    "rating": 4.7,
+    "reviews_count": 8934
+  },
+  {
+    "sku": "HOME-001",
+    "name": "Dyson V15 Detect Absolute",
+    "brand": "Dyson",
+    "price": 749.99,
+    "currency": "USD",
+    "category": "Home Appliances",
+    "specs": {
+      "suction_aw": 230,
+      "runtime_min": 60,
+      "weight_kg": 3.1,
+      "has_laser": true
+    },
+    "tags": ["cordless", "smart-home"],
+    "in_stock": false,
+    "rating": 4.5,
+    "reviews_count": 2156,
+    "warehouse": {"location": "Malmesbury, UK", "zone": "EU-WEST"}
+  },
+  {
+    "sku": "GAME-001",
+    "name": "PlayStation 5 Slim",
+    "brand": "Sony",
+    "price": 449.99,
+    "currency": "USD",
+    "category": "Gaming",
+    "specs": {
+      "cpu": "AMD Zen 2",
+      "gpu": "AMD RDNA 2",
+      "storage_gb": 1000,
+      "resolution": "4K",
+      "fps_max": 120
+    },
+    "tags": ["console", "next-gen"],
+    "in_stock": true,
+    "rating": 4.8,
+    "reviews_count": 15672,
+    "warehouse": {"location": "Tokyo, Japan", "zone": "APAC"}
+  },
+  {
+    "sku": "WEAR-001",
+    "name": "Apple Watch Ultra 2",
+    "brand": "Apple",
+    "price": 799.00,
+    "currency": "USD",
+    "category": "Wearables",
+    "specs": {
+      "display_mm": 49,
+      "battery_hours": 36,
+      "water_resistance_m": 100,
+      "has_gps": true,
+      "sensors": ["heart_rate", "spo2", "ecg", "temperature", "depth"]
+    },
+    "tags": ["adventure", "fitness", "premium"],
+    "in_stock": true,
+    "rating": 4.7,
+    "reviews_count": 4523
+  },
+  {
+    "sku": "PHOTO-001",
+    "name": "Canon EOS R6 Mark II",
+    "brand": "Canon",
+    "price": 2499.00,
+    "currency": "USD",
+    "category": "Cameras",
+    "specs": {
+      "megapixels": 24.2,
+      "sensor_type": "Full Frame CMOS",
+      "iso_max": 204800,
+      "fps": 40,
+      "video_max": "4K60"
+    },
+    "tags": ["mirrorless", "professional"],
+    "in_stock": true,
+    "rating": 4.9,
+    "reviews_count": 1876,
+    "warehouse": {"location": "Ōita, Japan", "zone": "APAC"}
+  },
+  {
+    "sku": "FURN-001",
+    "name": "Secretlab Titan Evo 2022",
+    "brand": "Secretlab",
+    "price": 519.00,
+    "currency": "USD",
+    "category": "Furniture",
+    "specs": {
+      "weight_capacity_kg": 130,
+      "material": "NEO Hybrid Leatherette",
+      "adjustable_armrests": true
+    },
+    "tags": ["ergonomic", "gaming"],
+    "in_stock": true,
+    "rating": 4.6,
+    "reviews_count": 9012
+  },
+  {
+    "sku": "SMRT-001",
+    "name": "Ring Video Doorbell Pro 2",
+    "brand": "Ring",
+    "price": 249.99,
+    "currency": "USD",
+    "category": "Smart Home",
+    "specs": {
+      "resolution": "1536p",
+      "field_of_view_deg": 150,
+      "has_radar": true,
+      "power": "hardwired"
+    },
+    "tags": ["security", "smart-home", "alexa"],
+    "in_stock": true,
+    "rating": 4.3,
+    "reviews_count": 6789,
+    "warehouse": {"location": "Seattle, WA", "zone": "US-WEST"}
+  },
+  {
+    "sku": "HEALTH-001",
+    "name": "Theragun Pro Plus",
+    "brand": "Therabody",
+    "price": 599.00,
+    "currency": "USD",
+    "category": "Health & Wellness",
+    "specs": {
+      "stall_force_lbs": 60,
+      "percussions_per_min": 2400,
+      "battery_min": 150,
+      "noise_db": 55
+    },
+    "tags": ["recovery", "massage", "fitness"],
+    "in_stock": true,
+    "rating": 4.4,
+    "reviews_count": 3245
+  },
+  {
+    "sku": "MISSING-001",
+    "name": "Product With Missing Data",
+    "price": null,
+    "category": null,
+    "in_stock": null,
+    "rating": null
+  },
+  {
+    "sku": "OUTLIER-001",
+    "name": "Extremely Overpriced Widget",
+    "brand": "Unknown",
+    "price": 99999.99,
+    "currency": "USD",
+    "category": "Miscellaneous",
+    "in_stock": true,
+    "rating": 1.0,
+    "reviews_count": 0
+  }
+]

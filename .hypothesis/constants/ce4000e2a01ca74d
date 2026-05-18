@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\verifier\drift_verifier.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-10, 0.1, 0.25, 0.3, 0.5, 100, 'DRIFT', 'STABLE', 'WARN', 'column_details', 'critical_columns', 'detail', 'dipex.verifier.drift', 'drift_psi', 'js_divergence', 'kl_divergence', 'metric', 'number', 'passed', 'psi', 'severity', 'value', 'warn_columns', 'wasserstein']

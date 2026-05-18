@@ -37,7 +37,11 @@ class RankerProposer(BaseProposer):
         if X.empty:
             return {"error": "No numeric features to rank"}
 
-        is_classification = y.nunique() < 10 or pd.api.types.is_object_dtype(y)
+        try:
+            n_unique = y.nunique()
+        except Exception: # noqa: BLE001
+            n_unique = y.astype(str).nunique()
+        is_classification = n_unique < 10 or pd.api.types.is_object_dtype(y)
         
         try:
             priors = self._load_feature_priors()

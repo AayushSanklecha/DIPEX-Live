@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\validation\multicollinearity_detector.py
-# hypothesis_version: 6.151.9
-
-[0.0, 1e-09, 0.95, 0.9999, 1.0, 5.0, 10.0, 100, '?', 'ERROR', 'WARNING', 'col_a', 'col_b', 'column', 'columns_dropped', 'corr_hard_threshold', 'correlated_pairs', 'correlation', 'drop', 'drop_on_error', 'max_features_for_vif', 'message', 'monitor', 'multicollinearity', 'paired_with', 'recommendation', 'run_id', 'severity', 'validation', 'vif', 'vif_error_threshold', 'vif_warn_threshold', 'violations', 'warnings']

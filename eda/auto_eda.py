@@ -130,36 +130,134 @@ class AutoEDA:
 
     def _generate_html_report(self, df: pd.DataFrame, run_id: Optional[str]) -> Optional[str]:
         """
-        Generates a visually rich HTML Data Profiling report if ydata-profiling is available.
+        Generates a visually rich HTML Data Profiling report.
+
+        Strategy:
+          1. Try ydata-profiling if installed (full interactive report)
+          2. Fall back to built-in HTML report using string templates
+          3. Never return None — always write a real file or raise
         """
+        import os
+
+        output_dir = "reports_output"
+        os.makedirs(output_dir, exist_ok=True)
+        run_str = run_id or f"run_{int(time.time())}"
+        filepath = os.path.join(output_dir, f"eda_profile_{run_str}.html")
+
+        # Strategy 1: ydata-profiling
         try:
             from ydata_profiling import ProfileReport
-            import os
-            
-            # Ensure output directory exists (using a temp-like directory for now, 
-            # in a real system this would go to a specific run_id folder like /data/reports/)
-            output_dir = "reports_output"
-            os.makedirs(output_dir, exist_ok=True)
-            
-            run_str = run_id or f"run_{int(time.time())}"
-            filepath = os.path.join(output_dir, f"eda_profile_{run_str}.html")
-            
-            # Subsample if dataset is absolutely massive to save memory
+
             df_prof = df.sample(min(len(df), 10000), random_state=42) if len(df) > 10000 else df
-            
             logger.info("Generating ydata-profiling HTML report...")
-            profile = ProfileReport(df_prof, title=f"DIPEX Profiling Report ({run_str})", explorative=True, minimal=len(df)>5000)
+            profile = ProfileReport(
+                df_prof,
+                title=f"DIPEX Profiling Report ({run_str})",
+                explorative=True,
+                minimal=len(df) > 5000,
+            )
             profile.to_file(filepath)
-            
             logger.info("Saved EDA HTML report to %s", filepath)
             return filepath
-            
+
         except ImportError:
-            logger.info("ydata-profiling not installed. Skipping interactive HTML EDA report generation.")
+            logger.info("ydata-profiling not installed — using built-in HTML fallback.")
+
+        except Exception as exc:
+            logger.warning("ydata-profiling failed (%s) — falling back to built-in HTML.", exc)
+
+        # Strategy 2: Built-in HTML fallback (no external dependencies)
+        try:
+            return self._generate_html_fallback(df, run_str, filepath)
+        except Exception as exc:
+            logger.error("HTML report generation failed: %s", exc, exc_info=True)
             return None
-        except Exception as e:
-            logger.warning("Failed to generate EDA HTML profile: %s", e)
-            return None
+
+    def _generate_html_fallback(
+        self, df: pd.DataFrame, run_str: str, filepath: str
+    ) -> str:
+        """Generate a basic HTML EDA report using string templates (no dependencies)."""
+        rows, cols = df.shape
+        numeric_cols = df.select_dtypes(include="number").columns.tolist()
+        cat_cols = df.select_dtypes(exclude="number").columns.tolist()
+
+        # Build per-column stats rows
+        col_rows = []
+        for col in df.columns:
+            dtype = str(df[col].dtype)
+            null_count = int(df[col].isnull().sum())
+            null_pct = f"{null_count / rows * 100:.1f}%" if rows else "0.0%"
+            try:
+                unique = int(df[col].nunique())
+            except Exception:  # noqa: BLE001 — unhashable
+                unique = int(df[col].astype(str).nunique())
+
+            if col in numeric_cols:
+                s = df[col].dropna()
+                stats = (
+                    f"mean={s.mean():.2f}, std={s.std():.2f}, "
+                    f"min={s.min():.2f}, max={s.max():.2f}"
+                ) if len(s) else "no data"
+            else:
+                top = str(df[col].mode().iloc[0]) if len(df[col].dropna()) else "N/A"
+                stats = f"top='{top}', unique={unique}"
+
+            col_rows.append(
+                f"<tr><td>{col}</td><td>{dtype}</td><td>{null_count} ({null_pct})</td>"
+                f"<td>{unique}</td><td>{stats}</td></tr>"
+            )
+
+        html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DIPEX EDA Report — {run_str}</title>
+<style>
+  body {{ font-family: 'Segoe UI', Arial, sans-serif; margin: 2rem; background: #f8f9fa; color: #212529; }}
+  h1 {{ color: #0d6efd; border-bottom: 2px solid #0d6efd; padding-bottom: 0.5rem; }}
+  h2 {{ color: #495057; margin-top: 2rem; }}
+  table {{ border-collapse: collapse; width: 100%; margin-top: 1rem; background: #fff; }}
+  th, td {{ border: 1px solid #dee2e6; padding: 8px 12px; text-align: left; }}
+  th {{ background: #e9ecef; font-weight: 600; }}
+  tr:nth-child(even) {{ background: #f8f9fa; }}
+  .summary {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }}
+  .card {{ background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 1rem; text-align: center; }}
+  .card .value {{ font-size: 1.8rem; font-weight: 700; color: #0d6efd; }}
+  .card .label {{ font-size: 0.85rem; color: #6c757d; }}
+  .footer {{ margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #dee2e6; font-size: 0.8rem; color: #6c757d; }}
+</style>
+</head>
+<body>
+<h1>DIPEX EDA Report</h1>
+<p>Run ID: <strong>{run_str}</strong></p>
+
+<div class="summary">
+  <div class="card"><div class="value">{rows:,}</div><div class="label">Rows</div></div>
+  <div class="card"><div class="value">{cols}</div><div class="label">Columns</div></div>
+  <div class="card"><div class="value">{len(numeric_cols)}</div><div class="label">Numeric</div></div>
+  <div class="card"><div class="value">{len(cat_cols)}</div><div class="label">Categorical</div></div>
+  <div class="card"><div class="value">{int(df.isnull().sum().sum()):,}</div><div class="label">Missing Cells</div></div>
+</div>
+
+<h2>Column Details</h2>
+<table>
+<thead><tr><th>Column</th><th>Type</th><th>Missing</th><th>Unique</th><th>Statistics</th></tr></thead>
+<tbody>
+{''.join(col_rows)}
+</tbody>
+</table>
+
+<div class="footer">
+  Generated by DIPEX AutoEDA (built-in fallback). Install <code>ydata-profiling</code> for interactive reports.
+</div>
+</body>
+</html>"""
+
+        with open(filepath, "w", encoding="utf-8") as fh:
+            fh.write(html)
+        logger.info("Saved built-in EDA HTML report to %s", filepath)
+        return filepath
+
 
     def _distributions(
         self,
@@ -193,9 +291,16 @@ class AutoEDA:
         # Categorical — top value counts
         for col in cat_cols:
             s = df[col].dropna()
-            n_unique = s.nunique()
+            try:
+                n_unique = s.nunique()
+            except Exception: # noqa: BLE001
+                n_unique = s.astype(str).nunique()
             if n_unique <= self.max_cat_unique:
-                vc = s.value_counts().head(20).to_dict()
+                try:
+                    vc = s.value_counts().head(20).to_dict()
+                except Exception:
+                    vc = s.astype(str).value_counts().head(20).to_dict()
+                    
                 out["categorical"][col] = {
                     "n_unique": int(n_unique),
                     "top_values": {str(k): int(v) for k, v in vc.items()},
@@ -212,13 +317,17 @@ class AutoEDA:
         if len(numeric_cols) < 2:
             return {"pairs": [], "note": "fewer than 2 numeric columns"}
 
-        corr_df = df[numeric_cols].corr(method="pearson")
-        pairs = []
-        for i, col_a in enumerate(numeric_cols):
-            for col_b in numeric_cols[i + 1 :]:
-                val = corr_df.loc[col_a, col_b]
-                if not np.isnan(val):
-                    pairs.append({"col_a": col_a, "col_b": col_b, "pearson_r": round(float(val), 4)})
+        try:
+            corr_df = df[numeric_cols].corr(method="pearson")
+            pairs = []
+            for i, col_a in enumerate(numeric_cols):
+                for col_b in numeric_cols[i + 1 :]:
+                    val = corr_df.loc[col_a, col_b]
+                    if not np.isnan(val):
+                        pairs.append({"col_a": col_a, "col_b": col_b, "pearson_r": round(float(val), 4)})
+        except Exception as exc:
+            logger.warning("Pearson correlation failed: %s", exc)
+            return {"pairs": [], "note": f"Correlation failed: {exc}"}
 
         # Sort by absolute correlation, return top-N
         pairs.sort(key=lambda x: abs(x["pearson_r"]), reverse=True)

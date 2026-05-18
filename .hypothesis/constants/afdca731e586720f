@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex_project\validation\hard_gate.py
-# hypothesis_version: 6.151.9
-
-[120, 'ADAPTIVE_DEGRADATION', 'CRITICAL', 'DATASET', 'ERROR', 'HardGate', 'N/A', 'PASS', 'REJECT', 'WARNING', 'ZeroValueDetector', 'column', 'decision', 'evaluated_at', 'explanation', 'failures', 'message', 'reason', 'run_id', 'schema', 'severity', 'shap_explanation', 'strict_mode', 'suppress_learning', 'total_violations', 'total_warnings', 'type', 'validation', 'warnings']

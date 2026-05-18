@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\verifier\confidence_vector.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.05, 0.1, 0.15, 0.18, 0.2, 0.22, 0.5, 1.0, 100, 'REJECT', 'all_gates_passed', 'compliance', 'compliance_score', 'confidence', 'confidence_score', 'data_quality', 'data_quality_score', 'decision', 'details', 'domain', 'drift', 'drift_robustness', 'failure_penalty', 'gate1_decision', 'gate2_vector_keys', 'improvement', 'metric', 'p_value', 'passed', 'pipeline', 'r', 'retry_attempt', 'retry_penalty', 'retry_penalty_score', 'stability', 'stability_score', 'statistical', 'statistical_score', 'storage', 'total_warnings', 'utf-8', 'value', 'vector', 'weights']

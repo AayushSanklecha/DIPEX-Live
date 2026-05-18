@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\stats\regression.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.05, 0.1, 1.0, 10.0, 1000, 10000, 'Lasso (CV)', 'Logistic', 'OLS', 'Ridge (CV)', 'adj_r_squared', 'aic', 'best_alpha', 'bic', 'ci_lower_95', 'ci_upper_95', 'coefficient', 'coefficients', 'const', 'diagnostics', 'durbin_watson', 'f_pvalue', 'f_statistic', 'formula', 'log_odds', 'model_type', 'n_obs', 'odds_ratio', 'p_value', 'r_squared', 'selected', 'significant', 'std_error', 't_statistic', 'variable', 'vif', 'warnings']

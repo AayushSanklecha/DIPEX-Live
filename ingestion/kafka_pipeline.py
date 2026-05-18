@@ -209,7 +209,7 @@ class KafkaPipelineRunner:
                     batch_idx, len(df_batch), self._topics,
                 )
 
-                self._process_batch(df_batch, dataset_id, batch_idx)
+                self._process_batch(df_batch, dataset_id, batch_idx, connector=connector)
 
                 # Consumer lag logging
                 if batch_idx % self._lag_every == 0:
@@ -232,6 +232,7 @@ class KafkaPipelineRunner:
         df: pd.DataFrame,
         dataset_id: str,
         batch_idx: int,
+        connector: Optional[Any] = None,
     ) -> None:
         """Route batch through pipeline, DLQ on failure."""
         try:
@@ -258,6 +259,22 @@ class KafkaPipelineRunner:
                 if isinstance(result_summary.get("confidence_vector"), dict)
                 else 0.0,
             )
+
+            # --- SINK RESULTS TO KAFKA (Gold Topic) ---
+            try:
+                # We use the gold topic from env or default
+                gold_topic = os.environ.get("KAFKA_GOLD_TOPIC", "gold_outputs")
+                if connector:
+                    # Enrich result with batch metadata
+                    sink_payload = {
+                        "batch_id": dataset_id,
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "summary": result_summary
+                    }
+                    connector.produce(gold_topic, sink_payload)
+                    logger.info("[KafkaPipeline] Sink: %d results → %s", len(df), gold_topic)
+            except Exception as sink_exc:
+                logger.warning("[KafkaPipeline] Sink error: %s", sink_exc)
 
             if self._on_batch_complete:
                 try:

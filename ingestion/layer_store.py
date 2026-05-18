@@ -102,8 +102,8 @@ class LayerStore:
         lineage_id: Optional[str] = None,
     ) -> str:
         """Persist df as a parquet file and return the lineage_id."""
-        import datetime
-        ts  = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%S")
+        import datetime as _dt
+        ts  = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%S")
         lid = lineage_id or f"{dataset_id}_{layer}_{ts}"
         path = os.path.join(self._root, f"{lid}.parquet")
         df.to_parquet(path, index=False)

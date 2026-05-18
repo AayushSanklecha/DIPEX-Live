@@ -166,9 +166,22 @@ class APIReader:
     def read(self, config: APISourceConfig) -> APIReadResult:
         t0 = time.perf_counter()
         errors = ErrorAggregator()
-        all_records: List[Any] = []
         pages_fetched = 0
         total_requests = 0
+
+        try:
+            import uuid as _uuid
+            from ingestion.chunked_writer import ChunkedParquetWriter
+            run_id = _uuid.uuid4().hex[:12]
+            writer = ChunkedParquetWriter(
+                base_dir="data/tmp",
+                dataset_id="api_stream",
+                run_id=run_id,
+            )
+        except Exception as exc:
+            logger.warning("Could not initialize ChunkedParquetWriter (fallback to memory): %s", exc)
+            writer = None
+        records_buf = []
 
         # ── [RL] Adaptive backoff selection ──────────────────────────────────
         try:
@@ -267,16 +280,79 @@ class APIReader:
                 errors.add(
                     "API_RESPONSE_ERROR",
                     f"HTTP {resp.status_code}: {resp.text[:200]}",
-                    severity="ERROR",
+                    severity="WARN",   # WARN not ERROR — try next page
                 )
-                break
+                # Skip this page, allow pagination to continue unless fatal
+                if resp.status_code in (401, 403, 404):
+                    break  # Auth/not-found errors are unrecoverable
+                page += 1
+                continue
 
-            # Parse JSON
-            try:
-                payload = resp.json()
-            except Exception:  # noqa: BLE001
-                errors.add("DATA_FORMAT_ERROR", f"Non-JSON response: {resp.text[:200]}", severity="ERROR")
-                break
+            # ── Content-type aware parsing ─────────────────────────────
+            content_type = resp.headers.get("Content-Type", "").lower()
+            payload = None
+
+            if "application/json" in content_type or "text/json" in content_type:
+                try:
+                    payload = resp.json()
+                except Exception:  # noqa: BLE001
+                    errors.add("DATA_FORMAT_ERROR",
+                               f"Content-Type is JSON but parse failed: {resp.text[:200]}",
+                               severity="WARN")
+                    page += 1
+                    continue
+
+            elif "xml" in content_type:
+                # XML API response — convert to DataFrame rows
+                try:
+                    import io as _io
+                    xml_df = pd.read_xml(_io.StringIO(resp.text))
+                    extracted = xml_df.to_dict(orient="records")
+                    if writer:
+                        records_buf.extend(extracted)
+                    else:
+                        records_buf.extend(extracted)
+                    pages_fetched += 1
+                    errors.add("QUALITY_WARN", "XML API response — parsed via pd.read_xml", severity="WARN")
+                    break  # XML APIs typically return all data in one response
+                except Exception as xml_exc:  # noqa: BLE001
+                    errors.add("DATA_FORMAT_ERROR", f"XML parse failed: {xml_exc}", severity="WARN")
+                    page += 1
+                    continue
+
+            elif "text/csv" in content_type:
+                # CSV API response
+                try:
+                    import io as _io
+                    csv_df = pd.read_csv(_io.StringIO(resp.text), encoding_errors="replace")
+                    extracted = csv_df.to_dict(orient="records")
+                    records_buf.extend(extracted)
+                    pages_fetched += 1
+                    errors.add("QUALITY_WARN", "CSV API response — parsed via pd.read_csv", severity="WARN")
+                    break
+                except Exception as csv_exc:  # noqa: BLE001
+                    errors.add("DATA_FORMAT_ERROR", f"CSV parse failed: {csv_exc}", severity="WARN")
+                    page += 1
+                    continue
+
+            else:
+                # Try JSON first regardless of content-type (many APIs lie)
+                try:
+                    payload = resp.json()
+                except Exception:  # noqa: BLE001
+                    # Last resort: treat text as raw content row
+                    raw_text = resp.text.strip()
+                    if raw_text:
+                        records_buf.append({"_raw_response": raw_text[:1000], "_page": page})
+                        errors.add("QUALITY_WARN",
+                                   f"Non-parseable response on page {page} — stored as _raw_response",
+                                   severity="WARN")
+                    page += 1
+                    continue
+
+            if payload is None:
+                page += 1
+                continue
 
             # Validate schema
             if config.schema_validator:
@@ -286,20 +362,48 @@ class APIReader:
                 except Exception as exc:  # noqa: BLE001
                     errors.add("SCHEMA_ERROR", f"API response schema invalid: {exc}", severity="WARN")
 
-            # Extract records
+            # Extract records with auto-flattening of deeply nested payloads
             records = self._extract_records(payload, config.data_path)
             if records is None:
-                errors.add("PARTIAL_DATA_ERROR", "Could not extract records from response", severity="WARN")
-                records = []
+                errors.add("PARTIAL_DATA_ERROR",
+                           f"Could not extract records from page {page} — skipping",
+                           severity="WARN")
+                page += 1
+                continue  # Skip page, don't abort
 
-            all_records.extend(records if isinstance(records, list) else [records])
+            extracted = records if isinstance(records, list) else [records]
+
+            # If records are dicts with nested structure, flatten up to 3 levels
+            flat_extracted = []
+            for rec in extracted:
+                if isinstance(rec, dict):
+                    try:
+                        norm = pd.json_normalize([rec], max_level=3)
+                        flat_extracted.extend(norm.to_dict(orient="records"))
+                    except Exception:  # noqa: BLE001
+                        flat_extracted.append(rec)
+                else:
+                    flat_extracted.append({"_value": rec})
+
+            if writer:
+                records_buf.extend(flat_extracted)
+                if len(records_buf) >= config.pagination.page_size * 5:
+                    try:
+                        writer.write_chunk(pd.json_normalize(records_buf, max_level=3))
+                    except Exception:
+                        writer.write_chunk(pd.DataFrame(records_buf))
+                    records_buf.clear()
+            else:
+                records_buf.extend(flat_extracted)
+
             pages_fetched += 1
 
             # Pagination control
             if config.pagination.strategy == "none":
                 break
             if config.pagination.strategy in ("page", "offset"):
-                if len(records) < config.pagination.page_size or pages_fetched >= config.pagination.max_pages:
+                # Empty page = end of data
+                if len(extracted) == 0 or pages_fetched >= config.pagination.max_pages:
                     break
                 page += 1
             elif config.pagination.strategy == "cursor":
@@ -317,13 +421,22 @@ class APIReader:
                 break
 
         # Flatten to DataFrame
-        if all_records:
-            try:
-                df = pd.json_normalize(all_records)
-            except Exception:  # noqa: BLE001
-                df = pd.DataFrame(all_records)
+        if writer:
+            if records_buf:
+                try:
+                    writer.write_chunk(pd.json_normalize(records_buf))
+                except Exception:
+                    writer.write_chunk(pd.DataFrame(records_buf))
+            df = writer.merge_to_single()
+            writer.cleanup()
         else:
-            df = pd.DataFrame()
+            if records_buf:
+                try:
+                    df = pd.json_normalize(records_buf)
+                except Exception:
+                    df = pd.DataFrame(records_buf)
+            else:
+                df = pd.DataFrame()
 
         elapsed = (time.perf_counter() - t0) * 1000
         session.close()
@@ -366,8 +479,19 @@ class APIReader:
 
     @staticmethod
     def _extract_records(payload: Any, data_path: str) -> Any:
-        """Traverse dot-separated data_path to find records list."""
+        """Traverse dot-separated data_path to find records list. Auto-detects common keys if empty."""
         if not data_path:
+            # Auto-unwrap common patterns if payload is a dict containing a list
+            if isinstance(payload, dict):
+                common_keys = ["results", "data", "items", "records", "users", "list"]
+                for key in common_keys:
+                    if key in payload and isinstance(payload[key], list):
+                        return payload[key]
+                # Fallback: if there's exactly one key and its value is a list, use it
+                if len(payload) == 1:
+                    val = next(iter(payload.values()))
+                    if isinstance(val, list):
+                        return val
             return payload
         for key in data_path.split("."):
             if isinstance(payload, dict):

@@ -1,4 +1,0 @@
-# file: C:\Users\sankl\Desktop\dipex\ingestion\adaptive_learner.py
-# hypothesis_version: 6.151.9
-
-[0.0, 0.45, 0.5, 0.95, 200, 999999, '.', '; ', 'API_RESPONSE_ERROR', 'API_TIMEOUT_ERROR', 'DATA_FORMAT_ERROR', 'DB_CONNECTION_ERROR', 'ENCODING_ERROR', 'FAILED', 'FAILURE', 'PENDING', 'QUALITY_GATE_ERROR', 'SCHEMA_ERROR', 'STREAM_LAG_ERROR', 'SUCCESS', 'UNKNOWN', 'Unknown error type', 'WARN', 'attempts', 'auto', 'avg_ms', 'avg_quality', 'best_strategy', 'common_issues', 'count', 'delimiter', 'drift_count', 'encoding', 'error_patterns', 'examples', 'fail_count', 'failures', 'file', 'format', 'global_stats', 'last_drift_type', 'none', 'pipeline_stage_fails', 'quality_history', 'quality_patterns', 'root_cause', 'runs', 'schema_history', 'schema_patterns', 'source', 'source_strategies', 'source_type', 'success_rate', 'successes', 'suggested_fix', 'top_errors', 'total_datasets', 'total_rows', 'total_runs', 'unknown', 'utf-8', 'versions_seen', 'w', 'warn_count']
