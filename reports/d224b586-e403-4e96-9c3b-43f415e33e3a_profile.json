@@ -1,0 +1,238 @@
+{
+  "run_id": "d224b586-e403-4e96-9c3b-43f415e33e3a",
+  "generated_at": "2026-03-16T09:18:38.205404+00:00",
+  "dataset_shape": {
+    "rows": 4,
+    "columns": 4
+  },
+  "columns": {
+    "age": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 3,
+      "cardinality_tier": "high",
+      "min": -1.716255741159569,
+      "max": 0.7921180343813394,
+      "mean": -8.326672684688674e-17,
+      "median": 0.4620688533891146,
+      "std": 1.1547005383792517,
+      "variance": 1.3333333333333337,
+      "q05": -1.3895070519772663,
+      "q25": -0.08251229524805631,
+      "q75": 0.5445811486371708,
+      "q95": 0.7426106572325056,
+      "iqr": 0.627093,
+      "skewness": -1.090241,
+      "kurtosis": -0.709741,
+      "high_skew": true,
+      "heavy_tails": false,
+      "shapiro_p": 0.033123,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 1,
+          "pct": 0.25,
+          "fence_low": -1.023152,
+          "fence_high": 1.485221
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "is_active_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "high",
+      "min": -1.0,
+      "max": 1.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 1.1547005383792515,
+      "variance": 1.3333333333333333,
+      "q05": -1.0,
+      "q25": -1.0,
+      "q75": 1.0,
+      "q95": 1.0,
+      "iqr": 2.0,
+      "skewness": 0.0,
+      "kurtosis": -2.0,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.023857,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -4.0,
+          "fence_high": 4.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "product_category_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 3,
+      "cardinality_tier": "high",
+      "min": -1.4922480101214208,
+      "max": 0.9119293395186461,
+      "mean": 0.0,
+      "median": 0.2901593353013874,
+      "std": 1.1547005383792515,
+      "variance": 1.3333333333333333,
+      "q05": -1.3181524089405885,
+      "q25": -0.6217700042172587,
+      "q75": 0.9119293395186461,
+      "q95": 0.9119293395186461,
+      "iqr": 1.533699,
+      "skewness": -0.460665,
+      "kurtosis": -1.411521,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.2752,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.922319,
+          "fence_high": 3.212478
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "purchase_amount": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 3,
+      "cardinality_tier": "high",
+      "min": -0.6971759668722545,
+      "max": 1.7272559875920728,
+      "mean": -5.551115123125783e-17,
+      "median": -0.5150400103599092,
+      "std": 1.1547005383792515,
+      "variance": 1.3333333333333333,
+      "q05": -0.6698555733954027,
+      "q25": -0.5605739994879955,
+      "q75": 0.04553398912808626,
+      "q95": 1.3909115878992746,
+      "iqr": 0.606108,
+      "skewness": 1.135252,
+      "kurtosis": -0.680566,
+      "high_skew": true,
+      "heavy_tails": false,
+      "shapiro_p": 0.009886,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 1,
+          "pct": 0.25,
+          "fence_low": -1.469736,
+          "fence_high": 0.954696
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {},
+    "spearman": {},
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 4,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "age": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "is_active_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "product_category_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "purchase_amount": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "age",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "25.00% of values are outside IQR fence [-1.023, 1.485]."
+    },
+    {
+      "column": "purchase_amount",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "25.00% of values are outside IQR fence [-1.47, 0.9547]."
+    },
+    {
+      "column": "age",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-1.0902. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "purchase_amount",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=1.1353. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "age",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.03312 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "is_active_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.02386 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "purchase_amount",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.009886 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 7
+}

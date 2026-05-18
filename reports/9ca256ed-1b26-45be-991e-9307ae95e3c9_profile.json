@@ -1,0 +1,312 @@
+{
+  "run_id": "9ca256ed-1b26-45be-991e-9307ae95e3c9",
+  "generated_at": "2026-03-17T02:02:01.021982+00:00",
+  "dataset_shape": {
+    "rows": 1809,
+    "columns": 5
+  },
+  "columns": {
+    "anomaly_flag": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -4.345011033256519,
+      "max": 0.2301490128209215,
+      "mean": -9.819551351024049e-19,
+      "median": 0.2301490128209215,
+      "std": 1.0002765104435536,
+      "variance": 1.0005530973451326,
+      "q05": -2.514947014825517,
+      "q25": 0.2301490128209215,
+      "q75": 0.2301490128209215,
+      "q95": 0.2301490128209215,
+      "iqr": 0.0,
+      "skewness": -4.114862,
+      "kurtosis": 14.932089,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 91,
+          "pct": 0.050304,
+          "fence_low": 0.230149,
+          "fence_high": 0.230149
+        },
+        "zscore": {
+          "count": 91,
+          "pct": 0.050304,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1392,
+      "cardinality_tier": "high",
+      "min": -2.904321305456844,
+      "max": 1.5452952646285931,
+      "mean": 2.011044116689725e-15,
+      "median": 0.12371077901938336,
+      "std": 1.0002765104435536,
+      "variance": 1.0005530973451326,
+      "q05": -1.7585205229221323,
+      "q25": -0.7250839296871705,
+      "q75": 0.9216831681133105,
+      "q95": 1.3134509014644855,
+      "iqr": 1.646767,
+      "skewness": -0.420444,
+      "kurtosis": -0.777689,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.195235,
+          "fence_high": 3.391834
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "currency_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "low",
+      "min": -0.9386866312842596,
+      "max": 1.4786583348369464,
+      "mean": -1.3747371891433669e-17,
+      "median": -0.8883252778234011,
+      "std": 1.0002765104435538,
+      "variance": 1.000553097345133,
+      "q05": -0.9386866312842596,
+      "q25": -0.9386866312842596,
+      "q75": 0.37070855869806035,
+      "q95": 1.4786583348369464,
+      "iqr": 1.309395,
+      "skewness": 0.433306,
+      "kurtosis": -1.450589,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.902779,
+          "fence_high": 2.334801
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "status_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 3,
+      "cardinality_tier": "low",
+      "min": -1.789848664546129,
+      "max": 0.7556200730041444,
+      "mean": 2.435248735053964e-16,
+      "median": 0.7556200730041444,
+      "std": 1.0002765104435538,
+      "variance": 1.000553097345133,
+      "q05": -1.789848664546129,
+      "q25": -0.2625674220159649,
+      "q75": 0.7556200730041444,
+      "q95": 0.7556200730041444,
+      "iqr": 1.018187,
+      "skewness": -0.941688,
+      "kurtosis": -0.697932,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 373,
+          "pct": 0.206191,
+          "fence_low": -1.789849,
+          "fence_high": 2.282901
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "user_id": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 865,
+      "cardinality_tier": "medium",
+      "min": -1.719505333405249,
+      "max": 1.6957368139335336,
+      "mean": 1.9639102702048098e-17,
+      "median": -0.001427729647255279,
+      "std": 1.0002765104435536,
+      "variance": 1.0005530973451324,
+      "q05": -1.5838492830557782,
+      "q25": -0.8449211567945296,
+      "q75": 0.8594932476476901,
+      "q95": 1.5565952535545284,
+      "iqr": 1.704414,
+      "skewness": -0.013942,
+      "kurtosis": -1.177865,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.401543,
+          "fence_high": 3.416115
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "anomaly_flag::anomaly_score": 0.484124,
+      "anomaly_flag::currency_fallback_hash": -0.164797,
+      "anomaly_flag::status_fallback_hash": 0.306352,
+      "anomaly_flag::user_id": 0.031181,
+      "anomaly_score::currency_fallback_hash": -0.359397,
+      "anomaly_score::status_fallback_hash": 0.74922,
+      "anomaly_score::user_id": -0.018786,
+      "currency_fallback_hash::status_fallback_hash": -0.015551,
+      "currency_fallback_hash::user_id": 0.05584,
+      "status_fallback_hash::user_id": -0.010971
+    },
+    "spearman": {
+      "anomaly_flag::anomaly_score": 0.378577,
+      "anomaly_flag::currency_fallback_hash": -0.158513,
+      "anomaly_flag::status_fallback_hash": 0.283977,
+      "anomaly_flag::user_id": 0.029497,
+      "anomaly_score::currency_fallback_hash": -0.353558,
+      "anomaly_score::status_fallback_hash": 0.758921,
+      "anomaly_score::user_id": -0.01099,
+      "currency_fallback_hash::status_fallback_hash": -0.019312,
+      "currency_fallback_hash::user_id": 0.05355,
+      "status_fallback_hash::user_id": -0.011142
+    },
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 1809,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "anomaly_flag": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "currency_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "status_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "user_id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "5.03% of values are outside IQR fence [0.2301, 0.2301]."
+    },
+    {
+      "column": "status_fallback_hash",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "20.62% of values are outside IQR fence [-1.79, 2.283]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-4.1149. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=14.9321. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "anomaly_score",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "currency_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "status_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "user_id",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 9
+}

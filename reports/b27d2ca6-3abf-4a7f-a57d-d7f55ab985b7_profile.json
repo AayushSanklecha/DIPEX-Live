@@ -1,0 +1,720 @@
+{
+  "run_id": "b27d2ca6-3abf-4a7f-a57d-d7f55ab985b7",
+  "generated_at": "2026-03-17T03:10:33.242926+00:00",
+  "dataset_shape": {
+    "rows": 100,
+    "columns": 11
+  },
+  "columns": {
+    "anomaly_flag": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -4.358898943540674,
+      "max": 0.22941573387056172,
+      "mean": -1.0075273948473295e-16,
+      "median": 0.22941573387056172,
+      "std": 1.0050378152592123,
+      "variance": 1.0101010101010106,
+      "q05": 7.216449660063518e-16,
+      "q25": 0.22941573387056172,
+      "q75": 0.22941573387056172,
+      "q95": 0.22941573387056172,
+      "iqr": 0.0,
+      "skewness": -4.129483,
+      "kurtosis": 15.052632,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 5,
+          "pct": 0.05,
+          "fence_low": 0.229416,
+          "fence_high": 0.229416
+        },
+        "zscore": {
+          "count": 5,
+          "pct": 0.05,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 100,
+      "cardinality_tier": "unique",
+      "min": -2.154448356340928,
+      "max": 2.0646897394344994,
+      "mean": 1.9595436384634012e-16,
+      "median": 0.005099440709355442,
+      "std": 1.005037815259212,
+      "variance": 1.0101010101010102,
+      "q05": -1.9725431599486196,
+      "q25": -0.5626037730345831,
+      "q75": 0.7633620405609839,
+      "q95": 1.545970506243331,
+      "iqr": 1.325966,
+      "skewness": -0.243246,
+      "kurtosis": -0.59634,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.158143,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.551552,
+          "fence_high": 2.752311
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "dob_age": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 48,
+      "cardinality_tier": "medium",
+      "min": -1.6950373965103935,
+      "max": 1.731209325428175,
+      "mean": 1.63202784619898e-16,
+      "median": -0.04503411493990337,
+      "std": 1.005037815259212,
+      "variance": 1.0101010101010102,
+      "q05": -1.4469976875161366,
+      "q25": -0.9490151515558004,
+      "q75": 0.8589469216759937,
+      "q95": 1.5440693915322523,
+      "iqr": 1.807962,
+      "skewness": 0.067524,
+      "kurtosis": -1.204927,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.000992,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.660958,
+          "fence_high": 3.57089
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "gender_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -1.061913167103641,
+      "max": 0.9416965821485112,
+      "mean": -3.5749181392930043e-16,
+      "median": 0.9416965821485112,
+      "std": 1.0050378152592119,
+      "variance": 1.0101010101010097,
+      "q05": -1.061913167103641,
+      "q25": -1.061913167103641,
+      "q75": 0.9416965821485112,
+      "q95": 0.9416965821485112,
+      "iqr": 2.00361,
+      "skewness": -0.120217,
+      "kurtosis": -1.985548,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -4.067328,
+          "fence_high": 3.947111
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "id_name_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 16,
+      "cardinality_tier": "medium",
+      "min": -1.8185282988277678,
+      "max": 1.443877792819269,
+      "mean": -1.1990408665951691e-16,
+      "median": 0.1283914655422381,
+      "std": 1.005037815259212,
+      "variance": 1.01010101010101,
+      "q05": -1.8185282988277678,
+      "q25": -0.45042251845965553,
+      "q75": 0.6019665433619692,
+      "q95": 1.443877792819269,
+      "iqr": 1.052389,
+      "skewness": -0.32748,
+      "kurtosis": -0.67076,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.1e-05,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.029006,
+          "fence_high": 2.18055
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "location_country_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 17,
+      "cardinality_tier": "medium",
+      "min": -1.5447588549923266,
+      "max": 1.6996034180225839,
+      "mean": 6.272760089132134e-17,
+      "median": -0.10691648399708223,
+      "std": 1.005037815259212,
+      "variance": 1.0101010101010102,
+      "q05": -1.5447588549923266,
+      "q25": -0.6599327805337147,
+      "q75": 0.6673063311542032,
+      "q95": 1.6996034180225839,
+      "iqr": 1.327239,
+      "skewness": 0.312288,
+      "kurtosis": -0.829152,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 4.3e-05,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.650791,
+          "fence_high": 2.658165
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "location_timezone_description_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 27,
+      "cardinality_tier": "medium",
+      "min": -1.7558961104988051,
+      "max": 1.6904161770356505,
+      "mean": -2.3869795029440865e-17,
+      "median": -0.14761704298272588,
+      "std": 1.005037815259212,
+      "variance": 1.0101010101010102,
+      "q05": -1.4170087355579168,
+      "q25": -0.6789235206442878,
+      "q75": 0.8862766432776108,
+      "q95": 1.632977638910076,
+      "iqr": 1.5652,
+      "skewness": 0.239258,
+      "kurtosis": -1.020154,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.000158,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.026724,
+          "fence_high": 3.234077
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "location_timezone_offset": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 23,
+      "cardinality_tier": "medium",
+      "min": -1.9321297216723652,
+      "max": 1.6031911692158127,
+      "mean": -1.7763568394002505e-17,
+      "median": 0.2198047336508737,
+      "std": 1.005037815259212,
+      "variance": 1.0101010101010102,
+      "q05": -1.6323959939666282,
+      "q25": -0.8561624940107457,
+      "q75": 0.7193609464937684,
+      "q95": 1.4494815652641528,
+      "iqr": 1.575523,
+      "skewness": -0.294131,
+      "kurtosis": -1.152936,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.000187,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.219448,
+          "fence_high": 3.082646
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "name_title_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 6,
+      "cardinality_tier": "medium",
+      "min": -2.7119008254387587,
+      "max": 0.9738012978328017,
+      "mean": -1.9428902930940238e-17,
+      "median": -0.48108111924807745,
+      "std": 1.005037815259212,
+      "variance": 1.01010101010101,
+      "q05": -1.2570184083578795,
+      "q25": -1.063034086080429,
+      "q75": 0.9738012978328017,
+      "q95": 0.9738012978328017,
+      "iqr": 2.036835,
+      "skewness": -0.259998,
+      "kurtosis": -1.423402,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -4.118287,
+          "fence_high": 4.029054
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "nat_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 19,
+      "cardinality_tier": "medium",
+      "min": -1.3809975013261842,
+      "max": 2.3763998037985807,
+      "mean": -1.2212453270876723e-16,
+      "median": -0.02587060439594111,
+      "std": 1.005037815259212,
+      "variance": 1.0101010101010102,
+      "q05": -1.2578041470597985,
+      "q25": -0.8420265764107466,
+      "q75": 0.4669028126696019,
+      "q95": 2.1916097723990022,
+      "iqr": 1.308929,
+      "skewness": 0.781567,
+      "kurtosis": 0.029093,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 8e-06,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.805421,
+          "fence_high": 2.430297
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "registered_age": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 20,
+      "cardinality_tier": "medium",
+      "min": -1.550872079470462,
+      "max": 1.6555010989777186,
+      "mean": 4.884981308350689e-17,
+      "median": -0.03206373178448172,
+      "std": 1.005037815259212,
+      "variance": 1.01010101010101,
+      "q05": -1.550872079470462,
+      "q25": -0.875846147165582,
+      "q75": 0.8117186835966185,
+      "q95": 1.6555010989777186,
+      "iqr": 1.687565,
+      "skewness": 0.120381,
+      "kurtosis": -1.211864,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.000246,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.407193,
+          "fence_high": 3.343066
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "anomaly_flag::anomaly_score": 0.470709,
+      "anomaly_flag::dob_age": 0.187913,
+      "anomaly_flag::gender_fallback_hash": 0.059756,
+      "anomaly_flag::id_name_fallback_hash": -0.196045,
+      "anomaly_flag::location_country_fallback_hash": -0.190306,
+      "anomaly_flag::location_timezone_description_fallback_hash": 0.023324,
+      "anomaly_flag::location_timezone_offset": -0.099795,
+      "anomaly_flag::name_title_fallback_hash": 0.048063,
+      "anomaly_flag::nat_fallback_hash": -0.23147,
+      "anomaly_flag::registered_age": 0.309336,
+      "anomaly_score::dob_age": -0.076235,
+      "anomaly_score::gender_fallback_hash": 0.221953,
+      "anomaly_score::id_name_fallback_hash": -0.276071,
+      "anomaly_score::location_country_fallback_hash": -0.198494,
+      "anomaly_score::location_timezone_description_fallback_hash": -0.260575,
+      "anomaly_score::location_timezone_offset": -0.052378,
+      "anomaly_score::name_title_fallback_hash": 0.261446,
+      "anomaly_score::nat_fallback_hash": -0.362431,
+      "anomaly_score::registered_age": 0.213334,
+      "dob_age::gender_fallback_hash": -0.079598,
+      "dob_age::id_name_fallback_hash": 0.013758,
+      "dob_age::location_country_fallback_hash": 0.119246,
+      "dob_age::location_timezone_description_fallback_hash": 0.07221,
+      "dob_age::location_timezone_offset": 0.046665,
+      "dob_age::name_title_fallback_hash": -0.096608,
+      "dob_age::nat_fallback_hash": 0.02096,
+      "dob_age::registered_age": -0.077337,
+      "gender_fallback_hash::id_name_fallback_hash": 0.147938,
+      "gender_fallback_hash::location_country_fallback_hash": 0.042327,
+      "gender_fallback_hash::location_timezone_description_fallback_hash": 0.092977,
+      "gender_fallback_hash::location_timezone_offset": 0.060948,
+      "gender_fallback_hash::name_title_fallback_hash": 0.901945,
+      "gender_fallback_hash::nat_fallback_hash": -0.101522,
+      "gender_fallback_hash::registered_age": -0.03743,
+      "id_name_fallback_hash::location_country_fallback_hash": 0.399469,
+      "id_name_fallback_hash::location_timezone_description_fallback_hash": -0.111735,
+      "id_name_fallback_hash::location_timezone_offset": 0.147615,
+      "id_name_fallback_hash::name_title_fallback_hash": 0.051406,
+      "id_name_fallback_hash::nat_fallback_hash": 0.317327,
+      "id_name_fallback_hash::registered_age": -0.093651,
+      "location_country_fallback_hash::location_timezone_description_fallback_hash": -0.017117,
+      "location_country_fallback_hash::location_timezone_offset": 0.015057,
+      "location_country_fallback_hash::name_title_fallback_hash": -0.01961,
+      "location_country_fallback_hash::nat_fallback_hash": -0.057768,
+      "location_country_fallback_hash::registered_age": -0.071431,
+      "location_timezone_description_fallback_hash::location_timezone_offset": -0.035888,
+      "location_timezone_description_fallback_hash::name_title_fallback_hash": 0.143193,
+      "location_timezone_description_fallback_hash::nat_fallback_hash": 0.046952,
+      "location_timezone_description_fallback_hash::registered_age": 0.066802,
+      "location_timezone_offset::name_title_fallback_hash": 0.014801,
+      "location_timezone_offset::nat_fallback_hash": 0.13625,
+      "location_timezone_offset::registered_age": -0.030305,
+      "name_title_fallback_hash::nat_fallback_hash": -0.056298,
+      "name_title_fallback_hash::registered_age": -0.06011,
+      "nat_fallback_hash::registered_age": -0.035964
+    },
+    "spearman": {
+      "anomaly_flag::anomaly_score": 0.377511,
+      "anomaly_flag::dob_age": 0.199553,
+      "anomaly_flag::gender_fallback_hash": 0.059756,
+      "anomaly_flag::id_name_fallback_hash": -0.181317,
+      "anomaly_flag::location_country_fallback_hash": -0.175425,
+      "anomaly_flag::location_timezone_description_fallback_hash": 0.041385,
+      "anomaly_flag::location_timezone_offset": -0.093194,
+      "anomaly_flag::name_title_fallback_hash": 0.063875,
+      "anomaly_flag::nat_fallback_hash": -0.120257,
+      "anomaly_flag::registered_age": 0.322378,
+      "anomaly_score::dob_age": -0.08154,
+      "anomaly_score::gender_fallback_hash": 0.230096,
+      "anomaly_score::id_name_fallback_hash": -0.303208,
+      "anomaly_score::location_country_fallback_hash": -0.21195,
+      "anomaly_score::location_timezone_description_fallback_hash": -0.272806,
+      "anomaly_score::location_timezone_offset": -0.054228,
+      "anomaly_score::name_title_fallback_hash": 0.253868,
+      "anomaly_score::nat_fallback_hash": -0.210709,
+      "anomaly_score::registered_age": 0.206621,
+      "dob_age::gender_fallback_hash": -0.085752,
+      "dob_age::id_name_fallback_hash": 0.044432,
+      "dob_age::location_country_fallback_hash": 0.090772,
+      "dob_age::location_timezone_description_fallback_hash": 0.085218,
+      "dob_age::location_timezone_offset": 0.036692,
+      "dob_age::name_title_fallback_hash": -0.090917,
+      "dob_age::nat_fallback_hash": 0.014815,
+      "dob_age::registered_age": -0.068426,
+      "gender_fallback_hash::id_name_fallback_hash": 0.151726,
+      "gender_fallback_hash::location_country_fallback_hash": 0.029945,
+      "gender_fallback_hash::location_timezone_description_fallback_hash": 0.096615,
+      "gender_fallback_hash::location_timezone_offset": 0.053565,
+      "gender_fallback_hash::name_title_fallback_hash": 0.875835,
+      "gender_fallback_hash::nat_fallback_hash": -0.160323,
+      "gender_fallback_hash::registered_age": -0.036497,
+      "id_name_fallback_hash::location_country_fallback_hash": 0.4516,
+      "id_name_fallback_hash::location_timezone_description_fallback_hash": -0.063698,
+      "id_name_fallback_hash::location_timezone_offset": 0.144613,
+      "id_name_fallback_hash::name_title_fallback_hash": 0.028717,
+      "id_name_fallback_hash::nat_fallback_hash": 0.265812,
+      "id_name_fallback_hash::registered_age": -0.071165,
+      "location_country_fallback_hash::location_timezone_description_fallback_hash": -0.004289,
+      "location_country_fallback_hash::location_timezone_offset": -0.018367,
+      "location_country_fallback_hash::name_title_fallback_hash": -0.035964,
+      "location_country_fallback_hash::nat_fallback_hash": -0.111495,
+      "location_country_fallback_hash::registered_age": -0.075291,
+      "location_timezone_description_fallback_hash::location_timezone_offset": -0.01087,
+      "location_timezone_description_fallback_hash::name_title_fallback_hash": 0.139673,
+      "location_timezone_description_fallback_hash::nat_fallback_hash": 0.006669,
+      "location_timezone_description_fallback_hash::registered_age": 0.071783,
+      "location_timezone_offset::name_title_fallback_hash": 0.015908,
+      "location_timezone_offset::nat_fallback_hash": 0.07555,
+      "location_timezone_offset::registered_age": -0.0108,
+      "name_title_fallback_hash::nat_fallback_hash": -0.108852,
+      "name_title_fallback_hash::registered_age": -0.045797,
+      "nat_fallback_hash::registered_age": -0.008389
+    },
+    "cramers_v": {},
+    "highlights": [
+      {
+        "columns": [
+          "gender_fallback_hash",
+          "name_title_fallback_hash"
+        ],
+        "method": "pearson",
+        "value": 0.901945,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Pearson r=0.9019. Review for feature redundancy or causal relationship."
+      },
+      {
+        "columns": [
+          "gender_fallback_hash",
+          "name_title_fallback_hash"
+        ],
+        "method": "spearman",
+        "value": 0.875835,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Spearman r=0.8758. Review for feature redundancy or causal relationship."
+      }
+    ]
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 100,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "anomaly_flag": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "dob_age": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "gender_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "id_name_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "location_country_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "location_timezone_description_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "location_timezone_offset": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "name_title_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "nat_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "registered_age": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "anomaly_score",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (100 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "columns": [
+        "gender_fallback_hash",
+        "name_title_fallback_hash"
+      ],
+      "method": "pearson",
+      "value": 0.901945,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Pearson r=0.9019. Review for feature redundancy or causal relationship."
+    },
+    {
+      "columns": [
+        "gender_fallback_hash",
+        "name_title_fallback_hash"
+      ],
+      "method": "spearman",
+      "value": 0.875835,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Spearman r=0.8758. Review for feature redundancy or causal relationship."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "5.00% of values are outside IQR fence [0.2294, 0.2294]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-4.1295. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=15.0526. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "dob_age",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.000992 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "gender_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "id_name_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=1.1e-05 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "location_country_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=4.3e-05 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "location_timezone_description_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.000158 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "location_timezone_offset",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.000187 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "name_title_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "nat_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=8e-06 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "registered_age",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.000246 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 16
+}

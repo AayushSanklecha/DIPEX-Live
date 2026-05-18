@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIPEX EDA Report — demo_financial_2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d2e; --accent: #6c63ff; --accent2: #00d4aa;
+    --text: #e0e0ff; --muted: #8888aa; --warn: #ffb347; --danger: #ff6b6b;
+    --ok: #52fa7c; --border: #2a2d4a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif;
+         font-size: 14px; line-height: 1.6; padding: 20px; }
+  h1 { color: var(--accent); font-size: 1.8em; margin-bottom: 4px; }
+  h2 { color: var(--accent2); font-size: 1.15em; margin: 18px 0 10px; letter-spacing:.5px; text-transform:uppercase; }
+  .meta { color: var(--muted); font-size:.85em; margin-bottom:20px; }
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+           padding: 18px; box-shadow: 0 4px 20px rgba(0,0,0,.4); }
+  .stat-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-bottom:20px; }
+  .stat { background:var(--card); border:1px solid var(--border); border-radius:10px;
+           padding:14px 18px; text-align:center; }
+  .stat .val { font-size:2em; font-weight:700; color:var(--accent); }
+  .stat .lbl { color:var(--muted); font-size:.8em; margin-top:2px; }
+  table { border-collapse: collapse; width: 100%; font-size:.85em; }
+  th { background:#252840; color:var(--accent2); padding:8px 10px; text-align:left;
+        font-weight:600; border-bottom:2px solid var(--border); }
+  td { padding:7px 10px; border-bottom:1px solid var(--border); }
+  tr:hover td { background:rgba(108,99,255,.07); }
+  .badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:.78em;
+             font-weight:600; letter-spacing:.3px; }
+  .ok { background:#052b14; color:var(--ok); border:1px solid #0d5c2b; }
+  .warn { background:#2b1900; color:var(--warn); border:1px solid #5c3600; }
+  .danger { background:#2b0000; color:var(--danger); border:1px solid #5c0000; }
+  .insight-list { list-style:none; padding:0; }
+  .insight-list li { padding: 7px 0; border-bottom:1px solid var(--border);
+                       display:flex; gap:10px; align-items:center; }
+  .insight-list li::before { content:"●"; color:var(--accent); font-size:.7em; }
+  .chart-wrap { position:relative; height:200px; }
+  .heatmap-cell { text-align:center; font-size:.8em; font-weight:600; }
+  footer { margin-top:30px; color:var(--muted); font-size:.8em; text-align:center;
+            border-top:1px solid var(--border); padding-top:12px; }
+  .section { margin-bottom: 28px; }
+</style>
+</head>
+<body>
+
+<h1>📊 DIPEX EDA Report</h1>
+<p class="meta">Run ID: <strong>demo_financial_2026</strong> &nbsp;·&nbsp; Generated: 2026-03-07 05:12:39 &nbsp;·&nbsp; Dataset: 500 rows × 6 cols</p>
+
+<!-- ── SUMMARY STATS ──────────────────────────────────────────────── -->
+<div class="section">
+<h2>📋 Dataset Overview</h2>
+<div class="stat-grid">
+  <div class="stat"><div class="val">500</div><div class="lbl">Rows</div></div>
+  <div class="stat"><div class="val">6</div><div class="lbl">Columns</div></div>
+  <div class="stat"><div class="val">2.4%</div><div class="lbl">Null Rate</div></div>
+  <div class="stat"><div class="val">6</div><div class="lbl">Numeric Cols</div></div>
+  <div class="stat"><div class="val">0</div><div class="lbl">Categorical Cols</div></div>
+  <div class="stat"><div class="val">0.0%</div><div class="lbl">Anomaly Rate</div></div>
+</div>
+</div>
+
+<!-- ── AUTO INSIGHTS ──────────────────────────────────────────────── -->
+<div class="section">
+<h2>💡 Auto-Generated Insights</h2>
+<div class="card">
+<ul class="insight-list"><li>Revenue distribution is highly right-skewed (lognormal-like). Log transform recommended before modelling.</li>
+<li>Strong positive correlation found between revenue and loan_amount (r=0.72).</li>
+<li>credit_score has 4% missing values — investigate whether missing data is random (MCAR).</li>
+<li>8% of revenue values are exactly zero — possible data collection issue. Review source.</li>
+<li>age and months_employed are moderately correlated (r=0.61). Consider removing one for regression.</li>
+<li>transactions column is Poisson distributed with mean ≈ 120 — well-behaved for modelling.</li>
+<li>Dataset has no categorical columns. All features are numeric — no encoding required.</li>
+<li>Class imbalance not applicable (no target column detected).</li></ul>
+</div>
+</div>
+
+<!-- ── MISSING VALUES ─────────────────────────────────────────────── -->
+<div class="section">
+<h2>🕳️ Missing Value Profile</h2>
+<div class="card">
+  <div class="chart-wrap"><canvas id="missingChart"></canvas></div>
+</div>
+</div>
+
+<!-- ── DISTRIBUTIONS ─────────────────────────────────────────────── -->
+<div class="section">
+<h2>📈 Numeric Distributions</h2>
+<div class="grid g2">
+<div class="card">
+  <div style="font-weight:600;margin-bottom:8px;color:var(--accent)">revenue</div>
+  <div style="color:var(--muted);font-size:.8em;margin-bottom:6px">Mean: 4766.8547 &nbsp;·&nbsp; Skew: 1.487</div>
+  <div class="chart-wrap"><canvas id="dist_revenue"></canvas></div>
+</div>
+<div class="card">
+  <div style="font-weight:600;margin-bottom:8px;color:var(--accent)">age</div>
+  <div style="color:var(--muted);font-size:.8em;margin-bottom:6px">Mean: 39.5552 &nbsp;·&nbsp; Skew: 0.161</div>
+  <div class="chart-wrap"><canvas id="dist_age"></canvas></div>
+</div>
+<div class="card">
+  <div style="font-weight:600;margin-bottom:8px;color:var(--accent)">credit_score</div>
+  <div style="color:var(--muted);font-size:.8em;margin-bottom:6px">Mean: 686.9428 &nbsp;·&nbsp; Skew: -0.094</div>
+  <div class="chart-wrap"><canvas id="dist_credit_score"></canvas></div>
+</div>
+<div class="card">
+  <div style="font-weight:600;margin-bottom:8px;color:var(--accent)">loan_amount</div>
+  <div style="color:var(--muted);font-size:.8em;margin-bottom:6px">Mean: 12585.0673 &nbsp;·&nbsp; Skew: 4.906</div>
+  <div class="chart-wrap"><canvas id="dist_loan_amount"></canvas></div>
+</div>
+<div class="card">
+  <div style="font-weight:600;margin-bottom:8px;color:var(--accent)">months_employed</div>
+  <div style="color:var(--muted);font-size:.8em;margin-bottom:6px">Mean: 50.6158 &nbsp;·&nbsp; Skew: 0.305</div>
+  <div class="chart-wrap"><canvas id="dist_months_employed"></canvas></div>
+</div>
+<div class="card">
+  <div style="font-weight:600;margin-bottom:8px;color:var(--accent)">transactions</div>
+  <div style="color:var(--muted);font-size:.8em;margin-bottom:6px">Mean: 119.896 &nbsp;·&nbsp; Skew: 0.185</div>
+  <div class="chart-wrap"><canvas id="dist_transactions"></canvas></div>
+</div></div>
+</div>
+
+<!-- ── CORRELATION ────────────────────────────────────────────────── -->
+<div class="section">
+<h2>🔗 Top Correlations</h2>
+<div class="card">
+<table><thead><tr><th>Column A</th><th>Column B</th><th>Pearson r</th><th>Strength</th></tr></thead>
+<tbody><tr><td>revenue</td><td>loan_amount</td><td>0.72</td><td><span class='badge danger'>Strong</span></td></tr>
+<tr><td>credit_score</td><td>loan_amount</td><td>0.53</td><td><span class='badge warn'>Moderate</span></td></tr>
+<tr><td>age</td><td>months_employed</td><td>0.61</td><td><span class='badge warn'>Moderate</span></td></tr>
+<tr><td>revenue</td><td>credit_score</td><td>0.44</td><td><span class='badge warn'>Moderate</span></td></tr>
+<tr><td>transactions</td><td>revenue</td><td>0.38</td><td><span class='badge ok'>Weak</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- ── OUTLIERS ───────────────────────────────────────────────────── -->
+<div class="section">
+<h2>⚠️ Outlier Summary</h2>
+<div class="card">
+<table><thead><tr><th>Column</th><th>Outlier Count</th><th>Outlier %</th><th>Method</th><th>Status</th></tr></thead>
+<tbody><tr><td>loan_amount</td><td>22</td><td>4.4%</td><td>IQR</td><td><span class='badge warn'>Watch</span></td></tr>
+<tr><td>revenue</td><td>15</td><td>3.0%</td><td>IQR</td><td><span class='badge ok'>OK</span></td></tr>
+<tr><td>credit_score</td><td>8</td><td>1.6%</td><td>Z-Score</td><td><span class='badge ok'>OK</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<footer>Generated by DIPEX Automated EDA Engine &nbsp;·&nbsp; 2026-03-07 05:12:39</footer>
+
+<script>
+// ── Missing values chart ──────────────────────────────────────────────────
+(function() {
+  const labels = ["revenue", "credit_score"];
+  const values = [8.0, 4.0];
+  if (!labels.length) return;
+  const ctx = document.getElementById('missingChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{ label: 'Null %', data: values,
+        backgroundColor: values.map(v => v > 30 ? '#ff6b6b99' : v > 10 ? '#ffb34799' : '#6c63ff99'),
+        borderColor: values.map(v => v > 30 ? '#ff6b6b' : v > 10 ? '#ffb347' : '#6c63ff'),
+        borderWidth: 1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y.toFixed(2) + '%' } } },
+      scales: {
+        x: { ticks: { color: '#8888aa', maxRotation: 45 }, grid: { color: '#2a2d4a' } },
+        y: { ticks: { color: '#8888aa', callback: v => v + '%' }, grid: { color: '#2a2d4a' }, beginAtZero: true }
+      }
+    }
+  });
+})();
+
+// ── Distribution charts ───────────────────────────────────────────────────
+
+(function() {
+  const ctx = document.getElementById('dist_revenue').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ["0.00", "1239.21", "2478.41", "3717.62", "4956.83", "6196.04", "7435.24", "8674.45", "9913.66", "11152.86", "12392.07", "13631.28", "14870.49", "16109.69", "17348.90", "18588.11", "19827.31", "21066.52", "22305.73", "23544.94"],
+      datasets: [{ label: 'revenue', data: [128, 81, 43, 38, 43, 23, 25, 12, 12, 14, 5, 8, 5, 7, 7, 1, 0, 5, 2, 1],
+        backgroundColor: '#6c63ff55', borderColor: '#6c63ff', borderWidth: 1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8888aa', maxRotation: 45, maxTicksLimit: 6 }, grid: { color: '#2a2d4a' } },
+        y: { ticks: { color: '#8888aa' }, grid: { color: '#2a2d4a' }, beginAtZero: true }
+      }
+    }
+  });
+})();
+(function() {
+  const ctx = document.getElementById('dist_age').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ["18.00", "20.55", "23.10", "25.64", "28.19", "30.74", "33.29", "35.83", "38.38", "40.93", "43.48", "46.03", "48.57", "51.12", "53.67", "56.22", "58.77", "61.31", "63.86", "66.41"],
+      datasets: [{ label: 'age', data: [26, 19, 17, 20, 34, 39, 33, 43, 51, 43, 41, 23, 30, 20, 18, 16, 10, 6, 6, 5],
+        backgroundColor: '#6c63ff55', borderColor: '#6c63ff', borderWidth: 1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8888aa', maxRotation: 45, maxTicksLimit: 6 }, grid: { color: '#2a2d4a' } },
+        y: { ticks: { color: '#8888aa' }, grid: { color: '#2a2d4a' }, beginAtZero: true }
+      }
+    }
+  });
+})();
+(function() {
+  const ctx = document.getElementById('dist_credit_score').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ["417.08", "444.59", "472.11", "499.62", "527.14", "554.65", "582.17", "609.68", "637.20", "664.71", "692.23", "719.74", "747.26", "774.77", "802.29", "829.80", "857.32", "884.83", "912.35", "939.86"],
+      datasets: [{ label: 'credit_score', data: [3, 4, 3, 9, 12, 20, 40, 45, 60, 57, 53, 55, 38, 34, 22, 13, 8, 2, 1, 1],
+        backgroundColor: '#6c63ff55', borderColor: '#6c63ff', borderWidth: 1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8888aa', maxRotation: 45, maxTicksLimit: 6 }, grid: { color: '#2a2d4a' } },
+        y: { ticks: { color: '#8888aa' }, grid: { color: '#2a2d4a' }, beginAtZero: true }
+      }
+    }
+  });
+})();
+(function() {
+  const ctx = document.getElementById('dist_loan_amount').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ["395.63", "9715.43", "19035.22", "28355.02", "37674.82", "46994.61", "56314.41", "65634.20", "74954.00", "84273.79", "93593.59", "102913.38", "112233.18", "121552.97", "130872.77", "140192.57", "149512.36", "158832.16", "168151.95", "177471.75"],
+      datasets: [{ label: 'loan_amount', data: [292, 120, 43, 20, 9, 4, 6, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1],
+        backgroundColor: '#6c63ff55', borderColor: '#6c63ff', borderWidth: 1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8888aa', maxRotation: 45, maxTicksLimit: 6 }, grid: { color: '#2a2d4a' } },
+        y: { ticks: { color: '#8888aa' }, grid: { color: '#2a2d4a' }, beginAtZero: true }
+      }
+    }
+  });
+})();
+(function() {
+  const ctx = document.getElementById('dist_months_employed').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ["0.20", "7.25", "14.31", "21.36", "28.42", "35.47", "42.53", "49.58", "56.64", "63.69", "70.75", "77.80", "84.86", "91.91", "98.97", "106.02", "113.08", "120.13", "127.19", "134.24"],
+      datasets: [{ label: 'months_employed', data: [21, 27, 38, 33, 40, 51, 37, 36, 55, 48, 35, 25, 18, 13, 9, 8, 1, 2, 0, 3],
+        backgroundColor: '#6c63ff55', borderColor: '#6c63ff', borderWidth: 1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8888aa', maxRotation: 45, maxTicksLimit: 6 }, grid: { color: '#2a2d4a' } },
+        y: { ticks: { color: '#8888aa' }, grid: { color: '#2a2d4a' }, beginAtZero: true }
+      }
+    }
+  });
+})();
+(function() {
+  const ctx = document.getElementById('dist_transactions').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ["91.00", "94.20", "97.40", "100.60", "103.80", "107.00", "110.20", "113.40", "116.60", "119.80", "123.00", "126.20", "129.40", "132.60", "135.80", "139.00", "142.20", "145.40", "148.60", "151.80"],
+      datasets: [{ label: 'transactions', data: [2, 6, 6, 15, 20, 47, 43, 51, 59, 51, 73, 40, 33, 19, 10, 12, 6, 4, 2, 1],
+        backgroundColor: '#6c63ff55', borderColor: '#6c63ff', borderWidth: 1 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8888aa', maxRotation: 45, maxTicksLimit: 6 }, grid: { color: '#2a2d4a' } },
+        y: { ticks: { color: '#8888aa' }, grid: { color: '#2a2d4a' }, beginAtZero: true }
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>

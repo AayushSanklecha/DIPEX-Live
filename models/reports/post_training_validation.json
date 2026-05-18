@@ -1,0 +1,153 @@
+{
+  "timestamp": "2026-04-13T15:20:59.771164",
+  "version": "20260413_1258",
+  "all_passed": true,
+  "models": {
+    "drift_autoencoder": {
+      "name": "drift_autoencoder",
+      "model_exists": true,
+      "checks": [
+        {
+          "check": "file_exists",
+          "passed": true,
+          "detail": "0.0 MB"
+        },
+        {
+          "check": "loadable",
+          "passed": true
+        },
+        {
+          "check": "drift_ae_torch_format",
+          "passed": true,
+          "detail": "torch_ae_v7 dict \u2705"
+        }
+      ],
+      "size_mb": 0.04,
+      "passed": true
+    },
+    "schema_classifier": {
+      "name": "schema_classifier",
+      "model_exists": true,
+      "checks": [
+        {
+          "check": "file_exists",
+          "passed": true,
+          "detail": "20.0 MB"
+        },
+        {
+          "check": "loadable",
+          "passed": true
+        },
+        {
+          "check": "metadata_exists",
+          "passed": true
+        },
+        {
+          "check": "nlp_method_consistent",
+          "passed": true,
+          "detail": "saved=sentence_transformers current=sentence_transformers"
+        }
+      ],
+      "size_mb": 19.99,
+      "version": "20260413_1258",
+      "passed": true
+    },
+    "domain_classifier": {
+      "name": "domain_classifier",
+      "model_exists": true,
+      "checks": [
+        {
+          "check": "file_exists",
+          "passed": true,
+          "detail": "0.4 MB"
+        },
+        {
+          "check": "loadable",
+          "passed": true
+        },
+        {
+          "check": "metadata_exists",
+          "passed": true
+        },
+        {
+          "check": "nlp_method_consistent",
+          "passed": true,
+          "detail": "saved=sentence_transformers current=sentence_transformers"
+        }
+      ],
+      "size_mb": 0.38,
+      "version": "20260413_1258",
+      "passed": true
+    },
+    "anomaly_detector": {
+      "name": "anomaly_detector",
+      "model_exists": true,
+      "checks": [
+        {
+          "check": "file_exists",
+          "passed": true,
+          "detail": "3.5 MB"
+        },
+        {
+          "check": "loadable",
+          "passed": true
+        },
+        {
+          "check": "metadata_exists",
+          "passed": true
+        }
+      ],
+      "size_mb": 3.52,
+      "passed": true
+    },
+    "chart_relevance_scorer": {
+      "name": "chart_relevance_scorer",
+      "model_exists": true,
+      "checks": [
+        {
+          "check": "file_exists",
+          "passed": true,
+          "detail": "3.1 MB"
+        },
+        {
+          "check": "loadable",
+          "passed": true
+        },
+        {
+          "check": "metadata_exists",
+          "passed": true
+        },
+        {
+          "check": "nlp_method_consistent",
+          "passed": true,
+          "detail": "saved=sentence_transformers current=sentence_transformers"
+        }
+      ],
+      "size_mb": 3.06,
+      "version": "20260413_1258",
+      "passed": true
+    },
+    "proposal_confidence": {
+      "name": "proposal_confidence",
+      "model_exists": true,
+      "checks": [
+        {
+          "check": "file_exists",
+          "passed": true,
+          "detail": "1.0 MB"
+        },
+        {
+          "check": "loadable",
+          "passed": true
+        },
+        {
+          "check": "metadata_exists",
+          "passed": true
+        }
+      ],
+      "size_mb": 0.97,
+      "version": "20260413_1258",
+      "passed": true
+    }
+  }
+}

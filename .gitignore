@@ -50,6 +50,7 @@ coverage.xml
 *.py,cover
 .pytest_cache/
 pytestdebug.log
+.hypothesis/
 
 # Translations
 *.mo
@@ -150,10 +151,16 @@ cython_debug/
 .vscode/
 
 # Project specific
+# data/ excluded: snapshots are 168MB+, regenerated at runtime
 data/
-reports/
-audit/
-docs/
+# audit/ and reports/ are INTENTIONALLY TRACKED:
+# - audit/audit.jsonl  = 540 historical pipeline runs (1.25MB)
+# - reports/*.html     = 199 executive reports (39.8MB)
+# These must be committed so HF Spaces deployment has full run history.
+!audit/
+!audit/**
+!reports/
+!reports/**
 *.png
 *.jpeg
 *.pdf
@@ -167,3 +174,5 @@ docs/
 !README.md
 !requirements.docker.txt
 !pyproject.toml
+# Allow RL training chart (needed for analytics dashboard)
+!models/rl_training_curves.png

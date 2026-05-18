@@ -1,0 +1,14 @@
+{
+  "n_estimators": 317,
+  "max_features": 0.9605335894809963,
+  "corpus_normal": 11996,
+  "n_multivariate_anomalies": 750,
+  "precision": 0.628,
+  "recall": 0.6573,
+  "f1": 0.6423,
+  "threshold": 0.008906,
+  "gate_passed": "True",
+  "model_size_mb": 3.52,
+  "time_s": 85.1,
+  "_version": "20260413_1258"
+}

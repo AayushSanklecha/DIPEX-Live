@@ -1,0 +1,750 @@
+{
+  "run_id": "6a133d7d-a7c2-4230-93ec-af450d788d49",
+  "generated_at": "2026-03-15T21:58:37.627383+00:00",
+  "dataset_shape": {
+    "rows": 611,
+    "columns": 12
+  },
+  "columns": {
+    "age": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 49,
+      "cardinality_tier": "medium",
+      "min": -1.798650662775185,
+      "max": 3.1455305367168935,
+      "mean": -1.98422838443645e-16,
+      "median": -0.12416845292716663,
+      "std": 1.000819336475018,
+      "variance": 1.001639344262295,
+      "q05": -1.4122316912717963,
+      "q25": -0.7186591783169958,
+      "q75": 0.569404060027634,
+      "q95": 2.006089979719721,
+      "iqr": 1.288063,
+      "skewness": 0.874439,
+      "kurtosis": 0.847066,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 19,
+          "pct": 0.031097,
+          "fence_low": -2.650754,
+          "fence_high": 2.501499
+        },
+        "zscore": {
+          "count": 9,
+          "pct": 0.01473,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_flag": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -4.325468462415931,
+      "max": 0.23118883161188603,
+      "mean": 5.233129805107121e-17,
+      "median": 0.23118883161188603,
+      "std": 1.0008193364750182,
+      "variance": 1.0016393442622955,
+      "q05": -2.047139815402023,
+      "q25": 0.23118883161188603,
+      "q75": 0.23118883161188603,
+      "q95": 0.23118883161188603,
+      "iqr": 0.0,
+      "skewness": -4.09428,
+      "kurtosis": 14.763126,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 31,
+          "pct": 0.050736,
+          "fence_low": 0.231189,
+          "fence_high": 0.231189
+        },
+        "zscore": {
+          "count": 31,
+          "pct": 0.050736,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 611,
+      "cardinality_tier": "unique",
+      "min": -3.294351962654906,
+      "max": 2.1540176703947096,
+      "mean": 7.122871123618025e-16,
+      "median": 0.06154851238330052,
+      "std": 1.000819336475018,
+      "variance": 1.001639344262295,
+      "q05": -1.7444758705126426,
+      "q25": -0.6944617725178643,
+      "q75": 0.6814061060283745,
+      "q95": 1.6541340035649648,
+      "iqr": 1.375868,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 2,
+          "pct": 0.003273,
+          "fence_low": -2.758264,
+          "fence_high": 2.745208
+        },
+        "zscore": {
+          "count": 1,
+          "pct": 0.001637,
+          "threshold": 3.0
+        }
+      }
+    },
+    "creditscore": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 286,
+      "cardinality_tier": "medium",
+      "min": -2.345755673693047,
+      "max": 2.2041778953853317,
+      "mean": -3.038122581298301e-16,
+      "median": 0.0038455011044145285,
+      "std": 1.000819336475018,
+      "variance": 1.001639344262295,
+      "q05": -1.5662409309955363,
+      "q25": -0.7480268748307732,
+      "q75": 0.6617338300477038,
+      "q95": 1.7121437670159807,
+      "iqr": 1.409761,
+      "skewness": 0.038798,
+      "kurtosis": -0.481879,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.002678,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.862668,
+          "fence_high": 2.776375
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "exited": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1,
+      "cardinality_tier": "low",
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 0.0,
+      "variance": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "q95": 0.0,
+      "iqr": 0.0,
+      "skewness": NaN,
+      "kurtosis": NaN,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.0,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": 0.0,
+          "fence_high": 0.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "gender_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -0.966200964498312,
+      "max": 1.0349813721405645,
+      "mean": -1.0466259610214242e-16,
+      "median": -0.966200964498312,
+      "std": 1.0008193364750178,
+      "variance": 1.0016393442622948,
+      "q05": -0.966200964498312,
+      "q25": -0.966200964498312,
+      "q75": 1.0349813721405645,
+      "q95": 1.0349813721405645,
+      "iqr": 2.001182,
+      "skewness": 0.06878,
+      "kurtosis": -1.995269,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.967974,
+          "fence_high": 4.036755
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "geography_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -1.4496630100266727,
+      "max": 0.6898154902783928,
+      "mean": 1.6498895357768284e-16,
+      "median": 0.6898154902783928,
+      "std": 1.000819336475018,
+      "variance": 1.001639344262295,
+      "q05": -1.4496630100266727,
+      "q25": -1.4496630100266727,
+      "q75": 0.6898154902783928,
+      "q95": 0.6898154902783928,
+      "iqr": 2.139479,
+      "skewness": -0.759848,
+      "kurtosis": -1.422632,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -4.658881,
+          "fence_high": 3.899033
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "hascrcard": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -1.1053588475324119,
+      "max": 0.9046835805696825,
+      "mean": 4.6516709378729965e-17,
+      "median": 0.9046835805696825,
+      "std": 1.000819336475018,
+      "variance": 1.0016393442622953,
+      "q05": -1.1053588475324119,
+      "q25": -1.1053588475324119,
+      "q75": 0.9046835805696825,
+      "q95": 0.9046835805696825,
+      "iqr": 2.010042,
+      "skewness": -0.200675,
+      "kurtosis": -1.959729,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -4.120422,
+          "fence_high": 3.919747
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "isactivemember": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -0.7105815283093027,
+      "max": 1.40729805118818,
+      "mean": 6.977506406809494e-17,
+      "median": -0.7105815283093027,
+      "std": 1.0008193364750182,
+      "variance": 1.0016393442622955,
+      "q05": -0.7105815283093027,
+      "q25": -0.7105815283093027,
+      "q75": 1.40729805118818,
+      "q95": 1.40729805118818,
+      "iqr": 2.11788,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.887401,
+          "fence_high": 4.584117
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "numofproducts": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -0.9227757861556358,
+      "max": 1.0836868663037713,
+      "mean": -1.54086599817043e-16,
+      "median": -0.9227757861556358,
+      "std": 1.000819336475018,
+      "variance": 1.001639344262295,
+      "q05": -0.9227757861556358,
+      "q25": -0.9227757861556358,
+      "q75": 1.0836868663037713,
+      "q95": 1.0836868663037713,
+      "iqr": 2.006463,
+      "skewness": 0.160911,
+      "kurtosis": -1.974108,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.93247,
+          "fence_high": 4.093381
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "surname_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 64,
+      "cardinality_tier": "medium",
+      "min": -1.7163582262006956,
+      "max": 1.6807919795347723,
+      "mean": 6.178000464362573e-17,
+      "median": 0.06310140537502563,
+      "std": 1.000819336475018,
+      "variance": 1.001639344262295,
+      "q05": -1.6354736974927082,
+      "q25": -0.853589919982164,
+      "q75": 0.871946692454899,
+      "q95": 1.5190229221187976,
+      "iqr": 1.725537,
+      "skewness": -0.129017,
+      "kurtosis": -1.182085,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.441895,
+          "fence_high": 3.460252
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "tenure": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 6,
+      "cardinality_tier": "low",
+      "min": -1.1560346815606781,
+      "max": 2.8390851738328413,
+      "mean": -8.140424141277743e-17,
+      "median": -0.35701071048197414,
+      "std": 1.000819336475018,
+      "variance": 1.001639344262295,
+      "q05": -1.1560346815606781,
+      "q25": -0.35701071048197414,
+      "q75": 0.44201326059672974,
+      "q95": 2.0400612027541376,
+      "iqr": 0.799024,
+      "skewness": 0.909784,
+      "kurtosis": 0.178639,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 60,
+          "pct": 0.0982,
+          "fence_low": -1.555547,
+          "fence_high": 1.640549
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "age::anomaly_flag": -0.251345,
+      "age::anomaly_score": -0.282275,
+      "age::creditscore": -0.019603,
+      "age::exited": NaN,
+      "age::gender_fallback_hash": 0.052153,
+      "age::geography_fallback_hash": 0.014426,
+      "age::hascrcard": -0.01329,
+      "age::isactivemember": 0.090736,
+      "age::numofproducts": -0.158603,
+      "age::surname_fallback_hash": 0.003046,
+      "age::tenure": 0.043637,
+      "anomaly_flag::anomaly_score": 0.498361,
+      "anomaly_flag::creditscore": 0.056132,
+      "anomaly_flag::exited": NaN,
+      "anomaly_flag::gender_fallback_hash": -0.015413,
+      "anomaly_flag::geography_fallback_hash": 0.159634,
+      "anomaly_flag::hascrcard": 0.090653,
+      "anomaly_flag::isactivemember": -0.183201,
+      "anomaly_flag::numofproducts": 0.063699,
+      "anomaly_flag::surname_fallback_hash": 0.098011,
+      "anomaly_flag::tenure": -0.078353,
+      "anomaly_score::creditscore": -0.021411,
+      "anomaly_score::exited": NaN,
+      "anomaly_score::gender_fallback_hash": -0.060641,
+      "anomaly_score::geography_fallback_hash": 0.443831,
+      "anomaly_score::hascrcard": 0.222166,
+      "anomaly_score::isactivemember": -0.325324,
+      "anomaly_score::numofproducts": 0.158788,
+      "anomaly_score::surname_fallback_hash": 0.091909,
+      "anomaly_score::tenure": -0.182362,
+      "creditscore::exited": NaN,
+      "creditscore::gender_fallback_hash": 0.00511,
+      "creditscore::geography_fallback_hash": -0.002401,
+      "creditscore::hascrcard": -0.003843,
+      "creditscore::isactivemember": 0.036249,
+      "creditscore::numofproducts": 0.07802,
+      "creditscore::surname_fallback_hash": 0.048042,
+      "creditscore::tenure": -0.054614,
+      "exited::gender_fallback_hash": NaN,
+      "exited::geography_fallback_hash": NaN,
+      "exited::hascrcard": NaN,
+      "exited::isactivemember": NaN,
+      "exited::numofproducts": NaN,
+      "exited::surname_fallback_hash": NaN,
+      "exited::tenure": NaN,
+      "gender_fallback_hash::geography_fallback_hash": 0.028832,
+      "gender_fallback_hash::hascrcard": 0.01168,
+      "gender_fallback_hash::isactivemember": 0.000159,
+      "gender_fallback_hash::numofproducts": 0.015305,
+      "gender_fallback_hash::surname_fallback_hash": -0.051356,
+      "gender_fallback_hash::tenure": -0.009967,
+      "geography_fallback_hash::hascrcard": -0.03988,
+      "geography_fallback_hash::isactivemember": 0.015548,
+      "geography_fallback_hash::numofproducts": 0.025298,
+      "geography_fallback_hash::surname_fallback_hash": 0.042572,
+      "geography_fallback_hash::tenure": 0.022442,
+      "hascrcard::isactivemember": -0.158389,
+      "hascrcard::numofproducts": -0.168498,
+      "hascrcard::surname_fallback_hash": -0.016464,
+      "hascrcard::tenure": -0.134394,
+      "isactivemember::numofproducts": -0.071496,
+      "isactivemember::surname_fallback_hash": -0.032542,
+      "isactivemember::tenure": -0.189984,
+      "numofproducts::surname_fallback_hash": 0.012719,
+      "numofproducts::tenure": -0.484252,
+      "surname_fallback_hash::tenure": 0.064203
+    },
+    "spearman": {
+      "age::anomaly_flag": -0.147365,
+      "age::anomaly_score": -0.172841,
+      "age::creditscore": -0.034404,
+      "age::exited": NaN,
+      "age::gender_fallback_hash": 0.07637,
+      "age::geography_fallback_hash": -0.005086,
+      "age::hascrcard": -0.006756,
+      "age::isactivemember": 0.054531,
+      "age::numofproducts": -0.171187,
+      "age::surname_fallback_hash": 0.009397,
+      "age::tenure": 0.054894,
+      "anomaly_flag::anomaly_score": 0.380115,
+      "anomaly_flag::creditscore": 0.042896,
+      "anomaly_flag::exited": NaN,
+      "anomaly_flag::gender_fallback_hash": -0.015413,
+      "anomaly_flag::geography_fallback_hash": 0.159634,
+      "anomaly_flag::hascrcard": 0.090653,
+      "anomaly_flag::isactivemember": -0.183201,
+      "anomaly_flag::numofproducts": 0.063699,
+      "anomaly_flag::surname_fallback_hash": 0.088386,
+      "anomaly_flag::tenure": -0.047092,
+      "anomaly_score::creditscore": -0.028254,
+      "anomaly_score::exited": NaN,
+      "anomaly_score::gender_fallback_hash": -0.065754,
+      "anomaly_score::geography_fallback_hash": 0.45923,
+      "anomaly_score::hascrcard": 0.225963,
+      "anomaly_score::isactivemember": -0.310425,
+      "anomaly_score::numofproducts": 0.152931,
+      "anomaly_score::surname_fallback_hash": 0.05945,
+      "anomaly_score::tenure": -0.11119,
+      "creditscore::exited": NaN,
+      "creditscore::gender_fallback_hash": 0.010028,
+      "creditscore::geography_fallback_hash": 0.000695,
+      "creditscore::hascrcard": 0.003432,
+      "creditscore::isactivemember": 0.033439,
+      "creditscore::numofproducts": 0.071328,
+      "creditscore::surname_fallback_hash": 0.054151,
+      "creditscore::tenure": -0.037763,
+      "exited::gender_fallback_hash": NaN,
+      "exited::geography_fallback_hash": NaN,
+      "exited::hascrcard": NaN,
+      "exited::isactivemember": NaN,
+      "exited::numofproducts": NaN,
+      "exited::surname_fallback_hash": NaN,
+      "exited::tenure": NaN,
+      "gender_fallback_hash::geography_fallback_hash": 0.028832,
+      "gender_fallback_hash::hascrcard": 0.01168,
+      "gender_fallback_hash::isactivemember": 0.000159,
+      "gender_fallback_hash::numofproducts": 0.015305,
+      "gender_fallback_hash::surname_fallback_hash": -0.048512,
+      "gender_fallback_hash::tenure": -0.002,
+      "geography_fallback_hash::hascrcard": -0.03988,
+      "geography_fallback_hash::isactivemember": 0.015548,
+      "geography_fallback_hash::numofproducts": 0.025298,
+      "geography_fallback_hash::surname_fallback_hash": 0.042731,
+      "geography_fallback_hash::tenure": 0.014678,
+      "hascrcard::isactivemember": -0.158389,
+      "hascrcard::numofproducts": -0.168498,
+      "hascrcard::surname_fallback_hash": -0.015903,
+      "hascrcard::tenure": -0.128053,
+      "isactivemember::numofproducts": -0.071496,
+      "isactivemember::surname_fallback_hash": -0.03544,
+      "isactivemember::tenure": -0.191965,
+      "numofproducts::surname_fallback_hash": 0.012365,
+      "numofproducts::tenure": -0.472554,
+      "surname_fallback_hash::tenure": 0.062744
+    },
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 611,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "age": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_flag": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "creditscore": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "exited": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "gender_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "geography_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "hascrcard": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "isactivemember": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "numofproducts": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "surname_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "tenure": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "anomaly_score",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (611 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "age",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "3.11% of values are outside IQR fence [-2.651, 2.501]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "5.07% of values are outside IQR fence [0.2312, 0.2312]."
+    },
+    {
+      "column": "tenure",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "9.82% of values are outside IQR fence [-1.556, 1.641]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-4.0943. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=14.7631. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "age",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "creditscore",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.002678 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "gender_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "geography_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "hascrcard",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "numofproducts",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "surname_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "tenure",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 15
+}

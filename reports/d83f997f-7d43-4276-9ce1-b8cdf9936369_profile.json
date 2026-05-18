@@ -1,0 +1,963 @@
+{
+  "run_id": "d83f997f-7d43-4276-9ce1-b8cdf9936369",
+  "generated_at": "2026-03-08T00:46:48.416726+00:00",
+  "dataset_shape": {
+    "rows": 10,
+    "columns": 15
+  },
+  "columns": {
+    "address_city_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 10,
+      "cardinality_tier": "unique",
+      "min": -1.2632066490786118,
+      "max": 1.3595529189235906,
+      "mean": -5.551115123125783e-17,
+      "median": 0.021410282187773022,
+      "std": 1.0540925533894596,
+      "variance": 1.111111111111111,
+      "q05": -1.239120081617367,
+      "q25": -0.9286709898946575,
+      "q75": 0.9447287015354872,
+      "q95": 1.2391200816173666,
+      "iqr": 1.8734,
+      "skewness": 0.004372,
+      "kurtosis": -1.749521,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.071105,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.738771,
+          "fence_high": 3.754828
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "address_geo_lat": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 10,
+      "cardinality_tier": "unique",
+      "min": -1.364210189511927,
+      "max": 1.4590266194410342,
+      "mean": 5.551115123125783e-18,
+      "median": -0.332742731996836,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111114,
+      "q05": -1.328826987642728,
+      "q25": -0.5554747786922783,
+      "q75": 1.0511944793936638,
+      "q95": 1.4015293886833757,
+      "iqr": 1.606669,
+      "skewness": 0.275774,
+      "kurtosis": -1.285896,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.161671,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.965479,
+          "fence_high": 3.461198
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "address_geo_lng": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 10,
+      "cardinality_tier": "unique",
+      "min": -1.5515012277197588,
+      "max": 1.1276830984109578,
+      "mean": 4.4408920985006264e-17,
+      "median": 0.1908490965543136,
+      "std": 1.0540925533894596,
+      "variance": 1.111111111111111,
+      "q05": -1.5293696973261262,
+      "q25": -0.8384464640967344,
+      "q75": 0.9139905074952634,
+      "q95": 1.0823496004143007,
+      "iqr": 1.752437,
+      "skewness": -0.415526,
+      "kurtosis": -1.384945,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.103161,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.467102,
+          "fence_high": 3.542646
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "address_street_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 8,
+      "cardinality_tier": "high",
+      "min": -1.2293999427952693,
+      "max": 1.4538142180674216,
+      "mean": 0.0,
+      "median": -0.4000428385286193,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111112,
+      "q05": -1.1854928019811526,
+      "q25": -0.8757035306815509,
+      "q75": 1.087921377949782,
+      "q95": 1.3001392252180126,
+      "iqr": 1.963625,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.821141,
+          "fence_high": 4.033359
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "address_suite": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 10,
+      "cardinality_tier": "unique",
+      "min": -1.5657862569338867,
+      "max": 1.4143991776757887,
+      "mean": -8.881784197001253e-17,
+      "median": 0.1224570876721262,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111114,
+      "q05": -1.4195510939856195,
+      "q25": -0.8623515300147147,
+      "q75": 0.8893000153276743,
+      "q95": 1.2877809268303375,
+      "iqr": 1.751652,
+      "skewness": -0.130261,
+      "kurtosis": -1.388165,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.580315,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.489829,
+          "fence_high": 3.516777
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "address_zipcode": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 10,
+      "cardinality_tier": "unique",
+      "min": -1.4364823200818504,
+      "max": 1.5822473508591917,
+      "mean": 1.3322676295501878e-16,
+      "median": -0.00921782677641892,
+      "std": 1.0540925533894596,
+      "variance": 1.111111111111111,
+      "q05": -1.2816058888975637,
+      "q25": -0.8833041151605101,
+      "q75": 0.6817825266127986,
+      "q95": 1.5347073432055016,
+      "iqr": 1.565087,
+      "skewness": 0.240304,
+      "kurtosis": -1.162399,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.546296,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.230934,
+          "fence_high": 3.029412
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "company_bs_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 9,
+      "cardinality_tier": "high",
+      "min": -1.3892509268838522,
+      "max": 1.3154853909431166,
+      "mean": -1.1102230246251565e-16,
+      "median": -0.09835404792098078,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111114,
+      "q05": -1.250940546994973,
+      "q25": -0.9282163272542553,
+      "q75": 0.9312898912517857,
+      "q95": 1.3154853909431166,
+      "iqr": 1.859506,
+      "skewness": 0.06435,
+      "kurtosis": -1.615,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.161005,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.717476,
+          "fence_high": 3.720549
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "company_catchphrase_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 9,
+      "cardinality_tier": "high",
+      "min": -1.385103590885714,
+      "max": 1.5916541263686712,
+      "mean": -4.4408920985006264e-17,
+      "median": -0.13972536223847118,
+      "std": 1.0540925533894596,
+      "variance": 1.111111111111111,
+      "q05": -1.2757533073947367,
+      "q25": -0.944664949047055,
+      "q75": 0.7411519214388469,
+      "q95": 1.4823038428776936,
+      "iqr": 1.685817,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.47339,
+          "fence_high": 3.269877
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "company_name_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 9,
+      "cardinality_tier": "high",
+      "min": -1.392212488496666,
+      "max": 1.672732915283308,
+      "mean": 4.4408920985006264e-17,
+      "median": 0.2701307813500994,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111112,
+      "q05": -1.3688357862644458,
+      "q25": -0.8597431598738741,
+      "q75": 0.6337683716290793,
+      "q95": 1.3922124884966656,
+      "iqr": 1.493512,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.10001,
+          "fence_high": 2.874036
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "email_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 10,
+      "cardinality_tier": "unique",
+      "min": -1.364739325447611,
+      "max": 1.6457150689221194,
+      "mean": 8.534839501805891e-17,
+      "median": 0.17393736500802898,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111112,
+      "q05": -1.274425693616519,
+      "q25": -0.9967948994690885,
+      "q75": 0.5418817909865516,
+      "q95": 1.4951923492036325,
+      "iqr": 1.538677,
+      "skewness": 0.126411,
+      "kurtosis": -1.255319,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.485325,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.30481,
+          "fence_high": 2.849897
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "id": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 10,
+      "cardinality_tier": "unique",
+      "min": -1.5666989036012806,
+      "max": 1.5666989036012806,
+      "mean": -6.661338147750939e-17,
+      "median": 0.0,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111112,
+      "q05": -1.4100290132411524,
+      "q25": -0.7833494518006403,
+      "q75": 0.7833494518006403,
+      "q95": 1.4100290132411522,
+      "iqr": 1.566699,
+      "skewness": 0.0,
+      "kurtosis": -1.224242,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.892367,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.133398,
+          "fence_high": 3.133398
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "name_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 9,
+      "cardinality_tier": "high",
+      "min": -1.2450686509663003,
+      "max": 1.954549111293466,
+      "mean": 1.1102230246251565e-16,
+      "median": -0.2364934867757218,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111114,
+      "q05": -1.1824674338786092,
+      "q25": -0.8798948846214356,
+      "q75": 0.824249358321266,
+      "q95": 1.5163405916796275,
+      "iqr": 1.704144,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.436111,
+          "fence_high": 3.380466
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "phone": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 8,
+      "cardinality_tier": "high",
+      "min": -0.8610213085141407,
+      "max": 1.980221263792451,
+      "mean": 6.661338147750939e-17,
+      "median": -0.4350790345945839,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111112,
+      "q05": -0.8610213085141407,
+      "q25": -0.8527618824318541,
+      "q75": 0.7257062132940303,
+      "q95": 1.6688293372937302,
+      "iqr": 1.578468,
+      "skewness": 0.779545,
+      "kurtosis": -0.858918,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.024559,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.220464,
+          "fence_high": 3.093408
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "username_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 9,
+      "cardinality_tier": "high",
+      "min": -1.433837447147651,
+      "max": 1.3991478314908532,
+      "mean": 1.2212453270876723e-16,
+      "median": 0.06937923131359619,
+      "std": 1.0540925533894596,
+      "variance": 1.111111111111111,
+      "q05": -1.433837447147651,
+      "q25": -0.8267691731536858,
+      "q75": 0.806533564020554,
+      "q95": 1.3210961962630574,
+      "iqr": 1.633303,
+      "skewness": -0.125948,
+      "kurtosis": -1.386416,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.392613,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.276723,
+          "fence_high": 3.256488
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "website_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 9,
+      "cardinality_tier": "high",
+      "min": -1.676199860486059,
+      "max": 1.4383606910927667,
+      "mean": -7.216449660063518e-17,
+      "median": -0.005662837366507051,
+      "std": 1.0540925533894596,
+      "variance": 1.111111111111111,
+      "q05": -1.3958894108439646,
+      "q25": -0.7984600686774808,
+      "q75": 0.7021918334468624,
+      "q95": 1.3873951547942038,
+      "iqr": 1.500652,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.049438,
+          "fence_high": 2.95317
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "address_city_fallback_hash::address_geo_lat": -0.272657,
+      "address_city_fallback_hash::address_geo_lng": 0.044135,
+      "address_city_fallback_hash::address_street_fallback_hash": -0.063768,
+      "address_city_fallback_hash::address_suite": 0.646411,
+      "address_city_fallback_hash::address_zipcode": 0.210881,
+      "address_city_fallback_hash::company_bs_fallback_hash": 0.222226,
+      "address_city_fallback_hash::company_catchphrase_fallback_hash": 0.772668,
+      "address_city_fallback_hash::company_name_fallback_hash": -0.063341,
+      "address_city_fallback_hash::email_fallback_hash": 0.373336,
+      "address_city_fallback_hash::id": -0.428611,
+      "address_city_fallback_hash::name_fallback_hash": 0.156221,
+      "address_city_fallback_hash::phone": -0.251354,
+      "address_city_fallback_hash::username_fallback_hash": 0.257227,
+      "address_city_fallback_hash::website_fallback_hash": -0.127184,
+      "address_geo_lat::address_geo_lng": -0.592793,
+      "address_geo_lat::address_street_fallback_hash": 0.179176,
+      "address_geo_lat::address_suite": -0.462169,
+      "address_geo_lat::address_zipcode": 0.199046,
+      "address_geo_lat::company_bs_fallback_hash": 0.050039,
+      "address_geo_lat::company_catchphrase_fallback_hash": -0.100655,
+      "address_geo_lat::company_name_fallback_hash": 0.302956,
+      "address_geo_lat::email_fallback_hash": -0.590233,
+      "address_geo_lat::id": 0.335981,
+      "address_geo_lat::name_fallback_hash": -0.171819,
+      "address_geo_lat::phone": 0.762353,
+      "address_geo_lat::username_fallback_hash": -0.20442,
+      "address_geo_lat::website_fallback_hash": 0.250645,
+      "address_geo_lng::address_street_fallback_hash": -0.767498,
+      "address_geo_lng::address_suite": -0.22139,
+      "address_geo_lng::address_zipcode": -0.238732,
+      "address_geo_lng::company_bs_fallback_hash": -0.188412,
+      "address_geo_lng::company_catchphrase_fallback_hash": -0.078454,
+      "address_geo_lng::company_name_fallback_hash": -0.106839,
+      "address_geo_lng::email_fallback_hash": 0.11209,
+      "address_geo_lng::id": -0.178511,
+      "address_geo_lng::name_fallback_hash": -0.350244,
+      "address_geo_lng::phone": -0.803769,
+      "address_geo_lng::username_fallback_hash": -0.026162,
+      "address_geo_lng::website_fallback_hash": -0.278532,
+      "address_street_fallback_hash::address_suite": 0.47934,
+      "address_street_fallback_hash::address_zipcode": 0.329567,
+      "address_street_fallback_hash::company_bs_fallback_hash": 0.285137,
+      "address_street_fallback_hash::company_catchphrase_fallback_hash": -0.167629,
+      "address_street_fallback_hash::company_name_fallback_hash": -0.13954,
+      "address_street_fallback_hash::email_fallback_hash": 0.356137,
+      "address_street_fallback_hash::id": -0.16985,
+      "address_street_fallback_hash::name_fallback_hash": 0.3221,
+      "address_street_fallback_hash::phone": 0.395395,
+      "address_street_fallback_hash::username_fallback_hash": 0.218709,
+      "address_street_fallback_hash::website_fallback_hash": 0.181727,
+      "address_suite::address_zipcode": 0.129592,
+      "address_suite::company_bs_fallback_hash": 0.072703,
+      "address_suite::company_catchphrase_fallback_hash": 0.558096,
+      "address_suite::company_name_fallback_hash": -0.270182,
+      "address_suite::email_fallback_hash": 0.627002,
+      "address_suite::id": -0.514575,
+      "address_suite::name_fallback_hash": 0.454861,
+      "address_suite::phone": -0.169524,
+      "address_suite::username_fallback_hash": 0.270808,
+      "address_suite::website_fallback_hash": -0.295708,
+      "address_zipcode::company_bs_fallback_hash": -0.124641,
+      "address_zipcode::company_catchphrase_fallback_hash": 0.143756,
+      "address_zipcode::company_name_fallback_hash": -0.115951,
+      "address_zipcode::email_fallback_hash": -0.235791,
+      "address_zipcode::id": -0.544326,
+      "address_zipcode::name_fallback_hash": -0.069461,
+      "address_zipcode::phone": 0.027616,
+      "address_zipcode::username_fallback_hash": -0.403652,
+      "address_zipcode::website_fallback_hash": 0.369492,
+      "company_bs_fallback_hash::company_catchphrase_fallback_hash": -0.161998,
+      "company_bs_fallback_hash::company_name_fallback_hash": 0.028165,
+      "company_bs_fallback_hash::email_fallback_hash": 0.326769,
+      "company_bs_fallback_hash::id": 0.220436,
+      "company_bs_fallback_hash::name_fallback_hash": -0.399954,
+      "company_bs_fallback_hash::phone": 0.072475,
+      "company_bs_fallback_hash::username_fallback_hash": 0.352275,
+      "company_bs_fallback_hash::website_fallback_hash": -0.064956,
+      "company_catchphrase_fallback_hash::company_name_fallback_hash": -0.223246,
+      "company_catchphrase_fallback_hash::email_fallback_hash": -0.026498,
+      "company_catchphrase_fallback_hash::id": -0.42301,
+      "company_catchphrase_fallback_hash::name_fallback_hash": 0.191757,
+      "company_catchphrase_fallback_hash::phone": -0.049741,
+      "company_catchphrase_fallback_hash::username_fallback_hash": -0.127638,
+      "company_catchphrase_fallback_hash::website_fallback_hash": -0.372847,
+      "company_name_fallback_hash::email_fallback_hash": -0.219012,
+      "company_name_fallback_hash::id": 0.672801,
+      "company_name_fallback_hash::name_fallback_hash": -0.109196,
+      "company_name_fallback_hash::phone": 0.149269,
+      "company_name_fallback_hash::username_fallback_hash": -0.159903,
+      "company_name_fallback_hash::website_fallback_hash": 0.225396,
+      "email_fallback_hash::id": -0.34471,
+      "email_fallback_hash::name_fallback_hash": 0.32452,
+      "email_fallback_hash::phone": -0.446249,
+      "email_fallback_hash::username_fallback_hash": 0.766527,
+      "email_fallback_hash::website_fallback_hash": -0.140322,
+      "id::name_fallback_hash": -0.081126,
+      "id::phone": 0.472082,
+      "id::username_fallback_hash": -0.018116,
+      "id::website_fallback_hash": 0.212927,
+      "name_fallback_hash::phone": 0.292928,
+      "name_fallback_hash::username_fallback_hash": 0.476468,
+      "name_fallback_hash::website_fallback_hash": 0.418153,
+      "phone::username_fallback_hash": 0.00436,
+      "phone::website_fallback_hash": 0.398692,
+      "username_fallback_hash::website_fallback_hash": 0.218771
+    },
+    "spearman": {
+      "address_city_fallback_hash::address_geo_lat": -0.369697,
+      "address_city_fallback_hash::address_geo_lng": 0.272727,
+      "address_city_fallback_hash::address_street_fallback_hash": -0.170735,
+      "address_city_fallback_hash::address_suite": 0.612121,
+      "address_city_fallback_hash::address_zipcode": 0.10303,
+      "address_city_fallback_hash::company_bs_fallback_hash": 0.25532,
+      "address_city_fallback_hash::company_catchphrase_fallback_hash": 0.711249,
+      "address_city_fallback_hash::company_name_fallback_hash": 0.054711,
+      "address_city_fallback_hash::email_fallback_hash": 0.357576,
+      "address_city_fallback_hash::id": -0.369697,
+      "address_city_fallback_hash::name_fallback_hash": -0.048632,
+      "address_city_fallback_hash::phone": -0.435616,
+      "address_city_fallback_hash::username_fallback_hash": 0.139818,
+      "address_city_fallback_hash::website_fallback_hash": -0.06687,
+      "address_geo_lat::address_geo_lng": -0.50303,
+      "address_geo_lat::address_street_fallback_hash": 0.10366,
+      "address_geo_lat::address_suite": -0.527273,
+      "address_geo_lat::address_zipcode": 0.139394,
+      "address_geo_lat::company_bs_fallback_hash": -0.164134,
+      "address_geo_lat::company_catchphrase_fallback_hash": -0.042553,
+      "address_geo_lat::company_name_fallback_hash": 0.231004,
+      "address_geo_lat::email_fallback_hash": -0.612121,
+      "address_geo_lat::id": 0.260606,
+      "address_geo_lat::name_fallback_hash": -0.097265,
+      "address_geo_lat::phone": 0.791471,
+      "address_geo_lat::username_fallback_hash": -0.237083,
+      "address_geo_lat::website_fallback_hash": 0.206688,
+      "address_geo_lng::address_street_fallback_hash": -0.810991,
+      "address_geo_lng::address_suite": -0.066667,
+      "address_geo_lng::address_zipcode": -0.2,
+      "address_geo_lng::company_bs_fallback_hash": -0.072949,
+      "address_geo_lng::company_catchphrase_fallback_hash": 0.109423,
+      "address_geo_lng::company_name_fallback_hash": -0.310032,
+      "address_geo_lng::email_fallback_hash": -0.018182,
+      "address_geo_lng::id": -0.284848,
+      "address_geo_lng::name_fallback_hash": -0.364743,
+      "address_geo_lng::phone": -0.693304,
+      "address_geo_lng::username_fallback_hash": 0.06687,
+      "address_geo_lng::website_fallback_hash": -0.267478,
+      "address_street_fallback_hash::address_suite": 0.463423,
+      "address_street_fallback_hash::address_zipcode": 0.170735,
+      "address_street_fallback_hash::company_bs_fallback_hash": 0.223243,
+      "address_street_fallback_hash::company_catchphrase_fallback_hash": -0.128441,
+      "address_street_fallback_hash::company_name_fallback_hash": -0.04893,
+      "address_street_fallback_hash::email_fallback_hash": 0.432935,
+      "address_street_fallback_hash::id": 0.0,
+      "address_street_fallback_hash::name_fallback_hash": 0.489299,
+      "address_street_fallback_hash::phone": 0.358032,
+      "address_street_fallback_hash::username_fallback_hash": 0.183487,
+      "address_street_fallback_hash::website_fallback_hash": 0.070337,
+      "address_suite::address_zipcode": 0.090909,
+      "address_suite::company_bs_fallback_hash": 0.097265,
+      "address_suite::company_catchphrase_fallback_hash": 0.565352,
+      "address_suite::company_name_fallback_hash": -0.291795,
+      "address_suite::email_fallback_hash": 0.709091,
+      "address_suite::id": -0.490909,
+      "address_suite::name_fallback_hash": 0.492403,
+      "address_suite::phone": -0.386532,
+      "address_suite::username_fallback_hash": 0.267478,
+      "address_suite::website_fallback_hash": -0.224925,
+      "address_zipcode::company_bs_fallback_hash": -0.206688,
+      "address_zipcode::company_catchphrase_fallback_hash": 0.097265,
+      "address_zipcode::company_name_fallback_hash": -0.243162,
+      "address_zipcode::email_fallback_hash": -0.224242,
+      "address_zipcode::id": -0.563636,
+      "address_zipcode::name_fallback_hash": 0.018237,
+      "address_zipcode::phone": -0.092031,
+      "address_zipcode::username_fallback_hash": -0.480245,
+      "address_zipcode::website_fallback_hash": 0.340427,
+      "company_bs_fallback_hash::company_catchphrase_fallback_hash": -0.088415,
+      "company_bs_fallback_hash::company_name_fallback_hash": -0.067073,
+      "company_bs_fallback_hash::email_fallback_hash": 0.407297,
+      "company_bs_fallback_hash::id": 0.103344,
+      "company_bs_fallback_hash::name_fallback_hash": -0.432927,
+      "company_bs_fallback_hash::phone": -0.073849,
+      "company_bs_fallback_hash::username_fallback_hash": 0.341463,
+      "company_bs_fallback_hash::website_fallback_hash": -0.140244,
+      "company_catchphrase_fallback_hash::company_name_fallback_hash": -0.22561,
+      "company_catchphrase_fallback_hash::email_fallback_hash": 0.109423,
+      "company_catchphrase_fallback_hash::id": -0.462008,
+      "company_catchphrase_fallback_hash::name_fallback_hash": 0.125,
+      "company_catchphrase_fallback_hash::phone": -0.227702,
+      "company_catchphrase_fallback_hash::username_fallback_hash": -0.097561,
+      "company_catchphrase_fallback_hash::website_fallback_hash": -0.277439,
+      "company_name_fallback_hash::email_fallback_hash": -0.243162,
+      "company_name_fallback_hash::id": 0.717329,
+      "company_name_fallback_hash::name_fallback_hash": -0.10061,
+      "company_name_fallback_hash::phone": 0.363092,
+      "company_name_fallback_hash::username_fallback_hash": -0.128049,
+      "company_name_fallback_hash::website_fallback_hash": 0.219512,
+      "email_fallback_hash::id": -0.345455,
+      "email_fallback_hash::name_fallback_hash": 0.395139,
+      "email_fallback_hash::phone": -0.36199,
+      "email_fallback_hash::username_fallback_hash": 0.717329,
+      "email_fallback_hash::website_fallback_hash": -0.12766,
+      "id::name_fallback_hash": -0.109423,
+      "id::phone": 0.570595,
+      "id::username_fallback_hash": -0.018237,
+      "id::website_fallback_hash": 0.158055,
+      "name_fallback_hash::phone": 0.295397,
+      "name_fallback_hash::username_fallback_hash": 0.432927,
+      "name_fallback_hash::website_fallback_hash": 0.417683,
+      "phone::username_fallback_hash": 0.10462,
+      "phone::website_fallback_hash": 0.510791,
+      "username_fallback_hash::website_fallback_hash": 0.25
+    },
+    "cramers_v": {},
+    "highlights": [
+      {
+        "columns": [
+          "address_geo_lng",
+          "address_street_fallback_hash"
+        ],
+        "method": "spearman",
+        "value": -0.810991,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Spearman r=-0.8110. Review for feature redundancy or causal relationship."
+      },
+      {
+        "columns": [
+          "address_geo_lng",
+          "phone"
+        ],
+        "method": "pearson",
+        "value": -0.803769,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Pearson r=-0.8038. Review for feature redundancy or causal relationship."
+      }
+    ]
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 10,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "address_city_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "address_geo_lat": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "address_geo_lng": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "address_street_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "address_suite": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "address_zipcode": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "company_bs_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "company_catchphrase_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "company_name_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "email_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "name_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "phone": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "username_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "website_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "address_city_fallback_hash",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (10 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "address_geo_lat",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (10 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "address_geo_lng",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (10 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "address_suite",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (10 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "address_zipcode",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (10 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "email_fallback_hash",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (10 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "id",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (10 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "columns": [
+        "address_geo_lng",
+        "address_street_fallback_hash"
+      ],
+      "method": "spearman",
+      "value": -0.810991,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Spearman r=-0.8110. Review for feature redundancy or causal relationship."
+    },
+    {
+      "columns": [
+        "address_geo_lng",
+        "phone"
+      ],
+      "method": "pearson",
+      "value": -0.803769,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Pearson r=-0.8038. Review for feature redundancy or causal relationship."
+    },
+    {
+      "column": "phone",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.02456 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 10
+}

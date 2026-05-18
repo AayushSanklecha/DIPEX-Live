@@ -27,13 +27,15 @@ wheels/
 venv/
 .env
 
-# Project specific huge folders
+# Project specific - runtime data (large, regenerated at runtime)
 data/
-models/
-audit/
-reports/
+# NOTE: models/ is intentionally NOT excluded here.
+# On localhost, docker-compose volume-mounts ./models:/app/models so it doesn't matter.
+# On HF Spaces there are no volume mounts - models must be baked in via COPY . .
+# audit/ and reports/ are also included so pre-seeded history is available.
 frontend/node_modules/
 frontend/dist/
+frontend/src/
 *.log
 
 # Tests

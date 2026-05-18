@@ -1,0 +1,358 @@
+{
+  "run_id": "094293f8-78d9-445c-9663-3f3592042b7f",
+  "generated_at": "2026-03-07T03:20:57.051001+00:00",
+  "dataset_shape": {
+    "rows": 100,
+    "columns": 5
+  },
+  "columns": {
+    "id": {
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 100,
+      "cardinality_tier": "unique",
+      "min": 0.0,
+      "max": 99.0,
+      "mean": 49.5,
+      "median": 49.5,
+      "std": 29.011491975882016,
+      "variance": 841.6666666666666,
+      "q05": 4.95,
+      "q25": 24.75,
+      "q75": 74.25,
+      "q95": 94.05,
+      "iqr": 49.5,
+      "skewness": 0.0,
+      "kurtosis": -1.20024,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.001722,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -49.5,
+          "fence_high": 148.5
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "target": {
+      "dtype": "int32",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.09,
+      "median": 0.0,
+      "std": 0.2876234912646614,
+      "variance": 0.08272727272727275,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "q95": 1.0,
+      "iqr": 0.0,
+      "skewness": 2.865312,
+      "kurtosis": 6.210012,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 9,
+          "pct": 0.09,
+          "fence_low": 0.0,
+          "fence_high": 0.0
+        },
+        "zscore": {
+          "count": 9,
+          "pct": 0.09,
+          "threshold": 3.0
+        }
+      }
+    },
+    "mixed_obj_col": {
+      "dtype": "int32",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "low",
+      "min": 0.0,
+      "max": 3.0,
+      "mean": 1.5,
+      "median": 1.5,
+      "std": 1.1236664374387368,
+      "variance": 1.2626262626262625,
+      "q05": 0.0,
+      "q25": 0.75,
+      "q75": 2.25,
+      "q95": 3.0,
+      "iqr": 1.5,
+      "skewness": 0.0,
+      "kurtosis": -1.36,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -1.5,
+          "fence_high": 4.5
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "high_cardinality_cat": {
+      "dtype": "int32",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 100,
+      "cardinality_tier": "unique",
+      "min": 0.0,
+      "max": 99.0,
+      "mean": 49.5,
+      "median": 49.5,
+      "std": 29.011491975882016,
+      "variance": 841.6666666666666,
+      "q05": 4.95,
+      "q25": 24.75,
+      "q75": 74.25,
+      "q95": 94.05,
+      "iqr": 49.5,
+      "skewness": 0.0,
+      "kurtosis": -1.20024,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.001722,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -49.5,
+          "fence_high": 148.5
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "normal_num": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 100,
+      "cardinality_tier": "unique",
+      "min": -1.9875689146008928,
+      "max": 2.463242112485286,
+      "mean": -0.0010803601673571495,
+      "median": 0.07780502152209928,
+      "std": 0.9129293580877064,
+      "variance": 0.8334400128584316,
+      "q05": -1.4177779523544995,
+      "q25": -0.7051276749146063,
+      "q75": 0.4836915489621797,
+      "q95": 1.5657264103238995,
+      "iqr": 1.188819,
+      "skewness": 0.227503,
+      "kurtosis": -0.078188,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.561565,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 1,
+          "pct": 0.01,
+          "fence_low": -2.488357,
+          "fence_high": 2.26692
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "id::target": -0.118025,
+      "id::mixed_obj_col": 0.030985,
+      "id::high_cardinality_cat": 0.865347,
+      "id::normal_num": 0.091781,
+      "target::mixed_obj_col": 0.046881,
+      "target::high_cardinality_cat": -0.166446,
+      "target::normal_num": -0.04779,
+      "mixed_obj_col::high_cardinality_cat": 0.003718,
+      "mixed_obj_col::normal_num": -0.032622,
+      "high_cardinality_cat::normal_num": 0.060351
+    },
+    "spearman": {
+      "id::target": -0.118025,
+      "id::mixed_obj_col": 0.030985,
+      "id::high_cardinality_cat": 0.865347,
+      "id::normal_num": 0.105959,
+      "target::mixed_obj_col": 0.046881,
+      "target::high_cardinality_cat": -0.166446,
+      "target::normal_num": -0.027237,
+      "mixed_obj_col::high_cardinality_cat": 0.003718,
+      "mixed_obj_col::normal_num": -0.02045,
+      "high_cardinality_cat::normal_num": 0.071659
+    },
+    "cramers_v": {},
+    "highlights": [
+      {
+        "columns": [
+          "id",
+          "high_cardinality_cat"
+        ],
+        "method": "pearson",
+        "value": 0.865347,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Pearson r=0.8653. Review for feature redundancy or causal relationship."
+      },
+      {
+        "columns": [
+          "id",
+          "high_cardinality_cat"
+        ],
+        "method": "spearman",
+        "value": 0.865347,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Spearman r=0.8653. Review for feature redundancy or causal relationship."
+      }
+    ]
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 100,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "target": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "mixed_obj_col": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "high_cardinality_cat": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "normal_num": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "id",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (100 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "high_cardinality_cat",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (100 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "normal_num",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (100 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "columns": [
+        "id",
+        "high_cardinality_cat"
+      ],
+      "method": "pearson",
+      "value": 0.865347,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Pearson r=0.8653. Review for feature redundancy or causal relationship."
+    },
+    {
+      "columns": [
+        "id",
+        "high_cardinality_cat"
+      ],
+      "method": "spearman",
+      "value": 0.865347,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Spearman r=0.8653. Review for feature redundancy or causal relationship."
+    },
+    {
+      "column": "target",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "9.00% of values are outside IQR fence [0, 0]."
+    },
+    {
+      "column": "target",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=2.8653. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "target",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=6.2100. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "id",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.001722 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "target",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "mixed_obj_col",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "high_cardinality_cat",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.001722 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 12
+}

@@ -1,0 +1,228 @@
+{
+  "run_id": "69c2d673-e73a-4388-925e-9dc59ec50e47",
+  "generated_at": "2026-03-17T01:49:02.856228+00:00",
+  "dataset_shape": {
+    "rows": 19,
+    "columns": 4
+  },
+  "columns": {
+    "amount": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 19,
+      "cardinality_tier": "unique",
+      "min": -2.286128007661878,
+      "max": 1.2367634993863854,
+      "mean": -2.220446049250313e-16,
+      "median": 0.4108954380418792,
+      "std": 1.027402333828163,
+      "variance": 1.055555555555556,
+      "q05": -1.6382282229714795,
+      "q25": -0.6443841094023179,
+      "q75": 0.7154021722174738,
+      "q95": 1.2081118060408234,
+      "iqr": 1.359786,
+      "skewness": -0.724946,
+      "kurtosis": -0.548515,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.077067,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.684064,
+          "fence_high": 2.755082
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "currency_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "medium",
+      "min": -0.7119079008354069,
+      "max": 1.6404834236641983,
+      "mean": -3.5059674461847047e-17,
+      "median": -0.6628997482416651,
+      "std": 1.0274023338281626,
+      "variance": 1.0555555555555551,
+      "q05": -0.7119079008354069,
+      "q25": -0.6628997482416651,
+      "q75": 0.8073448295705882,
+      "q95": 1.6404834236641983,
+      "iqr": 1.470245,
+      "skewness": 0.963187,
+      "kurtosis": -0.958701,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.3e-05,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.868267,
+          "fence_high": 3.012712
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "event_time": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 7,
+      "cardinality_tier": "medium",
+      "min": -1.8683486129536517,
+      "max": 2.169810801210952,
+      "mean": -6.289072294818927e-05,
+      "median": 0.15073109412865002,
+      "std": 1.0274023338281628,
+      "variance": 1.0555555555555556,
+      "q05": -1.3400045479054246,
+      "q25": -0.565369630525582,
+      "q75": 0.8666611153920228,
+      "q95": 1.6413131031109498,
+      "iqr": 1.432031,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.713416,
+          "fence_high": 3.014707
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "status_fallback_hash_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1,
+      "cardinality_tier": "medium",
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 0.0,
+      "variance": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "q95": 0.0,
+      "iqr": 0.0,
+      "skewness": NaN,
+      "kurtosis": NaN,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.0,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": 0.0,
+          "fence_high": 0.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "amount::currency_fallback_hash": 0.415209,
+      "amount::event_time": 0.157339,
+      "amount::status_fallback_hash_auto_log1p": NaN,
+      "currency_fallback_hash::event_time": -0.071824,
+      "currency_fallback_hash::status_fallback_hash_auto_log1p": NaN,
+      "event_time::status_fallback_hash_auto_log1p": NaN
+    },
+    "spearman": {
+      "amount::currency_fallback_hash": 0.465322,
+      "amount::event_time": 0.284263,
+      "amount::status_fallback_hash_auto_log1p": NaN,
+      "currency_fallback_hash::event_time": -0.021345,
+      "currency_fallback_hash::status_fallback_hash_auto_log1p": NaN,
+      "event_time::status_fallback_hash_auto_log1p": NaN
+    },
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 19,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "amount": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "currency_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "event_time": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "status_fallback_hash_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "amount",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (19 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "currency_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=1.3e-05 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 2
+}

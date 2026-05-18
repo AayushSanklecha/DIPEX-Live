@@ -1,0 +1,214 @@
+{
+  "run_id": "e01fbd44-69e4-4b7e-a99c-517baf7b8802",
+  "generated_at": "2026-03-17T06:46:01.782446+00:00",
+  "dataset_shape": {
+    "rows": 2144,
+    "columns": 3
+  },
+  "columns": {
+    "anomaly_flag": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -4.36318498090215,
+      "max": 0.22919037454910654,
+      "mean": -8.28524645242654e-18,
+      "median": 0.22919037454910654,
+      "std": 1.0002332905665705,
+      "variance": 1.0004666355576295,
+      "q05": 0.22919037454910654,
+      "q25": 0.22919037454910654,
+      "q75": 0.22919037454910654,
+      "q95": 0.22919037454910654,
+      "iqr": 0.0,
+      "skewness": -4.133995,
+      "kurtosis": 15.089911,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 107,
+          "pct": 0.049907,
+          "fence_low": 0.22919,
+          "fence_high": 0.22919
+        },
+        "zscore": {
+          "count": 107,
+          "pct": 0.049907,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1250,
+      "cardinality_tier": "high",
+      "min": -4.725605872970229,
+      "max": 0.9941090063510597,
+      "mean": 3.6952199177822375e-16,
+      "median": 0.41683165569266495,
+      "std": 1.0002332905665707,
+      "variance": 1.0004666355576297,
+      "q05": -2.284644998458604,
+      "q25": -0.3044150750113222,
+      "q75": 0.655973341450705,
+      "q95": 0.8282200375341012,
+      "iqr": 0.960388,
+      "skewness": -1.781757,
+      "kurtosis": 2.835632,
+      "high_skew": true,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 200,
+          "pct": 0.093284,
+          "fence_low": -1.744998,
+          "fence_high": 2.096556
+        },
+        "zscore": {
+          "count": 31,
+          "pct": 0.014459,
+          "threshold": 3.0
+        }
+      }
+    },
+    "volume_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2102,
+      "cardinality_tier": "unique",
+      "min": -2.64985310157875,
+      "max": 2.5441345552071364,
+      "mean": -1.0074859686150674e-15,
+      "median": -0.060304058877986455,
+      "std": 1.0002332905665705,
+      "variance": 1.0004666355576295,
+      "q05": -1.5258401417424738,
+      "q25": -0.7021077302840442,
+      "q75": 0.596389183912426,
+      "q95": 1.8875721610984924,
+      "iqr": 1.298497,
+      "skewness": 0.359308,
+      "kurtosis": -0.043216,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 44,
+          "pct": 0.020522,
+          "fence_low": -2.649853,
+          "fence_high": 2.544135
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "anomaly_flag::anomaly_score": 0.665798,
+      "anomaly_flag::volume_auto_log1p": -0.144542,
+      "anomaly_score::volume_auto_log1p": -0.223602
+    },
+    "spearman": {
+      "anomaly_flag::anomaly_score": 0.37716,
+      "anomaly_flag::volume_auto_log1p": -0.074018,
+      "anomaly_score::volume_auto_log1p": -0.080129
+    },
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 2144,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "anomaly_flag": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "volume_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "volume_auto_log1p",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (2102 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "4.99% of values are outside IQR fence [0.2292, 0.2292]."
+    },
+    {
+      "column": "anomaly_score",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "9.33% of values are outside IQR fence [-1.745, 2.097]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-4.1340. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_score",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-1.7818. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=15.0899. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "anomaly_score",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "volume_auto_log1p",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 9
+}

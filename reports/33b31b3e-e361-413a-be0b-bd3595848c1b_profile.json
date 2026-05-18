@@ -1,0 +1,181 @@
+{
+  "run_id": "33b31b3e-e361-413a-be0b-bd3595848c1b",
+  "generated_at": "2026-03-17T02:05:16.869392+00:00",
+  "dataset_shape": {
+    "rows": 4,
+    "columns": 3
+  },
+  "columns": {
+    "address_geo_lat": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "unique",
+      "min": -1.06108586448921,
+      "max": 1.6398069574820542,
+      "mean": 0.0,
+      "median": -0.28936054649642207,
+      "std": 1.1547005383792515,
+      "variance": 1.3333333333333333,
+      "q05": -0.9594266194310216,
+      "q25": -0.5527896391982676,
+      "q75": 0.26342909270184556,
+      "q95": 1.3645313845260119,
+      "iqr": 0.816219,
+      "skewness": 0.787728,
+      "kurtosis": -0.869686,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.38617,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 1,
+          "pct": 0.25,
+          "fence_low": -1.777118,
+          "fence_high": 1.487757
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "address_geo_lng": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "unique",
+      "min": -1.4168867775003215,
+      "max": 1.4075674196148262,
+      "mean": 1.1102230246251565e-16,
+      "median": 0.004659678942747776,
+      "std": 1.1547005383792517,
+      "variance": 1.3333333333333337,
+      "q05": -1.214850876642135,
+      "q25": -0.40670727320938993,
+      "q75": 0.4113669521521377,
+      "q95": 1.208327326122288,
+      "iqr": 0.818074,
+      "skewness": -0.013901,
+      "kurtosis": -1.011068,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.818247,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -1.633819,
+          "fence_high": 1.638478
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "id": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "unique",
+      "min": -1.3388833292762712,
+      "max": 1.338883329276271,
+      "mean": -5.551115123125783e-17,
+      "median": 0.0,
+      "std": 1.1547005383792515,
+      "variance": 1.3333333333333333,
+      "q05": -1.2063612038274973,
+      "q25": -0.6762727020324023,
+      "q75": 0.6762727020324022,
+      "q95": 1.206361203827497,
+      "iqr": 1.352545,
+      "skewness": -0.0,
+      "kurtosis": -1.371772,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.966748,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.705091,
+          "fence_high": 2.705091
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {},
+    "spearman": {},
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 4,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "address_geo_lat": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "address_geo_lng": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "address_geo_lat",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (4 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "address_geo_lng",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (4 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "id",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (4 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "address_geo_lat",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "25.00% of values are outside IQR fence [-1.777, 1.488]."
+    }
+  ],
+  "flag_count": 4
+}

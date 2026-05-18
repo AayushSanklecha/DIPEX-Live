@@ -1,0 +1,49 @@
+{
+  "corpus_size": 155791,
+  "n_base_feats": 23,
+  "n_total_feats": 30,
+  "label_method": "statistical_tests_v7",
+  "chart_types": [
+    "histogram",
+    "bar",
+    "scatter",
+    "line",
+    "box",
+    "heatmap",
+    "violin"
+  ],
+  "val_bal_acc": 0.9988,
+  "hold_bal_acc": 0.9993,
+  "cv_mean": 0.9981,
+  "cv_std": 0.0002,
+  "quality_gate": {
+    "passed": false,
+    "val": 0.9981,
+    "hold": 0.9993,
+    "gap": 0.0,
+    "cv_std": 0.0002,
+    "suspect": "True",
+    "spec": {
+      "min_val": 0.75,
+      "max_gap": 0.05,
+      "max_cv_std": 0.045,
+      "max_holdout": 0.99
+    }
+  },
+  "best_params": {
+    "n_estimators": 2343,
+    "max_depth": 7,
+    "num_leaves": 100,
+    "min_child_samples": 44,
+    "min_split_gain": 0.004492399415845807,
+    "subsample": 0.925423681185436,
+    "colsample_bytree": 0.6641743846383679,
+    "reg_lambda": 5.430171046060717,
+    "reg_alpha": 1.3034902095171343,
+    "learning_rate": 0.06888449980399146
+  },
+  "model_size_mb": 3.06,
+  "version": "20260413_1258",
+  "time_s": 2560.4,
+  "_version": "20260413_1258"
+}

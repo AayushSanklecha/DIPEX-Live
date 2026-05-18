@@ -1,4 +1,4 @@
-name: Deploy DIPEX to HuggingFace Space
+﻿name: Deploy DIPEX to HuggingFace Space
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
           fetch-depth: 0
           lfs: false
 
-      # ── Build React frontend ──────────────────────────────────────────────
+      # â”€â”€ Build React frontend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       - name: Setup Node 20
         uses: actions/setup-node@v4
         with:
@@ -27,18 +27,18 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      - name: Build frontend (Vite → dist/)
+      - name: Build frontend (Vite â†’ dist/)
         run: npm run build
         working-directory: frontend
         env:
           VITE_API_URL: ''   # empty = relative paths, works on HF Space (same origin)
 
-      - name: Copy frontend build → dashboard/
+      - name: Copy frontend build â†’ dashboard/
         run: |
           rm -rf dashboard
           cp -r frontend/dist dashboard
 
-      # ── Push to HuggingFace Space ─────────────────────────────────────────
+      # â”€â”€ Push to HuggingFace Space â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -73,13 +73,16 @@ jobs:
               "frontend/src/**",            # source - we deploy dashboard/ (built)
               "frontend/public/**",
               "frontend/dist/**",           # same as dashboard/ after copy
-              "data/**",                    # runtime data - too large
+              "data/**",                    # runtime data - regenerated at runtime
+              "latest_newest_models/**",    # duplicate of models/ - skip
               "Invistico_Airline.csv",
               "mock_banking_data.csv",
               "scratch/**", "logs.txt",
               "*.docx", "*.pdf", "*.pptx",
               "Mock_DIPEX_Database.db", "sample_company.db",
               "output/**",
+              "tests/**",                   # not needed at runtime on HF Spaces
+              "training/**",                # training scripts not needed at runtime
           ]
 
           print("Uploading codebase (including dashboard/ + models/)...")
@@ -90,5 +93,5 @@ jobs:
               ignore_patterns=IGNORE,
               commit_message="ci: auto-deploy from GitHub Actions",
           )
-          print(f"Deployed → https://huggingface.co/spaces/{repo_id}")
+          print(f"Deployed â†’ https://huggingface.co/spaces/{repo_id}")
           EOF

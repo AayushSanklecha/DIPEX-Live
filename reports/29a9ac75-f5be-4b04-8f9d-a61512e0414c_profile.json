@@ -1,0 +1,129 @@
+{
+  "run_id": "29a9ac75-f5be-4b04-8f9d-a61512e0414c",
+  "generated_at": "2026-03-05T08:39:03.046554+00:00",
+  "dataset_shape": {
+    "rows": 2,
+    "columns": 2
+  },
+  "columns": {
+    "id": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "unique",
+      "min": -1.0,
+      "max": 1.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 1.4142135623730951,
+      "variance": 2.0,
+      "q05": -0.9,
+      "q25": -0.5,
+      "q75": 0.5,
+      "q95": 0.8999999999999999,
+      "iqr": 1.0,
+      "skewness": 0.0,
+      "kurtosis": 0.0,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.0,
+          "fence_high": 2.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "val": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "unique",
+      "min": -1.0,
+      "max": 1.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 1.4142135623730951,
+      "variance": 2.0,
+      "q05": -0.9,
+      "q25": -0.5,
+      "q75": 0.5,
+      "q95": 0.8999999999999999,
+      "iqr": 1.0,
+      "skewness": 0.0,
+      "kurtosis": 0.0,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.0,
+          "fence_high": 2.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {},
+    "spearman": {},
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 2,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "val": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "id",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (2 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "val",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (2 unique values). Exclude from feature set unless intended."
+    }
+  ],
+  "flag_count": 2
+}

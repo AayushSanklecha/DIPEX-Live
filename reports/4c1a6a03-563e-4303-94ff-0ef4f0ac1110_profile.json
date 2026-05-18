@@ -1,0 +1,222 @@
+{
+  "run_id": "4c1a6a03-563e-4303-94ff-0ef4f0ac1110",
+  "generated_at": "2026-03-17T01:42:25.127824+00:00",
+  "dataset_shape": {
+    "rows": 10,
+    "columns": 4
+  },
+  "columns": {
+    "amount": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 9,
+      "cardinality_tier": "high",
+      "min": -1.6419316297352813,
+      "max": 2.057810611057668,
+      "mean": 1.3322676295501878e-16,
+      "median": -0.17344794951895098,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111112,
+      "q05": -1.3060087723171847,
+      "q25": -0.4644618102250902,
+      "q75": 0.6152290462419614,
+      "q95": 1.585323179933046,
+      "iqr": 1.079691,
+      "skewness": 0.506331,
+      "kurtosis": -0.245743,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.583063,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.083998,
+          "fence_high": 2.234765
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "currency_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "medium",
+      "min": -0.9048400815745862,
+      "max": 1.777650425748302,
+      "mean": -6.661338147750939e-17,
+      "median": -0.30428250530826795,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111112,
+      "q05": -0.8688066269986071,
+      "q25": -0.8247657380724104,
+      "q75": 0.2162007274558745,
+      "q95": 1.777650425748302,
+      "iqr": 1.040966,
+      "skewness": 0.828024,
+      "kurtosis": -0.75005,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.007648,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.386215,
+          "fence_high": 1.77765
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "event_time": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 6,
+      "cardinality_tier": "high",
+      "min": -1.7930506758712186,
+      "max": 1.1231523304912348,
+      "mean": 2.8319524218156644e-05,
+      "median": 0.23222009858870712,
+      "std": 1.0540925533894598,
+      "variance": 1.1111111111111112,
+      "q05": -1.5498355220048206,
+      "q25": -0.6585705356927298,
+      "q75": 0.9746518253723893,
+      "q95": 1.1231523304912348,
+      "iqr": 1.633222,
+      "skewness": -0.375551,
+      "kurtosis": -1.189462,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.240488,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.108404,
+          "fence_high": 3.424485
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "status_fallback_hash_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1,
+      "cardinality_tier": "medium",
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 0.0,
+      "variance": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "q95": 0.0,
+      "iqr": 0.0,
+      "skewness": NaN,
+      "kurtosis": NaN,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.0,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": 0.0,
+          "fence_high": 0.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "amount::currency_fallback_hash": 0.202405,
+      "amount::event_time": 0.134477,
+      "amount::status_fallback_hash_auto_log1p": NaN,
+      "currency_fallback_hash::event_time": 0.374634,
+      "currency_fallback_hash::status_fallback_hash_auto_log1p": NaN,
+      "event_time::status_fallback_hash_auto_log1p": NaN
+    },
+    "spearman": {
+      "amount::currency_fallback_hash": 0.548316,
+      "amount::event_time": 0.154817,
+      "amount::status_fallback_hash_auto_log1p": NaN,
+      "currency_fallback_hash::event_time": 0.314049,
+      "currency_fallback_hash::status_fallback_hash_auto_log1p": NaN,
+      "event_time::status_fallback_hash_auto_log1p": NaN
+    },
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 10,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "amount": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "currency_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "event_time": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "status_fallback_hash_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "currency_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.007648 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 1
+}

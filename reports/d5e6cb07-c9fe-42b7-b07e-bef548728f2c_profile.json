@@ -1,0 +1,1060 @@
+{
+  "run_id": "d5e6cb07-c9fe-42b7-b07e-bef548728f2c",
+  "generated_at": "2026-03-17T03:36:04.477260+00:00",
+  "dataset_shape": {
+    "rows": 185,
+    "columns": 15
+  },
+  "columns": {
+    "anomaly_flag": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -4.183300132670378,
+      "max": 0.23904572186687872,
+      "mean": -9.601928861622976e-18,
+      "median": 0.23904572186687872,
+      "std": 1.0027137091955487,
+      "variance": 1.0054347826086956,
+      "q05": -3.2988309617629215,
+      "q25": 0.23904572186687872,
+      "q75": 0.23904572186687872,
+      "q95": 0.23904572186687872,
+      "iqr": 0.0,
+      "skewness": -3.944254,
+      "kurtosis": 13.557143,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 10,
+          "pct": 0.054054,
+          "fence_low": 0.239046,
+          "fence_high": 0.239046
+        },
+        "zscore": {
+          "count": 10,
+          "pct": 0.054054,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 173,
+      "cardinality_tier": "high",
+      "min": -2.7539210939867345,
+      "max": 1.5066848707932181,
+      "mean": 5.569118739741326e-16,
+      "median": -0.026807976287652628,
+      "std": 1.0027137091955487,
+      "variance": 1.0054347826086956,
+      "q05": -1.6740719733651843,
+      "q25": -0.6473143959522961,
+      "q75": 0.9448717344783512,
+      "q95": 1.3862924128846021,
+      "iqr": 1.592186,
+      "skewness": -0.380393,
+      "kurtosis": -0.638929,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 3e-05,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.035594,
+          "fence_high": 3.333151
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "capsules_fallback_hash_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1,
+      "cardinality_tier": "low",
+      "min": -8.881784197001252e-16,
+      "max": -8.881784197001252e-16,
+      "mean": -8.881784197001252e-16,
+      "median": -8.881784197001252e-16,
+      "std": 0.0,
+      "variance": 0.0,
+      "q05": -8.881784197001252e-16,
+      "q25": -8.881784197001252e-16,
+      "q75": -8.881784197001252e-16,
+      "q95": -8.881784197001252e-16,
+      "iqr": 0.0,
+      "skewness": NaN,
+      "kurtosis": NaN,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.0,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -0.0,
+          "fence_high": -0.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "crew_fallback_hash_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1,
+      "cardinality_tier": "low",
+      "min": -8.881784197001252e-16,
+      "max": -8.881784197001252e-16,
+      "mean": -8.881784197001252e-16,
+      "median": -8.881784197001252e-16,
+      "std": 0.0,
+      "variance": 0.0,
+      "q05": -8.881784197001252e-16,
+      "q25": -8.881784197001252e-16,
+      "q75": -8.881784197001252e-16,
+      "q95": -8.881784197001252e-16,
+      "iqr": 0.0,
+      "skewness": NaN,
+      "kurtosis": NaN,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.0,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -0.0,
+          "fence_high": -0.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "date_precision_fallback_hash_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1,
+      "cardinality_tier": "low",
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 0.0,
+      "variance": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "q95": 0.0,
+      "iqr": 0.0,
+      "skewness": NaN,
+      "kurtosis": NaN,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.0,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": 0.0,
+          "fence_high": 0.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "failures_fallback_hash_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1,
+      "cardinality_tier": "low",
+      "min": -8.881784197001252e-16,
+      "max": -8.881784197001252e-16,
+      "mean": -8.881784197001252e-16,
+      "median": -8.881784197001252e-16,
+      "std": 0.0,
+      "variance": 0.0,
+      "q05": -8.881784197001252e-16,
+      "q25": -8.881784197001252e-16,
+      "q75": -8.881784197001252e-16,
+      "q95": -8.881784197001252e-16,
+      "iqr": 0.0,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -0.0,
+          "fence_high": -0.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "fairings_recovered": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -1.072922546457886,
+      "max": 0.9320337272260424,
+      "mean": 7.681543089298381e-17,
+      "median": 0.9320337272260424,
+      "std": 1.0027137091955487,
+      "variance": 1.0054347826086956,
+      "q05": -1.072922546457886,
+      "q25": -1.072922546457886,
+      "q75": 0.9320337272260424,
+      "q95": 0.9320337272260424,
+      "iqr": 2.004956,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -4.080357,
+          "fence_high": 3.939468
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "fairings_recovery_attempt": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -1.2817398889233116,
+      "max": 0.780189497605494,
+      "mean": 0.0,
+      "median": 0.780189497605494,
+      "std": 1.002713709195549,
+      "variance": 1.0054347826086958,
+      "q05": -1.2817398889233116,
+      "q25": -1.2817398889233116,
+      "q75": 0.780189497605494,
+      "q95": 0.780189497605494,
+      "iqr": 2.061929,
+      "skewness": -0.50155,
+      "kurtosis": -1.748447,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -4.374634,
+          "fence_high": 3.873084
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "fairings_reused": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -0.9524791309238019,
+      "max": 1.049891769313736,
+      "mean": -2.304462926789514e-16,
+      "median": -0.9524791309238019,
+      "std": 1.0027137091955487,
+      "variance": 1.0054347826086953,
+      "q05": -0.9524791309238019,
+      "q25": -0.9524791309238019,
+      "q75": 1.049891769313736,
+      "q95": 1.049891769313736,
+      "iqr": 2.002371,
+      "skewness": 0.097413,
+      "kurtosis": -1.990511,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.956035,
+          "fence_high": 4.053448
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "fairings_ships_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 16,
+      "cardinality_tier": "medium",
+      "min": -0.9962868839280247,
+      "max": 1.4897152909468026,
+      "mean": -3.3606751015680416e-17,
+      "median": -0.8654446641977707,
+      "std": 1.0027137091955487,
+      "variance": 1.0054347826086956,
+      "q05": -0.8654446641977707,
+      "q25": -0.8654446641977707,
+      "q75": 1.0971886317560404,
+      "q95": 1.4897152909468026,
+      "iqr": 1.962633,
+      "skewness": 0.474534,
+      "kurtosis": -1.550588,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.809395,
+          "fence_high": 4.041139
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "launch_library_id_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 53,
+      "cardinality_tier": "medium",
+      "min": -2.240311435301441,
+      "max": 2.1596165835354553,
+      "mean": 4.2248486991141094e-16,
+      "median": 0.5096435764716197,
+      "std": 1.0027137091955491,
+      "variance": 1.0054347826086962,
+      "q05": -2.0024217790961956,
+      "q25": -0.5903384282376045,
+      "q75": 0.5096435764716197,
+      "q95": 0.7358477935359041,
+      "iqr": 1.099982,
+      "skewness": -0.906006,
+      "kurtosis": -0.081535,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.240311,
+          "fence_high": 2.159617
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "ships_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 46,
+      "cardinality_tier": "medium",
+      "min": -1.2972542822730018,
+      "max": 1.9556499044507154,
+      "mean": 4.800964430811488e-17,
+      "median": -0.5227532854340216,
+      "std": 1.0027137091955487,
+      "variance": 1.0054347826086956,
+      "q05": -1.028760603368822,
+      "q25": -0.8325536841696137,
+      "q75": 0.7680817092976122,
+      "q95": 1.8420564249143307,
+      "iqr": 1.600635,
+      "skewness": 0.601805,
+      "kurtosis": -1.126702,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.233507,
+          "fence_high": 3.169035
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "static_fire_date_unix": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 121,
+      "cardinality_tier": "high",
+      "min": -3.7054424572349323,
+      "max": 0.9736053235315257,
+      "mean": 9.986006016087895e-16,
+      "median": 0.3257946008784939,
+      "std": 1.0027137091955487,
+      "variance": 1.0054347826086956,
+      "q05": -1.8335432163391185,
+      "q25": -0.5453447460362917,
+      "q75": 0.8597897240994057,
+      "q95": 0.9736053235315257,
+      "iqr": 1.405134,
+      "skewness": -1.364236,
+      "kurtosis": 1.948604,
+      "high_skew": true,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 5,
+          "pct": 0.027027,
+          "fence_low": -2.653046,
+          "fence_high": 2.967491
+        },
+        "zscore": {
+          "count": 4,
+          "pct": 0.021622,
+          "threshold": 3.0
+        }
+      }
+    },
+    "success_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1,
+      "cardinality_tier": "low",
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 0.0,
+      "variance": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "q95": 0.0,
+      "iqr": 0.0,
+      "skewness": NaN,
+      "kurtosis": NaN,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.0,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": 0.0,
+          "fence_high": 0.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "window": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 22,
+      "cardinality_tier": "medium",
+      "min": -2.581173439722277,
+      "max": 4.4638061423941355,
+      "mean": 3.300663046182898e-17,
+      "median": 0.042508489515702255,
+      "std": 1.0027137091955487,
+      "variance": 1.0054347826086956,
+      "q05": -1.9005905465701542,
+      "q25": 0.042508489515702255,
+      "q75": 0.042508489515702255,
+      "q95": 0.789854272625647,
+      "iqr": 0.0,
+      "skewness": 1.538255,
+      "kurtosis": 8.745539,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 37,
+          "pct": 0.2,
+          "fence_low": 0.042508,
+          "fence_high": 0.042508
+        },
+        "zscore": {
+          "count": 7,
+          "pct": 0.037838,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "anomaly_flag::anomaly_score": 0.497178,
+      "anomaly_flag::capsules_fallback_hash_auto_log1p": NaN,
+      "anomaly_flag::crew_fallback_hash_auto_log1p": NaN,
+      "anomaly_flag::date_precision_fallback_hash_auto_log1p": NaN,
+      "anomaly_flag::failures_fallback_hash_auto_log1p": NaN,
+      "anomaly_flag::fairings_recovered": -0.031088,
+      "anomaly_flag::fairings_recovery_attempt": 0.010657,
+      "anomaly_flag::fairings_reused": -0.059509,
+      "anomaly_flag::fairings_ships_fallback_hash": -0.0767,
+      "anomaly_flag::launch_library_id_auto_log1p": 0.054767,
+      "anomaly_flag::ships_fallback_hash": 0.0435,
+      "anomaly_flag::static_fire_date_unix": -0.102149,
+      "anomaly_flag::success_auto_log1p": NaN,
+      "anomaly_flag::window": -0.108514,
+      "anomaly_score::capsules_fallback_hash_auto_log1p": NaN,
+      "anomaly_score::crew_fallback_hash_auto_log1p": NaN,
+      "anomaly_score::date_precision_fallback_hash_auto_log1p": NaN,
+      "anomaly_score::failures_fallback_hash_auto_log1p": NaN,
+      "anomaly_score::fairings_recovered": 0.032634,
+      "anomaly_score::fairings_recovery_attempt": -0.088106,
+      "anomaly_score::fairings_reused": 0.124711,
+      "anomaly_score::fairings_ships_fallback_hash": -0.539899,
+      "anomaly_score::launch_library_id_auto_log1p": -0.07527,
+      "anomaly_score::ships_fallback_hash": -0.327274,
+      "anomaly_score::static_fire_date_unix": 0.055607,
+      "anomaly_score::success_auto_log1p": NaN,
+      "anomaly_score::window": -0.041795,
+      "capsules_fallback_hash_auto_log1p::crew_fallback_hash_auto_log1p": NaN,
+      "capsules_fallback_hash_auto_log1p::date_precision_fallback_hash_auto_log1p": NaN,
+      "capsules_fallback_hash_auto_log1p::failures_fallback_hash_auto_log1p": NaN,
+      "capsules_fallback_hash_auto_log1p::fairings_recovered": NaN,
+      "capsules_fallback_hash_auto_log1p::fairings_recovery_attempt": NaN,
+      "capsules_fallback_hash_auto_log1p::fairings_reused": NaN,
+      "capsules_fallback_hash_auto_log1p::fairings_ships_fallback_hash": NaN,
+      "capsules_fallback_hash_auto_log1p::launch_library_id_auto_log1p": NaN,
+      "capsules_fallback_hash_auto_log1p::ships_fallback_hash": NaN,
+      "capsules_fallback_hash_auto_log1p::static_fire_date_unix": NaN,
+      "capsules_fallback_hash_auto_log1p::success_auto_log1p": NaN,
+      "capsules_fallback_hash_auto_log1p::window": NaN,
+      "crew_fallback_hash_auto_log1p::date_precision_fallback_hash_auto_log1p": NaN,
+      "crew_fallback_hash_auto_log1p::failures_fallback_hash_auto_log1p": NaN,
+      "crew_fallback_hash_auto_log1p::fairings_recovered": NaN,
+      "crew_fallback_hash_auto_log1p::fairings_recovery_attempt": NaN,
+      "crew_fallback_hash_auto_log1p::fairings_reused": NaN,
+      "crew_fallback_hash_auto_log1p::fairings_ships_fallback_hash": NaN,
+      "crew_fallback_hash_auto_log1p::launch_library_id_auto_log1p": NaN,
+      "crew_fallback_hash_auto_log1p::ships_fallback_hash": NaN,
+      "crew_fallback_hash_auto_log1p::static_fire_date_unix": NaN,
+      "crew_fallback_hash_auto_log1p::success_auto_log1p": NaN,
+      "crew_fallback_hash_auto_log1p::window": NaN,
+      "date_precision_fallback_hash_auto_log1p::failures_fallback_hash_auto_log1p": NaN,
+      "date_precision_fallback_hash_auto_log1p::fairings_recovered": NaN,
+      "date_precision_fallback_hash_auto_log1p::fairings_recovery_attempt": NaN,
+      "date_precision_fallback_hash_auto_log1p::fairings_reused": NaN,
+      "date_precision_fallback_hash_auto_log1p::fairings_ships_fallback_hash": NaN,
+      "date_precision_fallback_hash_auto_log1p::launch_library_id_auto_log1p": NaN,
+      "date_precision_fallback_hash_auto_log1p::ships_fallback_hash": NaN,
+      "date_precision_fallback_hash_auto_log1p::static_fire_date_unix": NaN,
+      "date_precision_fallback_hash_auto_log1p::success_auto_log1p": NaN,
+      "date_precision_fallback_hash_auto_log1p::window": NaN,
+      "failures_fallback_hash_auto_log1p::fairings_recovered": NaN,
+      "failures_fallback_hash_auto_log1p::fairings_recovery_attempt": NaN,
+      "failures_fallback_hash_auto_log1p::fairings_reused": NaN,
+      "failures_fallback_hash_auto_log1p::fairings_ships_fallback_hash": NaN,
+      "failures_fallback_hash_auto_log1p::launch_library_id_auto_log1p": NaN,
+      "failures_fallback_hash_auto_log1p::ships_fallback_hash": NaN,
+      "failures_fallback_hash_auto_log1p::static_fire_date_unix": NaN,
+      "failures_fallback_hash_auto_log1p::success_auto_log1p": NaN,
+      "failures_fallback_hash_auto_log1p::window": NaN,
+      "fairings_recovered::fairings_recovery_attempt": 0.814737,
+      "fairings_recovered::fairings_reused": 0.757537,
+      "fairings_recovered::fairings_ships_fallback_hash": 0.030024,
+      "fairings_recovered::launch_library_id_auto_log1p": -0.475005,
+      "fairings_recovered::ships_fallback_hash": -0.072359,
+      "fairings_recovered::static_fire_date_unix": 0.763745,
+      "fairings_recovered::success_auto_log1p": NaN,
+      "fairings_recovered::window": 0.010284,
+      "fairings_recovery_attempt::fairings_reused": 0.653844,
+      "fairings_recovery_attempt::fairings_ships_fallback_hash": 0.205149,
+      "fairings_recovery_attempt::launch_library_id_auto_log1p": -0.397619,
+      "fairings_recovery_attempt::ships_fallback_hash": 0.056802,
+      "fairings_recovery_attempt::static_fire_date_unix": 0.772612,
+      "fairings_recovery_attempt::success_auto_log1p": NaN,
+      "fairings_recovery_attempt::window": 0.052952,
+      "fairings_reused::fairings_ships_fallback_hash": 0.011233,
+      "fairings_reused::launch_library_id_auto_log1p": -0.471767,
+      "fairings_reused::ships_fallback_hash": -0.011703,
+      "fairings_reused::static_fire_date_unix": 0.722898,
+      "fairings_reused::success_auto_log1p": NaN,
+      "fairings_reused::window": 0.057605,
+      "fairings_ships_fallback_hash::launch_library_id_auto_log1p": 0.038859,
+      "fairings_ships_fallback_hash::ships_fallback_hash": 0.378127,
+      "fairings_ships_fallback_hash::static_fire_date_unix": 0.010302,
+      "fairings_ships_fallback_hash::success_auto_log1p": NaN,
+      "fairings_ships_fallback_hash::window": 0.078239,
+      "launch_library_id_auto_log1p::ships_fallback_hash": -0.082099,
+      "launch_library_id_auto_log1p::static_fire_date_unix": -0.424741,
+      "launch_library_id_auto_log1p::success_auto_log1p": NaN,
+      "launch_library_id_auto_log1p::window": 0.06963,
+      "ships_fallback_hash::static_fire_date_unix": 0.030626,
+      "ships_fallback_hash::success_auto_log1p": NaN,
+      "ships_fallback_hash::window": -0.016809,
+      "static_fire_date_unix::success_auto_log1p": NaN,
+      "static_fire_date_unix::window": 0.005477,
+      "success_auto_log1p::window": NaN
+    },
+    "spearman": {
+      "anomaly_flag::anomaly_score": 0.391668,
+      "anomaly_flag::capsules_fallback_hash_auto_log1p": NaN,
+      "anomaly_flag::crew_fallback_hash_auto_log1p": NaN,
+      "anomaly_flag::date_precision_fallback_hash_auto_log1p": NaN,
+      "anomaly_flag::failures_fallback_hash_auto_log1p": NaN,
+      "anomaly_flag::fairings_recovered": -0.031088,
+      "anomaly_flag::fairings_recovery_attempt": 0.010657,
+      "anomaly_flag::fairings_reused": -0.059509,
+      "anomaly_flag::fairings_ships_fallback_hash": -0.070059,
+      "anomaly_flag::launch_library_id_auto_log1p": 0.051144,
+      "anomaly_flag::ships_fallback_hash": -0.007118,
+      "anomaly_flag::static_fire_date_unix": -0.053151,
+      "anomaly_flag::success_auto_log1p": NaN,
+      "anomaly_flag::window": 0.034925,
+      "anomaly_score::capsules_fallback_hash_auto_log1p": NaN,
+      "anomaly_score::crew_fallback_hash_auto_log1p": NaN,
+      "anomaly_score::date_precision_fallback_hash_auto_log1p": NaN,
+      "anomaly_score::failures_fallback_hash_auto_log1p": NaN,
+      "anomaly_score::fairings_recovered": 0.036529,
+      "anomaly_score::fairings_recovery_attempt": -0.106856,
+      "anomaly_score::fairings_reused": 0.134779,
+      "anomaly_score::fairings_ships_fallback_hash": -0.579335,
+      "anomaly_score::launch_library_id_auto_log1p": -0.089731,
+      "anomaly_score::ships_fallback_hash": -0.354434,
+      "anomaly_score::static_fire_date_unix": 0.153733,
+      "anomaly_score::success_auto_log1p": NaN,
+      "anomaly_score::window": 0.128062,
+      "capsules_fallback_hash_auto_log1p::crew_fallback_hash_auto_log1p": NaN,
+      "capsules_fallback_hash_auto_log1p::date_precision_fallback_hash_auto_log1p": NaN,
+      "capsules_fallback_hash_auto_log1p::failures_fallback_hash_auto_log1p": NaN,
+      "capsules_fallback_hash_auto_log1p::fairings_recovered": NaN,
+      "capsules_fallback_hash_auto_log1p::fairings_recovery_attempt": NaN,
+      "capsules_fallback_hash_auto_log1p::fairings_reused": NaN,
+      "capsules_fallback_hash_auto_log1p::fairings_ships_fallback_hash": NaN,
+      "capsules_fallback_hash_auto_log1p::launch_library_id_auto_log1p": NaN,
+      "capsules_fallback_hash_auto_log1p::ships_fallback_hash": NaN,
+      "capsules_fallback_hash_auto_log1p::static_fire_date_unix": NaN,
+      "capsules_fallback_hash_auto_log1p::success_auto_log1p": NaN,
+      "capsules_fallback_hash_auto_log1p::window": NaN,
+      "crew_fallback_hash_auto_log1p::date_precision_fallback_hash_auto_log1p": NaN,
+      "crew_fallback_hash_auto_log1p::failures_fallback_hash_auto_log1p": NaN,
+      "crew_fallback_hash_auto_log1p::fairings_recovered": NaN,
+      "crew_fallback_hash_auto_log1p::fairings_recovery_attempt": NaN,
+      "crew_fallback_hash_auto_log1p::fairings_reused": NaN,
+      "crew_fallback_hash_auto_log1p::fairings_ships_fallback_hash": NaN,
+      "crew_fallback_hash_auto_log1p::launch_library_id_auto_log1p": NaN,
+      "crew_fallback_hash_auto_log1p::ships_fallback_hash": NaN,
+      "crew_fallback_hash_auto_log1p::static_fire_date_unix": NaN,
+      "crew_fallback_hash_auto_log1p::success_auto_log1p": NaN,
+      "crew_fallback_hash_auto_log1p::window": NaN,
+      "date_precision_fallback_hash_auto_log1p::failures_fallback_hash_auto_log1p": NaN,
+      "date_precision_fallback_hash_auto_log1p::fairings_recovered": NaN,
+      "date_precision_fallback_hash_auto_log1p::fairings_recovery_attempt": NaN,
+      "date_precision_fallback_hash_auto_log1p::fairings_reused": NaN,
+      "date_precision_fallback_hash_auto_log1p::fairings_ships_fallback_hash": NaN,
+      "date_precision_fallback_hash_auto_log1p::launch_library_id_auto_log1p": NaN,
+      "date_precision_fallback_hash_auto_log1p::ships_fallback_hash": NaN,
+      "date_precision_fallback_hash_auto_log1p::static_fire_date_unix": NaN,
+      "date_precision_fallback_hash_auto_log1p::success_auto_log1p": NaN,
+      "date_precision_fallback_hash_auto_log1p::window": NaN,
+      "failures_fallback_hash_auto_log1p::fairings_recovered": NaN,
+      "failures_fallback_hash_auto_log1p::fairings_recovery_attempt": NaN,
+      "failures_fallback_hash_auto_log1p::fairings_reused": NaN,
+      "failures_fallback_hash_auto_log1p::fairings_ships_fallback_hash": NaN,
+      "failures_fallback_hash_auto_log1p::launch_library_id_auto_log1p": NaN,
+      "failures_fallback_hash_auto_log1p::ships_fallback_hash": NaN,
+      "failures_fallback_hash_auto_log1p::static_fire_date_unix": NaN,
+      "failures_fallback_hash_auto_log1p::success_auto_log1p": NaN,
+      "failures_fallback_hash_auto_log1p::window": NaN,
+      "fairings_recovered::fairings_recovery_attempt": 0.814737,
+      "fairings_recovered::fairings_reused": 0.757537,
+      "fairings_recovered::fairings_ships_fallback_hash": 0.04693,
+      "fairings_recovered::launch_library_id_auto_log1p": -0.488557,
+      "fairings_recovered::ships_fallback_hash": -0.081618,
+      "fairings_recovered::static_fire_date_unix": 0.847159,
+      "fairings_recovered::success_auto_log1p": NaN,
+      "fairings_recovered::window": -0.048082,
+      "fairings_recovery_attempt::fairings_reused": 0.653844,
+      "fairings_recovery_attempt::fairings_ships_fallback_hash": 0.212833,
+      "fairings_recovery_attempt::launch_library_id_auto_log1p": -0.408963,
+      "fairings_recovery_attempt::ships_fallback_hash": 0.060919,
+      "fairings_recovery_attempt::static_fire_date_unix": 0.80201,
+      "fairings_recovery_attempt::success_auto_log1p": NaN,
+      "fairings_recovery_attempt::window": -0.002988,
+      "fairings_reused::fairings_ships_fallback_hash": 0.021294,
+      "fairings_reused::launch_library_id_auto_log1p": -0.489201,
+      "fairings_reused::ships_fallback_hash": -0.034102,
+      "fairings_reused::static_fire_date_unix": 0.82657,
+      "fairings_reused::success_auto_log1p": NaN,
+      "fairings_reused::window": 0.03801,
+      "fairings_ships_fallback_hash::launch_library_id_auto_log1p": 0.023309,
+      "fairings_ships_fallback_hash::ships_fallback_hash": 0.3971,
+      "fairings_ships_fallback_hash::static_fire_date_unix": -0.060543,
+      "fairings_ships_fallback_hash::success_auto_log1p": NaN,
+      "fairings_ships_fallback_hash::window": 0.019644,
+      "launch_library_id_auto_log1p::ships_fallback_hash": -0.045441,
+      "launch_library_id_auto_log1p::static_fire_date_unix": -0.526737,
+      "launch_library_id_auto_log1p::success_auto_log1p": NaN,
+      "launch_library_id_auto_log1p::window": 0.075169,
+      "ships_fallback_hash::static_fire_date_unix": -0.127429,
+      "ships_fallback_hash::success_auto_log1p": NaN,
+      "ships_fallback_hash::window": 0.000762,
+      "static_fire_date_unix::success_auto_log1p": NaN,
+      "static_fire_date_unix::window": -0.014463,
+      "success_auto_log1p::window": NaN
+    },
+    "cramers_v": {},
+    "highlights": [
+      {
+        "columns": [
+          "fairings_recovered",
+          "static_fire_date_unix"
+        ],
+        "method": "spearman",
+        "value": 0.847159,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Spearman r=0.8472. Review for feature redundancy or causal relationship."
+      },
+      {
+        "columns": [
+          "fairings_reused",
+          "static_fire_date_unix"
+        ],
+        "method": "spearman",
+        "value": 0.82657,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Spearman r=0.8266. Review for feature redundancy or causal relationship."
+      },
+      {
+        "columns": [
+          "fairings_recovered",
+          "fairings_recovery_attempt"
+        ],
+        "method": "pearson",
+        "value": 0.814737,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Pearson r=0.8147. Review for feature redundancy or causal relationship."
+      },
+      {
+        "columns": [
+          "fairings_recovered",
+          "fairings_recovery_attempt"
+        ],
+        "method": "spearman",
+        "value": 0.814737,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Spearman r=0.8147. Review for feature redundancy or causal relationship."
+      },
+      {
+        "columns": [
+          "fairings_recovery_attempt",
+          "static_fire_date_unix"
+        ],
+        "method": "spearman",
+        "value": 0.80201,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Spearman r=0.8020. Review for feature redundancy or causal relationship."
+      }
+    ]
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 185,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "anomaly_flag": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "capsules_fallback_hash_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "crew_fallback_hash_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "date_precision_fallback_hash_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "failures_fallback_hash_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "fairings_recovered": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "fairings_recovery_attempt": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "fairings_reused": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "fairings_ships_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "launch_library_id_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "ships_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "static_fire_date_unix": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "success_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "window": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "columns": [
+        "fairings_recovered",
+        "static_fire_date_unix"
+      ],
+      "method": "spearman",
+      "value": 0.847159,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Spearman r=0.8472. Review for feature redundancy or causal relationship."
+    },
+    {
+      "columns": [
+        "fairings_reused",
+        "static_fire_date_unix"
+      ],
+      "method": "spearman",
+      "value": 0.82657,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Spearman r=0.8266. Review for feature redundancy or causal relationship."
+    },
+    {
+      "columns": [
+        "fairings_recovered",
+        "fairings_recovery_attempt"
+      ],
+      "method": "pearson",
+      "value": 0.814737,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Pearson r=0.8147. Review for feature redundancy or causal relationship."
+    },
+    {
+      "columns": [
+        "fairings_recovered",
+        "fairings_recovery_attempt"
+      ],
+      "method": "spearman",
+      "value": 0.814737,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Spearman r=0.8147. Review for feature redundancy or causal relationship."
+    },
+    {
+      "columns": [
+        "fairings_recovery_attempt",
+        "static_fire_date_unix"
+      ],
+      "method": "spearman",
+      "value": 0.80201,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Spearman r=0.8020. Review for feature redundancy or causal relationship."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "5.41% of values are outside IQR fence [0.239, 0.239]."
+    },
+    {
+      "column": "window",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "20.00% of values are outside IQR fence [0.04251, 0.04251]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-3.9443. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "static_fire_date_unix",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-1.3642. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "window",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=1.5383. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=13.5571. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "window",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=8.7455. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "anomaly_score",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=3e-05 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "fairings_recovery_attempt",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "fairings_reused",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "fairings_ships_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "launch_library_id_auto_log1p",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "ships_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "static_fire_date_unix",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "window",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 21
+}

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIPEX Executive Report — b0099f9d-7e3f-4152-b8af-4bbd0a97e7c0</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #0d1117; color: #e6edf3; padding: 0; }
+    .cover { background: linear-gradient(135deg, #1a1f35 0%, #0d1117 100%); padding: 60px 80px; border-bottom: 2px solid #21d4fd; }
+    .cover h1 { font-size: 2.6rem; color: #fff; font-weight: 700; letter-spacing: -0.5px; }
+    .cover h1 span { color: #21d4fd; }
+    .cover .subtitle { color: #8b949e; font-size: 1rem; margin-top: 8px; }
+    .cover .meta { display: flex; gap: 40px; margin-top: 32px; flex-wrap: wrap; }
+    .cover .meta-item { background: rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 8px; border: 1px solid #21262d; }
+    .cover .meta-item strong { display: block; color: #21d4fd; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .cover .meta-item span { font-size: 1rem; color: #e6edf3; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px 80px; }
+    section { margin-bottom: 50px; }
+    h2 { font-size: 1.4rem; color: #21d4fd; border-bottom: 1px solid #21262d; padding-bottom: 10px; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .kpi-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 20px; }
+    .kpi-card .label { color: #8b949e; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .kpi-card .value { font-size: 2rem; font-weight: 700; color: #3fb950; margin-top: 6px; }
+    .kpi-card .sub { color: #8b949e; font-size: 0.8rem; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; background: #161b22; border-radius: 10px; overflow: hidden; }
+    th { background: #1f2937; color: #8b949e; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; padding: 12px 16px; text-align: left; }
+    td { padding: 12px 16px; border-bottom: 1px solid #21262d; color: #e6edf3; font-size: 0.9rem; }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .badge.pass { background: rgba(63,185,80,0.15); color: #3fb950; border: 1px solid #3fb950; }
+    .badge.warn { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid #d29922; }
+    .badge.fail { background: rgba(248,81,73,0.15); color: #f85149; border: 1px solid #f85149; }
+    .narrative-box { background: #161b22; border-left: 4px solid #21d4fd; border-radius: 0 8px 8px 0; padding: 24px; font-size: 0.95rem; line-height: 1.7; color: #e6edf3; white-space: pre-wrap; }
+    .risk-item { display: flex; align-items: flex-start; gap: 12px; background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .risk-level { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+    .risk-HIGH { background: rgba(248,81,73,0.15); color: #f85149; }
+    .risk-MEDIUM { background: rgba(210,153,34,0.15); color: #d29922; }
+    .risk-LOW { background: rgba(63,185,80,0.15); color: #3fb950; }
+    .conf-bar { background: #21262d; border-radius: 4px; height: 8px; width: 100%; margin-top: 4px; }
+    .conf-fill { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #21d4fd, #3fb950); }
+    .footer { text-align: center; padding: 32px; color: #8b949e; font-size: 0.8rem; border-top: 1px solid #21262d; margin-top: 60px; }
+    .conf-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .conf-label { color: #8b949e; font-size: 0.85rem; width: 160px; flex-shrink: 0; }
+    .conf-score { color: #e6edf3; font-size: 0.85rem; width: 60px; text-align: right; }
+    /* EDA styles */
+    .eda-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .eda-stat { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 16px; text-align: center; }
+    .eda-stat .val { font-size: 1.8rem; font-weight: 700; color: #21d4fd; }
+    .eda-stat .lbl { color: #8b949e; font-size: 0.75rem; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+    .eda-insight-list { list-style: none; padding: 0; }
+    .eda-insight-list li { background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 0.9rem; display: flex; gap: 10px; align-items: flex-start; }
+    .eda-insight-list li::before { content: "›"; color: #21d4fd; font-size: 1.2em; flex-shrink: 0; margin-top: -1px; }
+    .eda-chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .eda-chart-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 16px; }
+    .eda-chart-card .chart-title { color: #21d4fd; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+    .eda-chart-card .chart-sub { color: #8b949e; font-size: 0.78rem; margin-bottom: 10px; }
+    .eda-chart-wrap { position: relative; height: 160px; }
+    .eda-link { display: inline-block; margin-top: 20px; padding: 10px 20px; background: rgba(33,212,253,0.1); border: 1px solid #21d4fd; color: #21d4fd; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+    .eda-link:hover { background: rgba(33,212,253,0.2); }
+    .eda-badge-ok   { background: rgba(63,185,80,0.15); color: #3fb950; border: 1px solid #3fb950; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    .eda-badge-warn { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid #d29922; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    .eda-badge-danger { background: rgba(248,81,73,0.15); color: #f85149; border: 1px solid #f85149; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    /* Insight callout boxes — inline reasoning beneath each stat/chart */
+    .insight-callout { background: rgba(33,212,253,0.04); border-left: 3px solid #21d4fd; border-radius: 0 6px 6px 0; padding: 10px 14px; margin-top: 8px; font-size: 0.82rem; color: #b0bec5; line-height: 1.6; font-style: italic; }
+    .insight-callout .insight-label { color: #21d4fd; font-style: normal; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: .6px; display: block; margin-bottom: 4px; }
+    .insight-callout .insight-rec  { color: #3fb950; font-style: normal; margin-top: 6px; font-size: 0.80rem; display: block; }
+    .insight-callout .insight-warn { color: #d29922; font-style: normal; margin-top: 4px; font-size: 0.80rem; display: block; }
+    .insight-callout .insight-flag { color: #f85149; font-style: normal; margin-top: 4px; font-size: 0.80rem; display: block; }
+    .model-metric-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; }
+    @media print {
+      body { background: #fff; color: #000; }
+      .cover { background: #1a1f35; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+<div class="cover">
+  <h1>DIPEX <span>Executive Report</span></h1>
+  <div class="subtitle">Cognitive Analytics Automation System — Verified Output</div>
+  <div class="meta">
+    <div class="meta-item"><strong>Run ID</strong><span>b0099f9d-7e3f-4152-b8af-4bbd0a97e7c0</span></div>
+    <div class="meta-item"><strong>Generated</strong><span>2026-04-17 10:01 UTC</span></div>
+    <div class="meta-item"><strong>QA Status</strong><span>QA_APPROVED</span></div>
+    <div class="meta-item"><strong>Domain</strong><span>GENERIC</span></div>
+  </div>
+</div>
+
+<div class="container">
+
+  
+  
+  <!-- KPI SCORECARD -->
+  <section>
+    <h2>Key Performance Indicators</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="label">Confidence Score</div>
+        <div class="value" style="color: #3fb950">99.7%</div>
+        <div class="sub">Aggregated gate confidence</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Gate 1 (Data Quality)</div>
+        <div class="value" style="color: #3fb950">PASS</div>
+        <div class="sub">Deterministic validation</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Gate 2 (Statistical)</div>
+        <div class="value" style="color: #3fb950">PASS</div>
+        <div class="sub">Model verification gate</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Dataset Rows</div>
+        <div class="value">0</div>
+        <div class="sub">0 columns</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Quality Flags</div>
+        <div class="value" style="color: #3fb950">0</div>
+        <div class="sub">Analyst flags raised</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Retry Attempts</div>
+        <div class="value">0</div>
+        <div class="sub">Pipeline retries</div>
+      </div>
+    </div>
+  </section>
+
+  
+  
+  
+  <!-- CONFIDENCE BREAKDOWN -->
+  <section>
+    <h2>Confidence Vector Breakdown</h2>
+    
+  </section>
+
+  
+  
+  
+  <!-- MODEL PERFORMANCE -->
+  
+
+  
+  
+  
+  <!-- DATA PREPARATION APPLIED -->
+  
+
+  
+  
+  
+  <!-- DATA QUALITY -->
+  
+
+  
+  
+  
+  <!-- RISK SUMMARY -->
+  
+
+  
+  
+  
+  <!-- NARRATIVE -->
+  
+  <section>
+    <h2>Verified Analytics Narrative</h2>
+    <div id="raw-narrative" style="display:none;">[GOVERNANCE BLOCK] Result gate_decision='PENDING' is not PASS. This result is NOT approved for LLM summarisation.</div>
+    <div class="narrative-box" id="rendered-narrative"></div>
+    <script>
+      if (typeof marked !== 'undefined') {
+        document.getElementById('rendered-narrative').innerHTML = marked.parse(document.getElementById('raw-narrative').innerText || document.getElementById('raw-narrative').textContent);
+      } else {
+        document.getElementById('rendered-narrative').innerText = document.getElementById('raw-narrative').innerText;
+      }
+    </script>
+  </section>
+  
+
+  
+  
+  
+  <!-- AUDIT METADATA -->
+  <section>
+    <h2>Audit & Provenance</h2>
+    <table>
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Run ID</td><td>b0099f9d-7e3f-4152-b8af-4bbd0a97e7c0</td></tr>
+        <tr><td>Data Fingerprint</td><td></td></tr>
+        <tr><td>Schema Version</td><td>1.0</td></tr>
+        <tr><td>Governance Decision</td><td><span class="badge fail">N/A</span></td></tr>
+        <tr><td>Report Generated</td><td>2026-04-17 10:01 UTC</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  
+  <!-- EDA REPORT SECTION -->
+  
+
+  
+  
+
+</div>
+
+
+<div class="container" style="max-width: 1400px; margin-top: 40px; margin-bottom: 40px;">
+  <h2>Full Interactive EDA Report</h2>
+  <iframe srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&#34;en&#34;&gt;
+&lt;head&gt;
+&lt;meta charset=&#34;utf-8&#34;&gt;
+&lt;title&gt;DIPEX EDA Report — b0099f9d-7e3f-4152-b8af-4bbd0a97e7c0&lt;/title&gt;
+&lt;style&gt;
+  body { font-family: &#39;Segoe UI&#39;, Arial, sans-serif; margin: 2rem; background: #f8f9fa; color: #212529; }
+  h1 { color: #0d6efd; border-bottom: 2px solid #0d6efd; padding-bottom: 0.5rem; }
+  h2 { color: #495057; margin-top: 2rem; }
+  table { border-collapse: collapse; width: 100%; margin-top: 1rem; background: #fff; }
+  th, td { border: 1px solid #dee2e6; padding: 8px 12px; text-align: left; }
+  th { background: #e9ecef; font-weight: 600; }
+  tr:nth-child(even) { background: #f8f9fa; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .card { background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 1rem; text-align: center; }
+  .card .value { font-size: 1.8rem; font-weight: 700; color: #0d6efd; }
+  .card .label { font-size: 0.85rem; color: #6c757d; }
+  .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #dee2e6; font-size: 0.8rem; color: #6c757d; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;DIPEX EDA Report&lt;/h1&gt;
+&lt;p&gt;Run ID: &lt;strong&gt;b0099f9d-7e3f-4152-b8af-4bbd0a97e7c0&lt;/strong&gt;&lt;/p&gt;
+
+&lt;div class=&#34;summary&#34;&gt;
+  &lt;div class=&#34;card&#34;&gt;&lt;div class=&#34;value&#34;&gt;100&lt;/div&gt;&lt;div class=&#34;label&#34;&gt;Rows&lt;/div&gt;&lt;/div&gt;
+  &lt;div class=&#34;card&#34;&gt;&lt;div class=&#34;value&#34;&gt;45&lt;/div&gt;&lt;div class=&#34;label&#34;&gt;Columns&lt;/div&gt;&lt;/div&gt;
+  &lt;div class=&#34;card&#34;&gt;&lt;div class=&#34;value&#34;&gt;45&lt;/div&gt;&lt;div class=&#34;label&#34;&gt;Numeric&lt;/div&gt;&lt;/div&gt;
+  &lt;div class=&#34;card&#34;&gt;&lt;div class=&#34;value&#34;&gt;0&lt;/div&gt;&lt;div class=&#34;label&#34;&gt;Categorical&lt;/div&gt;&lt;/div&gt;
+  &lt;div class=&#34;card&#34;&gt;&lt;div class=&#34;value&#34;&gt;0&lt;/div&gt;&lt;div class=&#34;label&#34;&gt;Missing Cells&lt;/div&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;h2&gt;Column Details&lt;/h2&gt;
+&lt;table&gt;
+&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Column&lt;/th&gt;&lt;th&gt;Type&lt;/th&gt;&lt;th&gt;Missing&lt;/th&gt;&lt;th&gt;Unique&lt;/th&gt;&lt;th&gt;Statistics&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;address_address&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;96&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.70, max=1.59&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;address_city_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;17&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.43, max=1.65&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;address_coordinates_lat&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;100&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.66, max=1.70&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;address_coordinates_lng&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;100&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.61, max=1.80&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;address_postalcode&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;100&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.75, max=1.83&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;address_state_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;33&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.37, max=1.95&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;address_statecode_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;28&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.78, max=1.97&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;age&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;19&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-2.19, max=2.59&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;anomaly_flag&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;2&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-4.36, max=0.23&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;anomaly_score&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;100&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-2.57, max=1.96&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;bank_cardexpire&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;12&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.54, max=1.51&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;bank_cardnumber&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;100&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-2.20, max=1.08&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;bank_cardtype_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;7&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.23, max=1.97&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;bank_currency_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;10&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.06, max=1.48&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;bank_iban_auto_log1p&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;80&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.79, max=2.02&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;bloodgroup_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;8&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.31, max=1.80&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;company_address_address&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;97&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.59, max=1.64&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;company_address_city_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;17&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.52, max=1.71&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;company_address_coordinates_lat&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;100&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.74, max=1.67&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;company_address_coordinates_lng&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;100&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.57, max=1.86&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;company_address_postalcode&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;100&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.66, max=1.63&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;company_address_state_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;36&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.37, max=1.82&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;company_address_statecode_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;30&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.95, max=1.98&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;company_department_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;12&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-2.06, max=1.85&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;company_name_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;49&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-2.07, max=1.44&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;company_title_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;20&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-2.39, max=1.54&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;ein&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;95&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.87, max=1.77&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;email_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;49&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.69, max=1.86&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;eyecolor_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;7&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.23, max=1.49&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;firstname_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;51&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.74, max=1.64&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;gender_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;2&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-0.96, max=1.04&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;hair_color_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;8&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.28, max=1.56&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;hair_type_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;4&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.28, max=1.46&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;height&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;99&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.90, max=1.69&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;id&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;100&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.71, max=1.71&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;ip&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;100&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.71, max=1.78&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;lastname_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;49&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.81, max=1.67&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;macaddress&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;44&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-0.93, max=2.23&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;password_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;53&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.79, max=1.65&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;phone&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;98&lt;/td&gt;&lt;td&gt;mean=0.00, std=1.01, min=-1.67, max=1.17&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;role_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;mean=0.00, std=0.00, min=0.00, max=0.00&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;ssn&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;98&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.77, max=1.66&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;university_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;26&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.48, max=1.71&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;username_fallback_hash&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;50&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.81, max=1.55&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;weight&lt;/td&gt;&lt;td&gt;float64&lt;/td&gt;&lt;td&gt;0 (0.0%)&lt;/td&gt;&lt;td&gt;99&lt;/td&gt;&lt;td&gt;mean=-0.00, std=1.01, min=-1.79, max=1.70&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;div class=&#34;footer&#34;&gt;
+  Generated by DIPEX AutoEDA (built-in fallback). Install &lt;code&gt;ydata-profiling&lt;/code&gt; for interactive reports.
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;" width="100%" height="800px" style="border: 1px solid #e2e8f0; border-radius: 8px;"></iframe>
+</div>
+
+
+<div class="footer">
+  Generated by DIPEX Cognitive Analytics Automation System &mdash;
+  Deterministic-first &bull; Statistically disciplined &bull; Governance-enforced
+</div>
+
+
+
+</body>
+</html>

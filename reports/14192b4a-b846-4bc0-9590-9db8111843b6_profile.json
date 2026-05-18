@@ -1,0 +1,143 @@
+{
+  "run_id": "14192b4a-b846-4bc0-9590-9db8111843b6",
+  "generated_at": "2026-03-15T19:12:08.598331+00:00",
+  "dataset_shape": {
+    "rows": 8,
+    "columns": 2
+  },
+  "columns": {
+    "mixed_obj_col_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "high",
+      "min": -1.7026921652527593,
+      "max": 0.7938824321895005,
+      "mean": 2.7755575615628914e-17,
+      "median": 0.4544048665316295,
+      "std": 1.0690449676496976,
+      "variance": 1.1428571428571428,
+      "q05": -1.7026921652527593,
+      "q25": -0.2121734785361694,
+      "q75": 0.6665783450677989,
+      "q95": 0.7938824321895005,
+      "iqr": 0.878752,
+      "skewness": -1.042457,
+      "kurtosis": -0.759833,
+      "high_skew": true,
+      "heavy_tails": false,
+      "shapiro_p": 0.002729,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 2,
+          "pct": 0.25,
+          "fence_low": -1.530301,
+          "fence_high": 1.984706
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "target": {
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "medium",
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.5,
+      "median": 0.5,
+      "std": 0.5345224838248488,
+      "variance": 0.2857142857142857,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 1.0,
+      "q95": 1.0,
+      "iqr": 1.0,
+      "skewness": 0.0,
+      "kurtosis": -2.0,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.000892,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -1.5,
+          "fence_high": 2.5
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "mixed_obj_col_fallback_hash::target": 0.0
+    },
+    "spearman": {
+      "mixed_obj_col_fallback_hash::target": 0.0
+    },
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 8,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "mixed_obj_col_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "target": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "mixed_obj_col_fallback_hash",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "25.00% of values are outside IQR fence [-1.53, 1.985]."
+    },
+    {
+      "column": "mixed_obj_col_fallback_hash",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-1.0425. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "mixed_obj_col_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.002729 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "target",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.000892 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 4
+}

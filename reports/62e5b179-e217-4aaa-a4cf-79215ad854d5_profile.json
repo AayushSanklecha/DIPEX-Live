@@ -1,0 +1,243 @@
+{
+  "run_id": "62e5b179-e217-4aaa-a4cf-79215ad854d5",
+  "generated_at": "2026-03-16T08:23:56.309808+00:00",
+  "dataset_shape": {
+    "rows": 28,
+    "columns": 4
+  },
+  "columns": {
+    "anomaly_flag": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "medium",
+      "min": -5.196152422706631,
+      "max": 0.19245008972987512,
+      "mean": -1.0903976134711358e-16,
+      "median": 0.19245008972987512,
+      "std": 1.0183501544346312,
+      "variance": 1.037037037037037,
+      "q05": 0.19245008972987512,
+      "q25": 0.19245008972987512,
+      "q75": 0.19245008972987512,
+      "q95": 0.19245008972987512,
+      "iqr": 0.0,
+      "skewness": -5.003702,
+      "kurtosis": 23.037037,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 1,
+          "pct": 0.035714,
+          "fence_low": 0.19245,
+          "fence_high": 0.19245
+        },
+        "zscore": {
+          "count": 1,
+          "pct": 0.035714,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 24,
+      "cardinality_tier": "high",
+      "min": -2.485286704481044,
+      "max": 1.4620380629519223,
+      "mean": -2.394909667405695e-15,
+      "median": 0.2902772282804559,
+      "std": 1.0183501544346312,
+      "variance": 1.037037037037037,
+      "q05": -1.8771491985050395,
+      "q25": -0.5966909993274196,
+      "q75": 0.7141886387227948,
+      "q95": 1.3243153346014154,
+      "iqr": 1.31088,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.56301,
+          "fence_high": 2.680508
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "mixed_obj_col_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 24,
+      "cardinality_tier": "high",
+      "min": -1.7446121808508699,
+      "max": 1.2511424025376077,
+      "mean": 5.15460690004537e-17,
+      "median": 0.2729368242883089,
+      "std": 1.0183501544346312,
+      "variance": 1.037037037037037,
+      "q05": -1.6804174397782596,
+      "q25": -0.9039667620428787,
+      "q75": 0.9607376214948471,
+      "q95": 1.229744155513404,
+      "iqr": 1.864704,
+      "skewness": -0.310207,
+      "kurtosis": -1.343949,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.013887,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.701023,
+          "fence_high": 3.757794
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "target": {
+      "dtype": "int32",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1,
+      "cardinality_tier": "low",
+      "min": 1.0,
+      "max": 1.0,
+      "mean": 1.0,
+      "median": 1.0,
+      "std": 0.0,
+      "variance": 0.0,
+      "q05": 1.0,
+      "q25": 1.0,
+      "q75": 1.0,
+      "q95": 1.0,
+      "iqr": 0.0,
+      "skewness": NaN,
+      "kurtosis": NaN,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.0,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": 1.0,
+          "fence_high": 1.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "anomaly_flag::anomaly_score": 0.478294,
+      "anomaly_flag::mixed_obj_col_fallback_hash": 0.300453,
+      "anomaly_flag::target": NaN,
+      "anomaly_score::mixed_obj_col_fallback_hash": 0.622544,
+      "anomaly_score::target": NaN,
+      "mixed_obj_col_fallback_hash::target": NaN
+    },
+    "spearman": {
+      "anomaly_flag::anomaly_score": 0.32181,
+      "anomaly_flag::mixed_obj_col_fallback_hash": 0.274134,
+      "anomaly_flag::target": NaN,
+      "anomaly_score::mixed_obj_col_fallback_hash": 0.490959,
+      "anomaly_score::target": NaN,
+      "mixed_obj_col_fallback_hash::target": NaN
+    },
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 28,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "anomaly_flag": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "mixed_obj_col_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "target": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "3.57% of values are outside IQR fence [0.1925, 0.1925]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-5.0037. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=23.0370. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "mixed_obj_col_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.01389 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 5
+}

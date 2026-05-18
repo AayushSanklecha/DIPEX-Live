@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIPEX Executive Report — 1e2175cc-af67-4686-8fa2-52050fa06fa9</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #0d1117; color: #e6edf3; padding: 0; }
+    .cover { background: linear-gradient(135deg, #1a1f35 0%, #0d1117 100%); padding: 60px 80px; border-bottom: 2px solid #21d4fd; }
+    .cover h1 { font-size: 2.6rem; color: #fff; font-weight: 700; letter-spacing: -0.5px; }
+    .cover h1 span { color: #21d4fd; }
+    .cover .subtitle { color: #8b949e; font-size: 1rem; margin-top: 8px; }
+    .cover .meta { display: flex; gap: 40px; margin-top: 32px; flex-wrap: wrap; }
+    .cover .meta-item { background: rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 8px; border: 1px solid #21262d; }
+    .cover .meta-item strong { display: block; color: #21d4fd; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .cover .meta-item span { font-size: 1rem; color: #e6edf3; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px 80px; }
+    section { margin-bottom: 50px; }
+    h2 { font-size: 1.4rem; color: #21d4fd; border-bottom: 1px solid #21262d; padding-bottom: 10px; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .kpi-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 20px; }
+    .kpi-card .label { color: #8b949e; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .kpi-card .value { font-size: 2rem; font-weight: 700; color: #3fb950; margin-top: 6px; }
+    .kpi-card .sub { color: #8b949e; font-size: 0.8rem; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; background: #161b22; border-radius: 10px; overflow: hidden; }
+    th { background: #1f2937; color: #8b949e; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; padding: 12px 16px; text-align: left; }
+    td { padding: 12px 16px; border-bottom: 1px solid #21262d; color: #e6edf3; font-size: 0.9rem; }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .badge.pass { background: rgba(63,185,80,0.15); color: #3fb950; border: 1px solid #3fb950; }
+    .badge.warn { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid #d29922; }
+    .badge.fail { background: rgba(248,81,73,0.15); color: #f85149; border: 1px solid #f85149; }
+    .narrative-box { background: #161b22; border-left: 4px solid #21d4fd; border-radius: 0 8px 8px 0; padding: 24px; font-size: 0.95rem; line-height: 1.7; color: #e6edf3; white-space: pre-wrap; }
+    .risk-item { display: flex; align-items: flex-start; gap: 12px; background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .risk-level { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+    .risk-HIGH { background: rgba(248,81,73,0.15); color: #f85149; }
+    .risk-MEDIUM { background: rgba(210,153,34,0.15); color: #d29922; }
+    .risk-LOW { background: rgba(63,185,80,0.15); color: #3fb950; }
+    .conf-bar { background: #21262d; border-radius: 4px; height: 8px; width: 100%; margin-top: 4px; }
+    .conf-fill { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #21d4fd, #3fb950); }
+    .footer { text-align: center; padding: 32px; color: #8b949e; font-size: 0.8rem; border-top: 1px solid #21262d; margin-top: 60px; }
+    .conf-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .conf-label { color: #8b949e; font-size: 0.85rem; width: 160px; flex-shrink: 0; }
+    .conf-score { color: #e6edf3; font-size: 0.85rem; width: 60px; text-align: right; }
+    /* EDA styles */
+    .eda-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .eda-stat { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 16px; text-align: center; }
+    .eda-stat .val { font-size: 1.8rem; font-weight: 700; color: #21d4fd; }
+    .eda-stat .lbl { color: #8b949e; font-size: 0.75rem; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+    .eda-insight-list { list-style: none; padding: 0; }
+    .eda-insight-list li { background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 0.9rem; display: flex; gap: 10px; align-items: flex-start; }
+    .eda-insight-list li::before { content: "›"; color: #21d4fd; font-size: 1.2em; flex-shrink: 0; margin-top: -1px; }
+    .eda-chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .eda-chart-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 16px; }
+    .eda-chart-card .chart-title { color: #21d4fd; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+    .eda-chart-card .chart-sub { color: #8b949e; font-size: 0.78rem; margin-bottom: 10px; }
+    .eda-chart-wrap { position: relative; height: 160px; }
+    .eda-link { display: inline-block; margin-top: 20px; padding: 10px 20px; background: rgba(33,212,253,0.1); border: 1px solid #21d4fd; color: #21d4fd; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+    .eda-link:hover { background: rgba(33,212,253,0.2); }
+    .eda-badge-ok   { background: rgba(63,185,80,0.15); color: #3fb950; border: 1px solid #3fb950; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    .eda-badge-warn { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid #d29922; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    .eda-badge-danger { background: rgba(248,81,73,0.15); color: #f85149; border: 1px solid #f85149; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    /* Insight callout boxes — inline reasoning beneath each stat/chart */
+    .insight-callout { background: rgba(33,212,253,0.04); border-left: 3px solid #21d4fd; border-radius: 0 6px 6px 0; padding: 10px 14px; margin-top: 8px; font-size: 0.82rem; color: #b0bec5; line-height: 1.6; font-style: italic; }
+    .insight-callout .insight-label { color: #21d4fd; font-style: normal; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: .6px; display: block; margin-bottom: 4px; }
+    .insight-callout .insight-rec  { color: #3fb950; font-style: normal; margin-top: 6px; font-size: 0.80rem; display: block; }
+    .insight-callout .insight-warn { color: #d29922; font-style: normal; margin-top: 4px; font-size: 0.80rem; display: block; }
+    .insight-callout .insight-flag { color: #f85149; font-style: normal; margin-top: 4px; font-size: 0.80rem; display: block; }
+    .model-metric-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; }
+    @media print {
+      body { background: #fff; color: #000; }
+      .cover { background: #1a1f35; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+<div class="cover">
+  <h1>DIPEX <span>Executive Report</span></h1>
+  <div class="subtitle">Cognitive Analytics Automation System — Verified Output</div>
+  <div class="meta">
+    <div class="meta-item"><strong>Run ID</strong><span>1e2175cc-af67-4686-8fa2-52050fa06fa9</span></div>
+    <div class="meta-item"><strong>Generated</strong><span>2026-03-07 03:18 UTC</span></div>
+    <div class="meta-item"><strong>QA Status</strong><span>QA_APPROVED</span></div>
+    <div class="meta-item"><strong>Domain</strong><span>GENERIC</span></div>
+  </div>
+</div>
+
+<div class="container">
+
+  
+  
+  <!-- KPI SCORECARD -->
+  <section>
+    <h2>Key Performance Indicators</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="label">Confidence Score</div>
+        <div class="value" style="color: #3fb950">89.4%</div>
+        <div class="sub">Aggregated gate confidence</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Gate 1 (Data Quality)</div>
+        <div class="value" style="color: #3fb950">PASS</div>
+        <div class="sub">Deterministic validation</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Gate 2 (Statistical)</div>
+        <div class="value" style="color: #3fb950">PASS</div>
+        <div class="sub">Model verification gate</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Dataset Rows</div>
+        <div class="value">0</div>
+        <div class="sub">0 columns</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Quality Flags</div>
+        <div class="value" style="color: #3fb950">0</div>
+        <div class="sub">Analyst flags raised</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Retry Attempts</div>
+        <div class="value">0</div>
+        <div class="sub">Pipeline retries</div>
+      </div>
+    </div>
+  </section>
+
+  
+  
+  
+  <!-- CONFIDENCE BREAKDOWN -->
+  <section>
+    <h2>Confidence Vector Breakdown</h2>
+    
+  </section>
+
+  
+  
+  
+  <!-- MODEL PERFORMANCE -->
+  
+
+  
+  
+  
+  <!-- DATA PREPARATION APPLIED -->
+  
+
+  
+  
+  
+  <!-- DATA QUALITY -->
+  
+
+  
+  
+  
+  <!-- RISK SUMMARY -->
+  
+
+  
+  
+  
+  <!-- NARRATIVE -->
+  
+  <section>
+    <h2>Verified Analytics Narrative</h2>
+    <div id="raw-narrative" style="display:none;">[GOVERNANCE BLOCK] Result gate_decision='PENDING' is not PASS. This result is NOT approved for LLM summarisation.</div>
+    <div class="narrative-box" id="rendered-narrative"></div>
+    <script>
+      if (typeof marked !== 'undefined') {
+        document.getElementById('rendered-narrative').innerHTML = marked.parse(document.getElementById('raw-narrative').innerText || document.getElementById('raw-narrative').textContent);
+      } else {
+        document.getElementById('rendered-narrative').innerText = document.getElementById('raw-narrative').innerText;
+      }
+    </script>
+  </section>
+  
+
+  
+  
+  
+  <!-- AUDIT METADATA -->
+  <section>
+    <h2>Audit & Provenance</h2>
+    <table>
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Run ID</td><td>1e2175cc-af67-4686-8fa2-52050fa06fa9</td></tr>
+        <tr><td>Data Fingerprint</td><td></td></tr>
+        <tr><td>Schema Version</td><td>1.0</td></tr>
+        <tr><td>Governance Decision</td><td><span class="badge fail">N/A</span></td></tr>
+        <tr><td>Report Generated</td><td>2026-03-07 03:18 UTC</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+  
+  <!-- EDA REPORT SECTION -->
+  
+
+  
+  
+
+</div>
+
+<div class="footer">
+  Generated by DIPEX Cognitive Analytics Automation System &mdash;
+  Deterministic-first &bull; Statistically disciplined &bull; Governance-enforced
+</div>
+
+</body>
+</html>

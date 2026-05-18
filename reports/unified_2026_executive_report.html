@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIPEX Executive Report — unified_2026</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #0d1117; color: #e6edf3; padding: 0; }
+    .cover { background: linear-gradient(135deg, #1a1f35 0%, #0d1117 100%); padding: 60px 80px; border-bottom: 2px solid #21d4fd; }
+    .cover h1 { font-size: 2.6rem; color: #fff; font-weight: 700; letter-spacing: -0.5px; }
+    .cover h1 span { color: #21d4fd; }
+    .cover .subtitle { color: #8b949e; font-size: 1rem; margin-top: 8px; }
+    .cover .meta { display: flex; gap: 40px; margin-top: 32px; flex-wrap: wrap; }
+    .cover .meta-item { background: rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 8px; border: 1px solid #21262d; }
+    .cover .meta-item strong { display: block; color: #21d4fd; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .cover .meta-item span { font-size: 1rem; color: #e6edf3; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px 80px; }
+    section { margin-bottom: 50px; }
+    h2 { font-size: 1.4rem; color: #21d4fd; border-bottom: 1px solid #21262d; padding-bottom: 10px; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .kpi-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 20px; }
+    .kpi-card .label { color: #8b949e; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .kpi-card .value { font-size: 2rem; font-weight: 700; color: #3fb950; margin-top: 6px; }
+    .kpi-card .sub { color: #8b949e; font-size: 0.8rem; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; background: #161b22; border-radius: 10px; overflow: hidden; }
+    th { background: #1f2937; color: #8b949e; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; padding: 12px 16px; text-align: left; }
+    td { padding: 12px 16px; border-bottom: 1px solid #21262d; color: #e6edf3; font-size: 0.9rem; }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .badge.pass { background: rgba(63,185,80,0.15); color: #3fb950; border: 1px solid #3fb950; }
+    .badge.warn { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid #d29922; }
+    .badge.fail { background: rgba(248,81,73,0.15); color: #f85149; border: 1px solid #f85149; }
+    .narrative-box { background: #161b22; border-left: 4px solid #21d4fd; border-radius: 0 8px 8px 0; padding: 24px; font-size: 0.95rem; line-height: 1.7; color: #e6edf3; white-space: pre-wrap; }
+    .risk-item { display: flex; align-items: flex-start; gap: 12px; background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .risk-level { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+    .risk-HIGH { background: rgba(248,81,73,0.15); color: #f85149; }
+    .risk-MEDIUM { background: rgba(210,153,34,0.15); color: #d29922; }
+    .risk-LOW { background: rgba(63,185,80,0.15); color: #3fb950; }
+    .conf-bar { background: #21262d; border-radius: 4px; height: 8px; width: 100%; margin-top: 4px; }
+    .conf-fill { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #21d4fd, #3fb950); }
+    .footer { text-align: center; padding: 32px; color: #8b949e; font-size: 0.8rem; border-top: 1px solid #21262d; margin-top: 60px; }
+    .conf-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .conf-label { color: #8b949e; font-size: 0.85rem; width: 160px; flex-shrink: 0; }
+    .conf-score { color: #e6edf3; font-size: 0.85rem; width: 60px; text-align: right; }
+    /* EDA styles */
+    .eda-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .eda-stat { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 16px; text-align: center; }
+    .eda-stat .val { font-size: 1.8rem; font-weight: 700; color: #21d4fd; }
+    .eda-stat .lbl { color: #8b949e; font-size: 0.75rem; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+    .eda-insight-list { list-style: none; padding: 0; }
+    .eda-insight-list li { background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 0.9rem; display: flex; gap: 10px; align-items: flex-start; }
+    .eda-insight-list li::before { content: "›"; color: #21d4fd; font-size: 1.2em; flex-shrink: 0; margin-top: -1px; }
+    .eda-chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .eda-chart-card { background: #161b22; border: 1px solid #21262d; border-radius: 10px; padding: 16px; }
+    .eda-chart-card .chart-title { color: #21d4fd; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+    .eda-chart-card .chart-sub { color: #8b949e; font-size: 0.78rem; margin-bottom: 10px; }
+    .eda-chart-wrap { position: relative; height: 160px; }
+    .eda-link { display: inline-block; margin-top: 20px; padding: 10px 20px; background: rgba(33,212,253,0.1); border: 1px solid #21d4fd; color: #21d4fd; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 600; }
+    .eda-link:hover { background: rgba(33,212,253,0.2); }
+    .eda-badge-ok   { background: rgba(63,185,80,0.15); color: #3fb950; border: 1px solid #3fb950; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    .eda-badge-warn { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid #d29922; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    .eda-badge-danger { background: rgba(248,81,73,0.15); color: #f85149; border: 1px solid #f85149; padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+    @media print {
+      body { background: #fff; color: #000; }
+      .cover { background: #1a1f35; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+<div class="cover">
+  <h1>DIPEX <span>Executive Report</span></h1>
+  <div class="subtitle">Cognitive Analytics Automation System — Verified Output</div>
+  <div class="meta">
+    <div class="meta-item"><strong>Run ID</strong><span>unified_2026</span></div>
+    <div class="meta-item"><strong>Generated</strong><span>2026-03-07 00:04 UTC</span></div>
+    <div class="meta-item"><strong>QA Status</strong><span>QA_APPROVED</span></div>
+    <div class="meta-item"><strong>Domain</strong><span>GENERIC</span></div>
+  </div>
+</div>
+
+<div class="container">
+
+  
+  
+  <!-- KPI SCORECARD -->
+  <section>
+    <h2>Key Performance Indicators</h2>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="label">Confidence Score</div>
+        <div class="value" style="color: #3fb950">87.0%</div>
+        <div class="sub">Aggregated gate confidence</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Gate 1 (Data Quality)</div>
+        <div class="value" style="color: #3fb950">PASS</div>
+        <div class="sub">Deterministic validation</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Gate 2 (Statistical)</div>
+        <div class="value" style="color: #3fb950">PASS</div>
+        <div class="sub">Model verification gate</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Dataset Rows</div>
+        <div class="value">500</div>
+        <div class="sub">6 columns</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Quality Flags</div>
+        <div class="value" style="color: #3fb950">0</div>
+        <div class="sub">Analyst flags raised</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Retry Attempts</div>
+        <div class="value">0</div>
+        <div class="sub">Pipeline retries</div>
+      </div>
+    </div>
+  </section>
+
+  
+  
+  
+  <!-- CONFIDENCE BREAKDOWN -->
+  <section>
+    <h2>Confidence Vector Breakdown</h2>
+    
+    <div class="conf-row">
+      <div class="conf-label">Data Quality</div>
+      <div class="conf-bar" style="flex:1; margin: 0 16px;"><div class="conf-fill" style="width: 91.0%;"></div></div>
+      <div class="conf-score">91%</div>
+    </div>
+    
+    <div class="conf-row">
+      <div class="conf-label">Model Stability</div>
+      <div class="conf-bar" style="flex:1; margin: 0 16px;"><div class="conf-fill" style="width: 84.0%;"></div></div>
+      <div class="conf-score">84%</div>
+    </div>
+    
+  </section>
+
+  
+  
+  
+  <!-- MODEL PERFORMANCE -->
+  
+  <section>
+    <h2>Model Performance</h2>
+    <table>
+      <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+      <tbody>
+        
+        <tr><td>Model</td><td>XGBoost</td></tr>
+        
+        <tr><td>Roc-Auc</td><td>0.9231</td></tr>
+        
+        <tr><td>F1-Score</td><td>0.8814</td></tr>
+        
+        <tr><td>Tuning</td><td>Optuna TPE</td></tr>
+        
+      </tbody>
+    </table>
+  </section>
+  
+
+  
+  
+  
+  <!-- DATA QUALITY -->
+  
+
+  
+  
+  
+  <!-- EDA REPORT SECTION -->
+  
+  <section>
+    <h2>📊 Exploratory Data Analysis</h2>
+
+    <!-- Stats row -->
+    <div class="eda-stat-grid">
+      <div class="eda-stat"><div class="val">500</div><div class="lbl">Rows</div></div>
+      <div class="eda-stat"><div class="val">6</div><div class="lbl">Columns</div></div>
+      <div class="eda-stat"><div class="val">2.4%</div><div class="lbl">Null Rate</div></div>
+      <div class="eda-stat"><div class="val">6</div><div class="lbl">Numeric</div></div>
+      <div class="eda-stat"><div class="val">0</div><div class="lbl">Categorical</div></div>
+      <div class="eda-stat">
+        <div class="val" style="color:#d29922">5.2%</div>
+        <div class="lbl">Anomaly Rate</div>
+      </div>
+    </div>
+
+    <!-- Auto Insights -->
+    
+    <h3 style="color:#8b949e; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">💡 Auto-Generated Insights</h3>
+    <ul class="eda-insight-list" style="margin-bottom:28px;">
+      
+      <li>Revenue is highly right-skewed (skew=1.49). Log transform recommended.</li>
+      
+      <li>Strong correlation: revenue <-> loan_amount (r=0.72). Potential multicollinearity.</li>
+      
+      <li>8% of revenue values are zero - possible data collection issue.</li>
+      
+      <li>credit_score: 4% missing - investigate MCAR vs MAR.</li>
+      
+      <li>age <-> months_employed moderately correlated (r=0.61). Consider feature removal.</li>
+      
+    </ul>
+    
+
+    <!-- Distribution charts -->
+    
+    <h3 style="color:#8b949e; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">📈 Numeric Distributions</h3>
+    <div class="eda-chart-grid">
+      
+      <div class="eda-chart-card">
+        <div class="chart-title">revenue</div>
+        <div class="chart-sub">Mean: 4766.85 · Skew: 1.487</div>
+        <div class="eda-chart-wrap"><canvas id="edadist_revenue"></canvas></div>
+      </div>
+      
+      <div class="eda-chart-card">
+        <div class="chart-title">age</div>
+        <div class="chart-sub">Mean: 39.56 · Skew: 0.161</div>
+        <div class="eda-chart-wrap"><canvas id="edadist_age"></canvas></div>
+      </div>
+      
+      <div class="eda-chart-card">
+        <div class="chart-title">credit_score</div>
+        <div class="chart-sub">Mean: 686.94 · Skew: -0.094</div>
+        <div class="eda-chart-wrap"><canvas id="edadist_credit_score"></canvas></div>
+      </div>
+      
+      <div class="eda-chart-card">
+        <div class="chart-title">loan_amount</div>
+        <div class="chart-sub">Mean: 12585.07 · Skew: 4.906</div>
+        <div class="eda-chart-wrap"><canvas id="edadist_loan_amount"></canvas></div>
+      </div>
+      
+      <div class="eda-chart-card">
+        <div class="chart-title">months_employed</div>
+        <div class="chart-sub">Mean: 50.62 · Skew: 0.305</div>
+        <div class="eda-chart-wrap"><canvas id="edadist_months_employed"></canvas></div>
+      </div>
+      
+      <div class="eda-chart-card">
+        <div class="chart-title">transactions</div>
+        <div class="chart-sub">Mean: 119.9 · Skew: 0.185</div>
+        <div class="eda-chart-wrap"><canvas id="edadist_transactions"></canvas></div>
+      </div>
+      
+    </div>
+    <script>
+    
+    (function(){
+      var ctx = document.getElementById('edadist_revenue').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: { labels: ["0.0", "1376.9", "2753.79", "4130.69", "5507.59", "6884.48", "8261.38", "9638.28", "11015.17", "12392.07", "13768.97", "15145.87", "16522.76", "17899.66", "19276.56", "20653.45", "22030.35", "23407.25"], datasets: [{ data: [136, 78, 55, 46, 29, 28, 17, 12, 18, 6, 10, 6, 8, 3, 0, 5, 2, 1],
+          backgroundColor: '#21d4fd33', borderColor: '#21d4fd', borderWidth: 1 }] },
+        options: { responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{ x:{ticks:{color:'#8b949e',maxRotation:45,maxTicksLimit:5},grid:{color:'#21262d'}},
+                   y:{ticks:{color:'#8b949e'},grid:{color:'#21262d'},beginAtZero:true} } }
+      });
+    })();
+    
+    (function(){
+      var ctx = document.getElementById('edadist_age').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: { labels: ["18.0", "20.83", "23.66", "26.49", "29.32", "32.15", "34.99", "37.82", "40.65", "43.48", "46.31", "49.14", "51.97", "54.8", "57.63", "60.46", "63.29", "66.13"], datasets: [{ data: [29, 20, 26, 16, 48, 38, 48, 48, 52, 44, 27, 29, 23, 19, 14, 6, 8, 5],
+          backgroundColor: '#21d4fd33', borderColor: '#21d4fd', borderWidth: 1 }] },
+        options: { responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{ x:{ticks:{color:'#8b949e',maxRotation:45,maxTicksLimit:5},grid:{color:'#21262d'}},
+                   y:{ticks:{color:'#8b949e'},grid:{color:'#21262d'},beginAtZero:true} } }
+      });
+    })();
+    
+    (function(){
+      var ctx = document.getElementById('edadist_credit_score').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: { labels: ["417.08", "447.65", "478.22", "508.8", "539.37", "569.94", "600.51", "631.08", "661.66", "692.23", "722.8", "753.37", "783.95", "814.52", "845.09", "875.66", "906.24", "936.81"], datasets: [{ data: [4, 3, 5, 12, 18, 36, 49, 59, 67, 60, 55, 41, 32, 21, 14, 1, 2, 1],
+          backgroundColor: '#21d4fd33', borderColor: '#21d4fd', borderWidth: 1 }] },
+        options: { responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{ x:{ticks:{color:'#8b949e',maxRotation:45,maxTicksLimit:5},grid:{color:'#21262d'}},
+                   y:{ticks:{color:'#8b949e'},grid:{color:'#21262d'},beginAtZero:true} } }
+      });
+    })();
+    
+    (function(){
+      var ctx = document.getElementById('edadist_loan_amount').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: { labels: ["395.63", "10750.96", "21106.29", "31461.62", "41816.95", "52172.28", "62527.6", "72882.93", "83238.26", "93593.59", "103948.92", "114304.25", "124659.57", "135014.9", "145370.23", "155725.56", "166080.89", "176436.22"], datasets: [{ data: [317, 109, 36, 19, 6, 5, 3, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+          backgroundColor: '#21d4fd33', borderColor: '#21d4fd', borderWidth: 1 }] },
+        options: { responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{ x:{ticks:{color:'#8b949e',maxRotation:45,maxTicksLimit:5},grid:{color:'#21262d'}},
+                   y:{ticks:{color:'#8b949e'},grid:{color:'#21262d'},beginAtZero:true} } }
+      });
+    })();
+    
+    (function(){
+      var ctx = document.getElementById('edadist_months_employed').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: { labels: ["0.2", "8.04", "15.88", "23.71", "31.55", "39.39", "47.23", "55.07", "62.91", "70.75", "78.59", "86.43", "94.26", "102.1", "109.94", "117.78", "125.62", "133.46"], datasets: [{ data: [25, 32, 39, 43, 45, 48, 39, 59, 56, 38, 27, 20, 13, 9, 1, 2, 1, 3],
+          backgroundColor: '#21d4fd33', borderColor: '#21d4fd', borderWidth: 1 }] },
+        options: { responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{ x:{ticks:{color:'#8b949e',maxRotation:45,maxTicksLimit:5},grid:{color:'#21262d'}},
+                   y:{ticks:{color:'#8b949e'},grid:{color:'#21262d'},beginAtZero:true} } }
+      });
+    })();
+    
+    (function(){
+      var ctx = document.getElementById('edadist_transactions').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: { labels: ["91.0", "94.56", "98.11", "101.67", "105.22", "108.78", "112.33", "115.89", "119.44", "123.0", "126.56", "130.11", "133.67", "137.22", "140.78", "144.33", "147.89", "151.44"], datasets: [{ data: [2, 9, 9, 21, 34, 51, 50, 73, 51, 73, 49, 30, 19, 8, 13, 4, 3, 1],
+          backgroundColor: '#21d4fd33', borderColor: '#21d4fd', borderWidth: 1 }] },
+        options: { responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{ x:{ticks:{color:'#8b949e',maxRotation:45,maxTicksLimit:5},grid:{color:'#21262d'}},
+                   y:{ticks:{color:'#8b949e'},grid:{color:'#21262d'},beginAtZero:true} } }
+      });
+    })();
+    
+    </script>
+    
+
+    <!-- Correlations -->
+    
+    <h3 style="color:#8b949e; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; margin-top:24px;">🔗 Top Correlations</h3>
+    <table style="margin-bottom:24px;">
+      <thead><tr><th>Column A</th><th>Column B</th><th>Pearson r</th><th>Strength</th></tr></thead>
+      <tbody>
+      
+        <tr>
+          <td>revenue</td><td>loan_amount</td><td>0.72</td>
+          <td><span class="eda-badge-danger">Strong</span></td>
+        </tr>
+      
+        <tr>
+          <td>credit_score</td><td>loan_amount</td><td>0.53</td>
+          <td><span class="eda-badge-warn">Moderate</span></td>
+        </tr>
+      
+        <tr>
+          <td>age</td><td>months_employed</td><td>0.61</td>
+          <td><span class="eda-badge-warn">Moderate</span></td>
+        </tr>
+      
+      </tbody>
+    </table>
+    
+
+    <!-- Outliers -->
+    
+    <h3 style="color:#8b949e; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">⚠️ Outlier Summary</h3>
+    <table style="margin-bottom:24px;">
+      <thead><tr><th>Column</th><th>Count</th><th>Pct</th><th>Method</th><th>Status</th></tr></thead>
+      <tbody>
+      
+        <tr>
+          <td>loan_amount</td><td>22</td><td>4.4%</td><td>IQR</td>
+          <td><span class="eda-badge-warn">Watch</span></td>
+        </tr>
+      
+        <tr>
+          <td>revenue</td><td>15</td><td>3.0%</td><td>IQR</td>
+          <td><span class="eda-badge-ok">OK</span></td>
+        </tr>
+      
+      </tbody>
+    </table>
+    
+
+    <!-- Link to full EDA HTML -->
+    
+  </section>
+  
+
+  
+  
+  
+  <!-- RISK SUMMARY -->
+  
+  <section>
+    <h2>Risk Communication</h2>
+    
+    <div class="risk-item">
+      <span class="risk-level risk-MEDIUM">MEDIUM</span>
+      <div>
+        <strong>Data Quality</strong>
+        <div style="color:#8b949e; font-size:0.85rem; margin-top:4px;">8% zero values in revenue.</div>
+      </div>
+    </div>
+    
+  </section>
+  
+
+  
+  
+  
+  <!-- NARRATIVE -->
+  
+  <section>
+    <h2>Verified Analytics Narrative</h2>
+    <div id="raw-narrative" style="display:none;">Pipeline processed 500 financial records. Revenue shows strong right skew. Model stability excellent.</div>
+    <div class="narrative-box" id="rendered-narrative"></div>
+    <script>
+      if (typeof marked !== 'undefined') {
+        document.getElementById('rendered-narrative').innerHTML = marked.parse(document.getElementById('raw-narrative').innerText || document.getElementById('raw-narrative').textContent);
+      } else {
+        document.getElementById('rendered-narrative').innerText = document.getElementById('raw-narrative').innerText;
+      }
+    </script>
+  </section>
+  
+
+  
+  
+  
+  <!-- AUDIT METADATA -->
+  <section>
+    <h2>Audit & Provenance</h2>
+    <table>
+      <thead><tr><th>Field</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Run ID</td><td>unified_2026</td></tr>
+        <tr><td>Data Fingerprint</td><td></td></tr>
+        <tr><td>Schema Version</td><td>1.0</td></tr>
+        <tr><td>Governance Decision</td><td><span class="badge fail">N/A</span></td></tr>
+        <tr><td>Report Generated</td><td>2026-03-07 00:04 UTC</td></tr>
+      </tbody>
+    </table>
+  </section>
+  
+  
+
+</div>
+
+<div class="footer">
+  Generated by DIPEX Cognitive Analytics Automation System &mdash;
+  Deterministic-first &bull; Statistically disciplined &bull; Governance-enforced
+</div>
+
+</body>
+</html>

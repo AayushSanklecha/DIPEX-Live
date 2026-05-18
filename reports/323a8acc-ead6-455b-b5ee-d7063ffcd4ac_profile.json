@@ -1,0 +1,396 @@
+{
+  "run_id": "323a8acc-ead6-455b-b5ee-d7063ffcd4ac",
+  "generated_at": "2026-03-05T10:42:19.470068+00:00",
+  "dataset_shape": {
+    "rows": 4,
+    "columns": 7
+  },
+  "columns": {
+    "id": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "unique",
+      "min": -1.3416407864998738,
+      "max": 1.3416407864998738,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 1.1547005383792515,
+      "variance": 1.3333333333333333,
+      "q05": -1.2074767078498865,
+      "q25": -0.6708203932499369,
+      "q75": 0.6708203932499369,
+      "q95": 1.207476707849886,
+      "iqr": 1.341641,
+      "skewness": 0.0,
+      "kurtosis": -1.36,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.971877,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.683282,
+          "fence_high": 2.683282
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "name_alice": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "high",
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.25,
+      "median": 0.0,
+      "std": 0.5,
+      "variance": 0.25,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.25,
+      "q95": 0.8499999999999996,
+      "iqr": 0.25,
+      "skewness": 1.154701,
+      "kurtosis": -0.666667,
+      "high_skew": true,
+      "heavy_tails": false,
+      "shapiro_p": 0.001241,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 1,
+          "pct": 0.25,
+          "fence_low": -0.375,
+          "fence_high": 0.625
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "name_bob": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "high",
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.25,
+      "median": 0.0,
+      "std": 0.5,
+      "variance": 0.25,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.25,
+      "q95": 0.8499999999999996,
+      "iqr": 0.25,
+      "skewness": 1.154701,
+      "kurtosis": -0.666667,
+      "high_skew": true,
+      "heavy_tails": false,
+      "shapiro_p": 0.001241,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 1,
+          "pct": 0.25,
+          "fence_low": -0.375,
+          "fence_high": 0.625
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "name_charlie": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "high",
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.25,
+      "median": 0.0,
+      "std": 0.5,
+      "variance": 0.25,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.25,
+      "q95": 0.8499999999999996,
+      "iqr": 0.25,
+      "skewness": 1.154701,
+      "kurtosis": -0.666667,
+      "high_skew": true,
+      "heavy_tails": false,
+      "shapiro_p": 0.001241,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 1,
+          "pct": 0.25,
+          "fence_low": -0.375,
+          "fence_high": 0.625
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "name_david": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "high",
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.25,
+      "median": 0.0,
+      "std": 0.5,
+      "variance": 0.25,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.25,
+      "q95": 0.8499999999999996,
+      "iqr": 0.25,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 1,
+          "pct": 0.25,
+          "fence_low": -0.375,
+          "fence_high": 0.625
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "value": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "unique",
+      "min": -1.1273390668995398,
+      "max": 1.449435943156551,
+      "mean": 0.0,
+      "median": -0.16104843812850567,
+      "std": 1.1547005383792515,
+      "variance": 1.3333333333333333,
+      "q05": -1.0629196916481374,
+      "q25": -0.8052421906425284,
+      "q75": 0.6441937525140227,
+      "q95": 1.288387505028045,
+      "iqr": 1.449436,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.979396,
+          "fence_high": 2.818348
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "target": {
+      "dtype": "int64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "high",
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.5,
+      "median": 0.5,
+      "std": 0.5773502691896257,
+      "variance": 0.3333333333333333,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 1.0,
+      "q95": 1.0,
+      "iqr": 1.0,
+      "skewness": 0.0,
+      "kurtosis": -2.0,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.023857,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -1.5,
+          "fence_high": 2.5
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {},
+    "spearman": {},
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 4,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "name_alice": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "name_bob": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "name_charlie": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "name_david": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "value": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "target": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "id",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (4 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "value",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (4 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "name_alice",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "25.00% of values are outside IQR fence [-0.375, 0.625]."
+    },
+    {
+      "column": "name_bob",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "25.00% of values are outside IQR fence [-0.375, 0.625]."
+    },
+    {
+      "column": "name_charlie",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "25.00% of values are outside IQR fence [-0.375, 0.625]."
+    },
+    {
+      "column": "name_david",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "25.00% of values are outside IQR fence [-0.375, 0.625]."
+    },
+    {
+      "column": "name_alice",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=1.1547. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "name_bob",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=1.1547. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "name_charlie",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=1.1547. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "name_alice",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.001241 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "name_bob",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.001241 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "name_charlie",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.001241 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "target",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.02386 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 13
+}

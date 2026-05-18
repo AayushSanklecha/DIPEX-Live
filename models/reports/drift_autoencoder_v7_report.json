@@ -1,0 +1,22 @@
+{
+  "type": "torch_ae_v7",
+  "corpus_rows": 44961,
+  "drift_feat_dim": 20,
+  "input_dim_filtered": 20,
+  "architecture": "[20\u219285\u219230\u219285\u219220]",
+  "train_recon_mse": 0.62838,
+  "holdout_recon_mse": 0.61384,
+  "overfit_ratio": 0.977,
+  "gate_passed": true,
+  "threshold_mad3s": 0.2588,
+  "threshold_p95": 0.785,
+  "threshold_used": 0.785,
+  "device": "cuda",
+  "best_h1": 85,
+  "best_h2": 30,
+  "best_lr": 0.0018657365455058378,
+  "best_dropout": 0.13765375747821992,
+  "version": "20260413_1258",
+  "time_s": 2088.7,
+  "_version": "20260413_1258"
+}

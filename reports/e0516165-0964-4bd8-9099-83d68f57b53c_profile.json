@@ -1,0 +1,374 @@
+{
+  "run_id": "e0516165-0964-4bd8-9099-83d68f57b53c",
+  "generated_at": "2026-04-16T23:01:44.401523+00:00",
+  "dataset_shape": {
+    "rows": 2000,
+    "columns": 6
+  },
+  "columns": {
+    "anomaly_flag": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -4.358898943540674,
+      "max": 0.22941573387056174,
+      "mean": -6.750155989720952e-17,
+      "median": 0.22941573387056174,
+      "std": 1.00025009378908,
+      "variance": 1.0005002501250633,
+      "q05": 1.2989609388114332e-14,
+      "q25": 0.22941573387056174,
+      "q75": 0.22941573387056174,
+      "q95": 0.22941573387056174,
+      "iqr": 0.0,
+      "skewness": -4.129483,
+      "kurtosis": 15.052632,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 100,
+          "pct": 0.05,
+          "fence_low": 0.229416,
+          "fence_high": 0.229416
+        },
+        "zscore": {
+          "count": 100,
+          "pct": 0.05,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1999,
+      "cardinality_tier": "unique",
+      "min": -3.5331404255002723,
+      "max": 2.0373057190966093,
+      "mean": -1.2931877790833823e-15,
+      "median": 0.11441559012841176,
+      "std": 1.0002500937890795,
+      "variance": 1.0005002501250624,
+      "q05": -1.7718658036468902,
+      "q25": -0.6155224588468116,
+      "q75": 0.7466318044565159,
+      "q95": 1.45099640269409,
+      "iqr": 1.362154,
+      "skewness": -0.523793,
+      "kurtosis": -0.062618,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 21,
+          "pct": 0.0105,
+          "fence_low": -2.658754,
+          "fence_high": 2.789863
+        },
+        "zscore": {
+          "count": 10,
+          "pct": 0.005,
+          "threshold": 3.0
+        }
+      }
+    },
+    "patient_age": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 98,
+      "cardinality_tier": "low",
+      "min": -1.7170674122152398,
+      "max": 1.7046504566498735,
+      "mean": -8.08242361927114e-17,
+      "median": 0.011429243190848351,
+      "std": 1.0002500937890797,
+      "variance": 1.0005002501250626,
+      "q05": -1.5759656444269878,
+      "q25": -0.8351813635386642,
+      "q75": 0.893315291867424,
+      "q95": 1.53003701901191,
+      "iqr": 1.728497,
+      "skewness": -0.023278,
+      "kurtosis": -1.203464,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.427926,
+          "fence_high": 3.48606
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "patient_id": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2000,
+      "cardinality_tier": "unique",
+      "min": -1.731184998563231,
+      "max": 1.731184998563231,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 1.0002500937890795,
+      "variance": 1.0005002501250624,
+      "q05": -1.5580664987069082,
+      "q25": -0.8655924992816155,
+      "q75": 0.8655924992816155,
+      "q95": 1.558066498706908,
+      "iqr": 1.731185,
+      "skewness": 0.0,
+      "kurtosis": -1.200001,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.46237,
+          "fence_high": 3.46237
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "ssn": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 799,
+      "cardinality_tier": "medium",
+      "min": -1.6291396270504817,
+      "max": 1.7511262405574957,
+      "mean": -2.6645352591003756e-17,
+      "median": -0.02736736942979387,
+      "std": 1.0002500937890797,
+      "variance": 1.0005002501250626,
+      "q05": -1.4900185624214548,
+      "q25": -0.9260142463578324,
+      "q75": 0.8599994211769721,
+      "q95": 1.5821129471770965,
+      "iqr": 1.786014,
+      "skewness": 0.070664,
+      "kurtosis": -1.241091,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.605035,
+          "fence_high": 3.53902
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "treatment_cost": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1987,
+      "cardinality_tier": "unique",
+      "min": -2.7193769603901052,
+      "max": 2.7318228014334456,
+      "mean": -1.7408297026122455e-16,
+      "median": -0.006817965534614489,
+      "std": 1.0002500937890797,
+      "variance": 1.0005002501250626,
+      "q05": -1.603563466702876,
+      "q25": -0.6751770497062738,
+      "q75": 0.687622890749614,
+      "q95": 1.6556384603512098,
+      "iqr": 1.3628,
+      "skewness": 0.032553,
+      "kurtosis": -0.110541,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.07169,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 5,
+          "pct": 0.0025,
+          "fence_low": -2.719377,
+          "fence_high": 2.731823
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "anomaly_flag::anomaly_score": 0.526692,
+      "anomaly_flag::patient_age": 0.05686,
+      "anomaly_flag::patient_id": -0.004367,
+      "anomaly_flag::ssn": -0.081268,
+      "anomaly_flag::treatment_cost": 0.028027,
+      "anomaly_score::patient_age": 0.046805,
+      "anomaly_score::patient_id": 0.011067,
+      "anomaly_score::ssn": -0.141585,
+      "anomaly_score::treatment_cost": -0.03911,
+      "patient_age::patient_id": 0.023353,
+      "patient_age::ssn": -0.001238,
+      "patient_age::treatment_cost": -0.057917,
+      "patient_id::ssn": -0.002768,
+      "patient_id::treatment_cost": -0.02821,
+      "ssn::treatment_cost": -0.006272
+    },
+    "spearman": {
+      "anomaly_flag::anomaly_score": 0.377492,
+      "anomaly_flag::patient_age": 0.056371,
+      "anomaly_flag::patient_id": -0.004367,
+      "anomaly_flag::ssn": -0.078447,
+      "anomaly_flag::treatment_cost": 0.038294,
+      "anomaly_score::patient_age": 0.031862,
+      "anomaly_score::patient_id": 0.011395,
+      "anomaly_score::ssn": -0.12473,
+      "anomaly_score::treatment_cost": -0.047978,
+      "patient_age::patient_id": 0.023749,
+      "patient_age::ssn": -0.001677,
+      "patient_age::treatment_cost": -0.061231,
+      "patient_id::ssn": -0.002528,
+      "patient_id::treatment_cost": -0.024694,
+      "ssn::treatment_cost": -0.006711
+    },
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 2000,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "anomaly_flag": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "patient_age": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "patient_id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "ssn": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "treatment_cost": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "anomaly_score",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (1999 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "patient_id",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (2000 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "treatment_cost",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (1987 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "5.00% of values are outside IQR fence [0.2294, 0.2294]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-4.1295. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=15.0526. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "anomaly_score",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "patient_age",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "patient_id",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "ssn",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 11
+}

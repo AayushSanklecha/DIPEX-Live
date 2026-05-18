@@ -1,0 +1,43 @@
+{
+  "n_features": 58,
+  "n_stat": 30,
+  "n_nlp": 28,
+  "nlp_method": "sentence_transformers",
+  "n_classes": 20,
+  "corpus_size": 4570,
+  "smote_method": "stat_features_only",
+  "val_bal_acc": 0.9901,
+  "hold_bal_acc": 0.9898,
+  "cv_mean": 0.9904,
+  "cv_std": 0.0052,
+  "quality_gate": {
+    "passed": true,
+    "val": 0.9904,
+    "hold": 0.9898,
+    "gap": 0.0007,
+    "cv_std": 0.0052,
+    "suspect": "False",
+    "spec": {
+      "min_val": 0.7,
+      "max_gap": 0.1,
+      "max_cv_std": 0.1,
+      "max_holdout": 1.01
+    }
+  },
+  "best_params": {
+    "n_estimators": 2672,
+    "max_depth": 7,
+    "num_leaves": 99,
+    "min_child_samples": 35,
+    "min_split_gain": 0.0964641189525673,
+    "subsample": 0.8971289742235471,
+    "colsample_bytree": 0.5918692935005985,
+    "reg_lambda": 2.0704834131556056,
+    "reg_alpha": 0.03893421200921565,
+    "learning_rate": 0.005620577807467978
+  },
+  "model_size_mb": 19.99,
+  "version": "20260413_1258",
+  "time_s": 1406.8,
+  "_version": "20260413_1258"
+}

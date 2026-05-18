@@ -1,0 +1,474 @@
+{
+  "run_id": "e46bf938-3670-48c7-b9fa-08a657926952",
+  "generated_at": "2026-03-11T01:42:31.652982+00:00",
+  "dataset_shape": {
+    "rows": 182,
+    "columns": 7
+  },
+  "columns": {
+    "anomaly_flag": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -4.147288270665544,
+      "max": 0.24112141108520618,
+      "mean": 1.6592344104288054e-16,
+      "median": 0.24112141108520618,
+      "std": 1.0027586259307137,
+      "variance": 1.0055248618784531,
+      "q05": -3.927867786578003,
+      "q25": 0.24112141108520618,
+      "q75": 0.24112141108520618,
+      "q95": 0.24112141108520618,
+      "iqr": 0.0,
+      "skewness": -3.906167,
+      "kurtosis": 13.25814,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 10,
+          "pct": 0.054945,
+          "fence_low": 0.241121,
+          "fence_high": 0.241121
+        },
+        "zscore": {
+          "count": 10,
+          "pct": 0.054945,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 181,
+      "cardinality_tier": "unique",
+      "min": -3.4636938742806733,
+      "max": 1.8192786810291652,
+      "mean": 3.9040809657148365e-17,
+      "median": 0.15067562123327816,
+      "std": 1.0027586259307137,
+      "variance": 1.0055248618784531,
+      "q05": -1.7290747708748697,
+      "q25": -0.5166879003803093,
+      "q75": 0.7005738176422937,
+      "q95": 1.4745003822139535,
+      "iqr": 1.217262,
+      "skewness": -0.76397,
+      "kurtosis": 0.707703,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.000105,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 4,
+          "pct": 0.021978,
+          "fence_low": -2.34258,
+          "fence_high": 2.526466
+        },
+        "zscore": {
+          "count": 2,
+          "pct": 0.010989,
+          "threshold": 3.0
+        }
+      }
+    },
+    "high_cardinality_cat": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 100,
+      "cardinality_tier": "high",
+      "min": -1.7995474657197161,
+      "max": 2.1906378945236806,
+      "mean": -5.3681113278579e-17,
+      "median": -0.005979298741623522,
+      "std": 1.0027586259307137,
+      "variance": 1.0055248618784531,
+      "q05": -1.555702804815953,
+      "q25": -0.7113150947442441,
+      "q75": 0.6489753689750957,
+      "q95": 1.8258785257337535,
+      "iqr": 1.36029,
+      "skewness": 0.207612,
+      "kurtosis": -0.637297,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.003958,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.751751,
+          "fence_high": 2.689411
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "id": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 100,
+      "cardinality_tier": "high",
+      "min": -1.7995474657197161,
+      "max": 2.1906378945236806,
+      "mean": -5.3681113278579e-17,
+      "median": -0.005979298741623522,
+      "std": 1.0027586259307137,
+      "variance": 1.0055248618784531,
+      "q05": -1.555702804815953,
+      "q25": -0.7113150947442441,
+      "q75": 0.6489753689750957,
+      "q95": 1.8258785257337535,
+      "iqr": 1.36029,
+      "skewness": 0.207612,
+      "kurtosis": -0.637297,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.003958,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.751751,
+          "fence_high": 2.689411
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "mixed_obj_col_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 29,
+      "cardinality_tier": "medium",
+      "min": -1.738552588837273,
+      "max": 0.8152955395189785,
+      "mean": 2.049642507000289e-16,
+      "median": 0.5286391169483788,
+      "std": 1.0027586259307137,
+      "variance": 1.0055248618784531,
+      "q05": -1.738552588837273,
+      "q25": -0.839493808956756,
+      "q75": 0.7631761899606876,
+      "q95": 0.8152955395189785,
+      "iqr": 1.60267,
+      "skewness": -0.964605,
+      "kurtosis": -0.839703,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.243499,
+          "fence_high": 3.167181
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "normal_num": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 181,
+      "cardinality_tier": "unique",
+      "min": -2.230513669217603,
+      "max": 2.7462458104408087,
+      "mean": -1.9520404828574182e-17,
+      "median": 0.08688804880770665,
+      "std": 1.0027586259307135,
+      "variance": 1.0055248618784527,
+      "q05": -1.686445191910919,
+      "q25": -0.803975402264907,
+      "q75": 0.6161130828173793,
+      "q95": 1.5399228010061639,
+      "iqr": 1.420088,
+      "skewness": 0.067281,
+      "kurtosis": -0.069892,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.02093,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.934108,
+          "fence_high": 2.746246
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "target": {
+      "dtype": "int32",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": 0.0,
+      "max": 1.0,
+      "mean": 0.5,
+      "median": 0.5,
+      "std": 0.5013793129653569,
+      "variance": 0.2513812154696133,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 1.0,
+      "q95": 1.0,
+      "iqr": 1.0,
+      "skewness": 0.0,
+      "kurtosis": -2.0,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -1.5,
+          "fence_high": 2.5
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "anomaly_flag::anomaly_score": 0.571868,
+      "anomaly_flag::high_cardinality_cat": -0.122953,
+      "anomaly_flag::id": -0.122953,
+      "anomaly_flag::mixed_obj_col_fallback_hash": 0.307355,
+      "anomaly_flag::normal_num": -0.184939,
+      "anomaly_flag::target": 0.241121,
+      "anomaly_score::high_cardinality_cat": -0.130105,
+      "anomaly_score::id": -0.130105,
+      "anomaly_score::mixed_obj_col_fallback_hash": 0.378364,
+      "anomaly_score::normal_num": -0.141707,
+      "anomaly_score::target": 0.375314,
+      "high_cardinality_cat::id": 1.0,
+      "high_cardinality_cat::mixed_obj_col_fallback_hash": -0.029492,
+      "high_cardinality_cat::normal_num": 0.175888,
+      "high_cardinality_cat::target": -0.238729,
+      "id::mixed_obj_col_fallback_hash": -0.029492,
+      "id::normal_num": 0.175888,
+      "id::target": -0.238729,
+      "mixed_obj_col_fallback_hash::normal_num": -0.095231,
+      "mixed_obj_col_fallback_hash::target": -0.034651,
+      "normal_num::target": -0.162815
+    },
+    "spearman": {
+      "anomaly_flag::anomaly_score": 0.394694,
+      "anomaly_flag::high_cardinality_cat": -0.093179,
+      "anomaly_flag::id": -0.093179,
+      "anomaly_flag::mixed_obj_col_fallback_hash": 0.245773,
+      "anomaly_flag::normal_num": -0.130111,
+      "anomaly_flag::target": 0.241121,
+      "anomaly_score::high_cardinality_cat": -0.088477,
+      "anomaly_score::id": -0.088477,
+      "anomaly_score::mixed_obj_col_fallback_hash": 0.298569,
+      "anomaly_score::normal_num": -0.10786,
+      "anomaly_score::target": 0.351707,
+      "high_cardinality_cat::id": 1.0,
+      "high_cardinality_cat::mixed_obj_col_fallback_hash": -0.017337,
+      "high_cardinality_cat::normal_num": 0.206255,
+      "high_cardinality_cat::target": -0.203021,
+      "id::mixed_obj_col_fallback_hash": -0.017337,
+      "id::normal_num": 0.206255,
+      "id::target": -0.203021,
+      "mixed_obj_col_fallback_hash::normal_num": 0.023559,
+      "mixed_obj_col_fallback_hash::target": -0.016001,
+      "normal_num::target": -0.123511
+    },
+    "cramers_v": {},
+    "highlights": [
+      {
+        "columns": [
+          "high_cardinality_cat",
+          "id"
+        ],
+        "method": "pearson",
+        "value": 1.0,
+        "flag": "NEAR_DUPLICATE_COLUMNS",
+        "detail": "Pearson r=1.0000. Columns are nearly collinear — consider removing one to avoid multicollinearity in regression / inflated feature importance."
+      },
+      {
+        "columns": [
+          "high_cardinality_cat",
+          "id"
+        ],
+        "method": "spearman",
+        "value": 1.0,
+        "flag": "NEAR_DUPLICATE_COLUMNS",
+        "detail": "Spearman r=1.0000. Columns are nearly collinear — consider removing one to avoid multicollinearity in regression / inflated feature importance."
+      }
+    ]
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 182,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "anomaly_flag": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "high_cardinality_cat": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "mixed_obj_col_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "normal_num": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "target": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "columns": [
+        "high_cardinality_cat",
+        "id"
+      ],
+      "method": "pearson",
+      "value": 1.0,
+      "flag": "NEAR_DUPLICATE_COLUMNS",
+      "detail": "Pearson r=1.0000. Columns are nearly collinear — consider removing one to avoid multicollinearity in regression / inflated feature importance."
+    },
+    {
+      "columns": [
+        "high_cardinality_cat",
+        "id"
+      ],
+      "method": "spearman",
+      "value": 1.0,
+      "flag": "NEAR_DUPLICATE_COLUMNS",
+      "detail": "Spearman r=1.0000. Columns are nearly collinear — consider removing one to avoid multicollinearity in regression / inflated feature importance."
+    },
+    {
+      "column": "anomaly_score",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (181 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "normal_num",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (181 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "5.49% of values are outside IQR fence [0.2411, 0.2411]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-3.9062. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=13.2581. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "anomaly_score",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.000105 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "high_cardinality_cat",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.003958 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "id",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.003958 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "mixed_obj_col_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "normal_num",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.02093 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "target",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 14
+}

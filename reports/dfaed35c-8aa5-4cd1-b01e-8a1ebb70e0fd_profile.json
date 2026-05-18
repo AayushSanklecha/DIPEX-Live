@@ -1,0 +1,558 @@
+{
+  "run_id": "dfaed35c-8aa5-4cd1-b01e-8a1ebb70e0fd",
+  "generated_at": "2026-04-16T23:30:53.108975+00:00",
+  "dataset_shape": {
+    "rows": 26,
+    "columns": 9
+  },
+  "columns": {
+    "amount": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 26,
+      "cardinality_tier": "unique",
+      "min": -1.734863624880989,
+      "max": 1.4603927512358115,
+      "mean": -3.1598655316254457e-16,
+      "median": 0.2972632836517605,
+      "std": 1.019803902718557,
+      "variance": 1.04,
+      "q05": -1.5675082439993122,
+      "q25": -1.061677721837691,
+      "q75": 0.8312947506664895,
+      "q95": 1.3478441839939976,
+      "iqr": 1.892972,
+      "skewness": -0.309414,
+      "kurtosis": -1.240249,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.049968,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.901136,
+          "fence_high": 3.670753
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_flag": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "medium",
+      "min": -3.464101615137755,
+      "max": 0.2886751345948129,
+      "mean": 3.416070845000482e-17,
+      "median": 0.2886751345948129,
+      "std": 1.019803902718557,
+      "variance": 1.04,
+      "q05": -2.5259074277046127,
+      "q25": 0.2886751345948129,
+      "q75": 0.2886751345948129,
+      "q95": 0.2886751345948129,
+      "iqr": 0.0,
+      "skewness": -3.175426,
+      "kurtosis": 8.083333,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 2,
+          "pct": 0.076923,
+          "fence_low": 0.288675,
+          "fence_high": 0.288675
+        },
+        "zscore": {
+          "count": 2,
+          "pct": 0.076923,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 26,
+      "cardinality_tier": "unique",
+      "min": -2.1653286261391393,
+      "max": 1.734782412632402,
+      "mean": 1.5713925887002215e-15,
+      "median": 0.050556831796820294,
+      "std": 1.019803902718557,
+      "variance": 1.04,
+      "q05": -1.5859145998964697,
+      "q25": -0.6493661789653541,
+      "q75": 0.706755166455505,
+      "q95": 1.375231193198469,
+      "iqr": 1.356121,
+      "skewness": -0.403066,
+      "kurtosis": -0.671473,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.432169,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.683548,
+          "fence_high": 2.740937
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "device_type_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 3,
+      "cardinality_tier": "medium",
+      "min": -0.9633313633707961,
+      "max": 1.3634034049892687,
+      "mean": 3.416070845000482e-17,
+      "median": -0.6211644856707865,
+      "std": 1.019803902718557,
+      "variance": 1.04,
+      "q05": -0.9633313633707961,
+      "q25": -0.6211644856707865,
+      "q75": 1.3634034049892687,
+      "q95": 1.3634034049892687,
+      "iqr": 1.984568,
+      "skewness": 0.594751,
+      "kurtosis": -1.569575,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 3e-06,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.598016,
+          "fence_high": 4.340255
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "event_id_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 19,
+      "cardinality_tier": "high",
+      "min": -1.2048529621404114,
+      "max": 2.4857070636180474,
+      "mean": -9.394194823751324e-17,
+      "median": -0.35363542577574936,
+      "std": 1.019803902718557,
+      "variance": 1.04,
+      "q05": -0.9943499766990433,
+      "q25": -0.6138963698537669,
+      "q75": 0.625945003534959,
+      "q95": 2.245638021431992,
+      "iqr": 1.239841,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.473658,
+          "fence_high": 2.485707
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "event_time": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 26,
+      "cardinality_tier": "unique",
+      "min": -2.189335349291972,
+      "max": 1.4960859015505164,
+      "mean": 1.3188657806887468e-08,
+      "median": 0.1455707925473091,
+      "std": 1.019803902718557,
+      "variance": 1.04,
+      "q05": -1.759928361282813,
+      "q25": -0.7016922696766159,
+      "q75": 0.9534617908152846,
+      "q95": 1.3897454192040546,
+      "iqr": 1.655154,
+      "skewness": -0.371931,
+      "kurtosis": -0.687368,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.413211,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.184423,
+          "fence_high": 3.436193
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "location_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 6,
+      "cardinality_tier": "medium",
+      "min": -1.8002778497876435,
+      "max": 1.5037614980579141,
+      "mean": 5.978123978750843e-17,
+      "median": -0.14825817586486473,
+      "std": 1.019803902718557,
+      "variance": 1.04,
+      "q05": -1.8002778497876435,
+      "q25": -0.5612630943455594,
+      "q75": 0.26474674261583,
+      "q95": 1.5037614980579141,
+      "iqr": 0.82601,
+      "skewness": 0.068983,
+      "kurtosis": -0.582921,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.007351,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 6,
+          "pct": 0.230769,
+          "fence_low": -1.800278,
+          "fence_high": 1.503761
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "merchant_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 8,
+      "cardinality_tier": "medium",
+      "min": -1.327164462460188,
+      "max": 1.275264176218728,
+      "mean": -3.416070845000482e-17,
+      "median": 0.2150154715717622,
+      "std": 1.019803902718557,
+      "variance": 1.0400000000000003,
+      "q05": -1.327164462460188,
+      "q25": -1.2789713395216895,
+      "q75": 0.9861054385877374,
+      "q95": 1.239119334014854,
+      "iqr": 2.265077,
+      "skewness": -0.264614,
+      "kurtosis": -1.60273,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.000536,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -4.676587,
+          "fence_high": 4.383721
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "user_id": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 26,
+      "cardinality_tier": "unique",
+      "min": -1.5684650762338999,
+      "max": 1.508979930986704,
+      "mean": -1.0248212535001446e-16,
+      "median": 0.18373811957337197,
+      "std": 1.019803902718557,
+      "variance": 1.04,
+      "q05": -1.5254699399275868,
+      "q25": -0.9854003118264147,
+      "q75": 0.920446154962791,
+      "q95": 1.1772058422004905,
+      "iqr": 1.905846,
+      "skewness": -0.249114,
+      "kurtosis": -1.381861,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.027113,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.84417,
+          "fence_high": 3.779216
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "amount::anomaly_flag": -0.167774,
+      "amount::anomaly_score": -0.002422,
+      "amount::device_type_fallback_hash": 0.448367,
+      "amount::event_id_auto_log1p": 0.119689,
+      "amount::event_time": -0.196507,
+      "amount::location_fallback_hash": 0.01278,
+      "amount::merchant_fallback_hash": -0.178929,
+      "amount::user_id": 0.169466,
+      "anomaly_flag::anomaly_score": 0.54238,
+      "anomaly_flag::device_type_fallback_hash": -0.393581,
+      "anomaly_flag::event_id_auto_log1p": -0.48271,
+      "anomaly_flag::event_time": -0.391739,
+      "anomaly_flag::location_fallback_hash": -0.255262,
+      "anomaly_flag::merchant_fallback_hash": 0.29269,
+      "anomaly_flag::user_id": -0.323966,
+      "anomaly_score::device_type_fallback_hash": -0.583528,
+      "anomaly_score::event_id_auto_log1p": -0.364395,
+      "anomaly_score::event_time": -0.419011,
+      "anomaly_score::location_fallback_hash": -0.096522,
+      "anomaly_score::merchant_fallback_hash": 0.243016,
+      "anomaly_score::user_id": 0.025656,
+      "device_type_fallback_hash::event_id_auto_log1p": 0.150707,
+      "device_type_fallback_hash::event_time": 0.266519,
+      "device_type_fallback_hash::location_fallback_hash": 0.286201,
+      "device_type_fallback_hash::merchant_fallback_hash": -0.384863,
+      "device_type_fallback_hash::user_id": 0.121014,
+      "event_id_auto_log1p::event_time": -0.118944,
+      "event_id_auto_log1p::location_fallback_hash": -0.132124,
+      "event_id_auto_log1p::merchant_fallback_hash": 0.018196,
+      "event_id_auto_log1p::user_id": 0.386666,
+      "event_time::location_fallback_hash": 0.368264,
+      "event_time::merchant_fallback_hash": -0.251472,
+      "event_time::user_id": 0.147492,
+      "location_fallback_hash::merchant_fallback_hash": -0.083463,
+      "location_fallback_hash::user_id": 0.15907,
+      "merchant_fallback_hash::user_id": -0.026705
+    },
+    "spearman": {
+      "amount::anomaly_flag": -0.11547,
+      "amount::anomaly_score": 0.016752,
+      "amount::device_type_fallback_hash": 0.336585,
+      "amount::event_id_auto_log1p": 0.001028,
+      "amount::event_time": -0.170598,
+      "amount::location_fallback_hash": -0.048295,
+      "amount::merchant_fallback_hash": -0.155266,
+      "amount::user_id": 0.106325,
+      "anomaly_flag::anomaly_score": 0.46188,
+      "anomaly_flag::device_type_fallback_hash": -0.353954,
+      "anomaly_flag::event_id_auto_log1p": -0.39547,
+      "anomaly_flag::event_time": -0.442635,
+      "anomaly_flag::location_fallback_hash": -0.283598,
+      "anomaly_flag::merchant_fallback_hash": 0.214125,
+      "anomaly_flag::user_id": -0.34641,
+      "anomaly_score::device_type_fallback_hash": -0.462713,
+      "anomaly_score::event_id_auto_log1p": -0.125086,
+      "anomaly_score::event_time": -0.494017,
+      "anomaly_score::location_fallback_hash": -0.152182,
+      "anomaly_score::merchant_fallback_hash": 0.240334,
+      "anomaly_score::user_id": -0.005128,
+      "device_type_fallback_hash::event_id_auto_log1p": 0.074709,
+      "device_type_fallback_hash::event_time": 0.360257,
+      "device_type_fallback_hash::location_fallback_hash": 0.431907,
+      "device_type_fallback_hash::merchant_fallback_hash": -0.358219,
+      "device_type_fallback_hash::user_id": 0.278515,
+      "event_id_auto_log1p::event_time": -0.114805,
+      "event_id_auto_log1p::location_fallback_hash": -0.128516,
+      "event_id_auto_log1p::merchant_fallback_hash": 0.066554,
+      "event_id_auto_log1p::user_id": 0.339617,
+      "event_time::location_fallback_hash": 0.33494,
+      "event_time::merchant_fallback_hash": -0.238951,
+      "event_time::user_id": 0.182222,
+      "location_fallback_hash::merchant_fallback_hash": -0.049904,
+      "location_fallback_hash::user_id": 0.116743,
+      "merchant_fallback_hash::user_id": -0.005533
+    },
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 26,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "amount": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_flag": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "device_type_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "event_id_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "event_time": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "location_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "merchant_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "user_id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "amount",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (26 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "anomaly_score",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (26 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "event_time",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (26 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "user_id",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (26 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "7.69% of values are outside IQR fence [0.2887, 0.2887]."
+    },
+    {
+      "column": "location_fallback_hash",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "23.08% of values are outside IQR fence [-1.8, 1.504]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-3.1754. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=8.0833. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "amount",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.04997 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "device_type_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=3e-06 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "location_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.007351 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "merchant_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.000536 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "user_id",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.02711 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 14
+}

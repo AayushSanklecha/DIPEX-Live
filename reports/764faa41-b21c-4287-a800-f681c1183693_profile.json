@@ -1,0 +1,999 @@
+{
+  "run_id": "764faa41-b21c-4287-a800-f681c1183693",
+  "generated_at": "2026-04-13T19:02:13.659152+00:00",
+  "dataset_shape": {
+    "rows": 1000,
+    "columns": 15
+  },
+  "columns": {
+    "age": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 58,
+      "cardinality_tier": "medium",
+      "min": -1.713712435964972,
+      "max": 1.727962176465562,
+      "mean": 1.3855583347321954e-16,
+      "median": 0.037314998429510124,
+      "std": 1.0005003753127737,
+      "variance": 1.001001001001001,
+      "q05": -1.5325716668896807,
+      "q25": -0.8683888469469462,
+      "q75": 0.882638587447536,
+      "q95": 1.5468214073902706,
+      "iqr": 1.751027,
+      "skewness": -0.016818,
+      "kurtosis": -1.205495,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.49493,
+          "fence_high": 3.50918
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_flag": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -4.358898943540674,
+      "max": 0.22941573387056174,
+      "mean": -5.684341886080802e-17,
+      "median": 0.22941573387056174,
+      "std": 1.0005003753127741,
+      "variance": 1.0010010010010018,
+      "q05": 1.2989609388114332e-14,
+      "q25": 0.22941573387056174,
+      "q75": 0.22941573387056174,
+      "q95": 0.22941573387056174,
+      "iqr": 0.0,
+      "skewness": -4.129483,
+      "kurtosis": 15.052632,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 50,
+          "pct": 0.05,
+          "fence_low": 0.229416,
+          "fence_high": 0.229416
+        },
+        "zscore": {
+          "count": 50,
+          "pct": 0.05,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1000,
+      "cardinality_tier": "unique",
+      "min": -3.3976479019046764,
+      "max": 2.67167113994812,
+      "mean": 9.734435479913373e-16,
+      "median": 0.05707663591609813,
+      "std": 1.0005003753127737,
+      "variance": 1.001001001001001,
+      "q05": -1.776832354244297,
+      "q25": -0.6463328458107238,
+      "q75": 0.7302063520326662,
+      "q95": 1.5151578866388196,
+      "iqr": 1.376539,
+      "skewness": -0.323753,
+      "kurtosis": -0.125187,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 3.7e-05,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 6,
+          "pct": 0.006,
+          "fence_low": -2.711142,
+          "fence_high": 2.795015
+        },
+        "zscore": {
+          "count": 2,
+          "pct": 0.002,
+          "threshold": 3.0
+        }
+      }
+    },
+    "category_id": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 5,
+      "cardinality_tier": "low",
+      "min": -1.3945441963766911,
+      "max": 1.39036682983737,
+      "mean": -1.0658141036401502e-16,
+      "median": -0.002088683269660625,
+      "std": 1.0005003753127737,
+      "variance": 1.0010010010010009,
+      "q05": -1.3945441963766911,
+      "q25": -0.6983164398231759,
+      "q75": 0.6941390732838546,
+      "q95": 1.39036682983737,
+      "iqr": 1.392456,
+      "skewness": 0.002846,
+      "kurtosis": -1.336724,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.787,
+          "fence_high": 2.782822
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "category_name_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 5,
+      "cardinality_tier": "low",
+      "min": -1.3422373442715054,
+      "max": 1.351594866688524,
+      "mean": -1.7408297026122455e-16,
+      "median": -0.3970330597241266,
+      "std": 1.0005003753127737,
+      "variance": 1.0010010010010009,
+      "q05": -1.3422373442715054,
+      "q25": -0.49155348817886446,
+      "q75": 0.9262529386422036,
+      "q95": 1.351594866688524,
+      "iqr": 1.417806,
+      "skewness": 0.117337,
+      "kurtosis": -1.46756,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.618263,
+          "fence_high": 3.052963
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "city_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 64,
+      "cardinality_tier": "medium",
+      "min": -1.7082165963747227,
+      "max": 1.7462707907664046,
+      "mean": 6.572520305780926e-17,
+      "median": -0.008389469368771238,
+      "std": 1.0005003753127737,
+      "variance": 1.001001001001001,
+      "q05": -1.54371719698705,
+      "q25": -0.8308864663071349,
+      "q75": 0.8141075275695924,
+      "q95": 1.6366045245079561,
+      "iqr": 1.644994,
+      "skewness": 0.035479,
+      "kurtosis": -1.138656,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.298377,
+          "fence_high": 3.281599
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "customer_id": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1000,
+      "cardinality_tier": "unique",
+      "min": -1.748825157365323,
+      "max": 1.7157155899722467,
+      "mean": 6.750155989720952e-17,
+      "median": -0.033641554841818876,
+      "std": 1.0005003753127737,
+      "variance": 1.001001001001001,
+      "q05": -1.5917948344772874,
+      "q25": -0.8353683026472211,
+      "q75": 0.8633270483982383,
+      "q95": 1.57314627452807,
+      "iqr": 1.698695,
+      "skewness": 0.014631,
+      "kurtosis": -1.13988,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.383411,
+          "fence_high": 3.41137
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "gender_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 3,
+      "cardinality_tier": "low",
+      "min": -0.9300108304411272,
+      "max": 2.324050857596407,
+      "mean": 4.263256414560601e-17,
+      "median": 0.3716138447738864,
+      "std": 1.0005003753127737,
+      "variance": 1.001001001001001,
+      "q05": -0.9300108304411272,
+      "q25": -0.9300108304411272,
+      "q75": 0.3716138447738864,
+      "q95": 2.324050857596407,
+      "iqr": 1.301625,
+      "skewness": 0.962451,
+      "kurtosis": 0.342702,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.882448,
+          "fence_high": 2.324051
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "order_date": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1,
+      "cardinality_tier": "low",
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 0.0,
+      "variance": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "q95": 0.0,
+      "iqr": 0.0,
+      "skewness": NaN,
+      "kurtosis": NaN,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.0,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": 0.0,
+          "fence_high": 0.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "payment_method_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 3,
+      "cardinality_tier": "low",
+      "min": -0.7914643473451323,
+      "max": 1.4443106451552417,
+      "mean": 1.0125233984581428e-16,
+      "median": -0.5561196112924613,
+      "std": 1.000500375312774,
+      "variance": 1.0010010010010013,
+      "q05": -0.7914643473451323,
+      "q25": -0.7914643473451323,
+      "q75": 1.4443106451552417,
+      "q95": 1.4443106451552417,
+      "iqr": 2.235775,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -4.145127,
+          "fence_high": 4.797973
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "price": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 991,
+      "cardinality_tier": "unique",
+      "min": -1.733193402977974,
+      "max": 1.7800482209099804,
+      "mean": 1.6697754290362354e-16,
+      "median": -0.011720820382194552,
+      "std": 1.0005003753127737,
+      "variance": 1.001001001001001,
+      "q05": -1.5406867664712036,
+      "q25": -0.8864373378727723,
+      "q75": 0.8238402821034125,
+      "q95": 1.6077895521074785,
+      "iqr": 1.710278,
+      "skewness": 0.038478,
+      "kurtosis": -1.168739,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.451854,
+          "fence_high": 3.389257
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "product_id": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 605,
+      "cardinality_tier": "high",
+      "min": -1.6846886105442949,
+      "max": 1.736476254785057,
+      "mean": -1.7763568394002505e-18,
+      "median": 0.006781169241446117,
+      "std": 1.0005003753127737,
+      "variance": 1.001001001001001,
+      "q05": -1.531978514041605,
+      "q25": -0.8752677611214008,
+      "q75": 0.8792737731648256,
+      "q95": 1.57994362770658,
+      "iqr": 1.754542,
+      "skewness": 0.010922,
+      "kurtosis": -1.214556,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.50708,
+          "fence_high": 3.511086
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "product_name_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 22,
+      "cardinality_tier": "low",
+      "min": -1.8955009464710868,
+      "max": 1.3853804554007396,
+      "mean": -2.842170943040401e-17,
+      "median": 0.02777435807446665,
+      "std": 1.0005003753127737,
+      "variance": 1.001001001001001,
+      "q05": -1.8389340257491589,
+      "q25": -0.6510286905886699,
+      "q75": 0.7631443274595312,
+      "q95": 1.3288135346788117,
+      "iqr": 1.414173,
+      "skewness": -0.455981,
+      "kurtosis": -0.922949,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.772288,
+          "fence_high": 2.884404
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "quantity": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 5,
+      "cardinality_tier": "low",
+      "min": -1.3780497762593513,
+      "max": 1.453074571474293,
+      "mean": -1.7763568394002505e-18,
+      "median": 0.03751239760747074,
+      "std": 1.0005003753127737,
+      "variance": 1.001001001001001,
+      "q05": -1.3780497762593513,
+      "q25": -0.6702686893259403,
+      "q75": 0.7452934845408818,
+      "q95": 1.453074571474293,
+      "iqr": 1.415562,
+      "skewness": 0.061887,
+      "kurtosis": -1.295928,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.793612,
+          "fence_high": 2.868637
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "review_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 5,
+      "cardinality_tier": "low",
+      "min": -1.89483274771864,
+      "max": 1.0454441084899653,
+      "mean": 2.4780177909633496e-16,
+      "median": -0.12190059119235819,
+      "std": 1.0005003753127737,
+      "variance": 1.001001001001001,
+      "q05": -1.89483274771864,
+      "q25": -0.13066663399347683,
+      "q75": 1.0454441084899653,
+      "q95": 1.0454441084899653,
+      "iqr": 1.176111,
+      "skewness": -0.546255,
+      "kurtosis": -0.824441,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 110,
+          "pct": 0.11,
+          "fence_low": -1.894833,
+          "fence_high": 2.80961
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "age::anomaly_flag": 0.049619,
+      "age::anomaly_score": 0.05668,
+      "age::category_id": -0.011441,
+      "age::category_name_fallback_hash": 0.003858,
+      "age::city_fallback_hash": -0.008779,
+      "age::customer_id": 0.037057,
+      "age::gender_fallback_hash": -0.055285,
+      "age::order_date": NaN,
+      "age::payment_method_fallback_hash": -0.019179,
+      "age::price": 0.029415,
+      "age::product_id": -0.015515,
+      "age::product_name_fallback_hash": 0.026496,
+      "age::quantity": -0.030503,
+      "age::review_score": -0.004385,
+      "anomaly_flag::anomaly_score": 0.511474,
+      "anomaly_flag::category_id": 0.061175,
+      "anomaly_flag::category_name_fallback_hash": -0.031432,
+      "anomaly_flag::city_fallback_hash": -0.010403,
+      "anomaly_flag::customer_id": -0.005082,
+      "anomaly_flag::gender_fallback_hash": -0.261436,
+      "anomaly_flag::order_date": NaN,
+      "anomaly_flag::payment_method_fallback_hash": -0.146156,
+      "anomaly_flag::price": 0.059594,
+      "anomaly_flag::product_id": -0.023251,
+      "anomaly_flag::product_name_fallback_hash": 0.000376,
+      "anomaly_flag::quantity": 0.036859,
+      "anomaly_flag::review_score": 0.150309,
+      "anomaly_score::category_id": 0.098861,
+      "anomaly_score::category_name_fallback_hash": -0.081612,
+      "anomaly_score::city_fallback_hash": -0.028499,
+      "anomaly_score::customer_id": -0.012295,
+      "anomaly_score::gender_fallback_hash": -0.316568,
+      "anomaly_score::order_date": NaN,
+      "anomaly_score::payment_method_fallback_hash": -0.290167,
+      "anomaly_score::price": 0.038611,
+      "anomaly_score::product_id": 0.004519,
+      "anomaly_score::product_name_fallback_hash": 0.091687,
+      "anomaly_score::quantity": 0.0195,
+      "anomaly_score::review_score": 0.224093,
+      "category_id::category_name_fallback_hash": -0.79526,
+      "category_id::city_fallback_hash": 0.0193,
+      "category_id::customer_id": 0.0363,
+      "category_id::gender_fallback_hash": 0.071915,
+      "category_id::order_date": NaN,
+      "category_id::payment_method_fallback_hash": -0.033277,
+      "category_id::price": -0.000553,
+      "category_id::product_id": -0.026782,
+      "category_id::product_name_fallback_hash": -0.456436,
+      "category_id::quantity": -0.035402,
+      "category_id::review_score": 0.034058,
+      "category_name_fallback_hash::city_fallback_hash": -0.040528,
+      "category_name_fallback_hash::customer_id": -0.033815,
+      "category_name_fallback_hash::gender_fallback_hash": -0.039586,
+      "category_name_fallback_hash::order_date": NaN,
+      "category_name_fallback_hash::payment_method_fallback_hash": -0.018141,
+      "category_name_fallback_hash::price": 0.002938,
+      "category_name_fallback_hash::product_id": 0.086197,
+      "category_name_fallback_hash::product_name_fallback_hash": 0.477265,
+      "category_name_fallback_hash::quantity": 0.046437,
+      "category_name_fallback_hash::review_score": -0.032978,
+      "city_fallback_hash::customer_id": -0.000166,
+      "city_fallback_hash::gender_fallback_hash": 0.005259,
+      "city_fallback_hash::order_date": NaN,
+      "city_fallback_hash::payment_method_fallback_hash": 0.053431,
+      "city_fallback_hash::price": -0.003077,
+      "city_fallback_hash::product_id": 0.013105,
+      "city_fallback_hash::product_name_fallback_hash": -0.005043,
+      "city_fallback_hash::quantity": -0.061897,
+      "city_fallback_hash::review_score": 0.005724,
+      "customer_id::gender_fallback_hash": -0.027083,
+      "customer_id::order_date": NaN,
+      "customer_id::payment_method_fallback_hash": -0.003887,
+      "customer_id::price": 0.031666,
+      "customer_id::product_id": 0.035258,
+      "customer_id::product_name_fallback_hash": -0.0097,
+      "customer_id::quantity": -0.038666,
+      "customer_id::review_score": 0.008054,
+      "gender_fallback_hash::order_date": NaN,
+      "gender_fallback_hash::payment_method_fallback_hash": -0.038556,
+      "gender_fallback_hash::price": -0.041982,
+      "gender_fallback_hash::product_id": 0.013871,
+      "gender_fallback_hash::product_name_fallback_hash": -0.061088,
+      "gender_fallback_hash::quantity": 0.010934,
+      "gender_fallback_hash::review_score": 0.044526,
+      "order_date::payment_method_fallback_hash": NaN,
+      "order_date::price": NaN,
+      "order_date::product_id": NaN,
+      "order_date::product_name_fallback_hash": NaN,
+      "order_date::quantity": NaN,
+      "order_date::review_score": NaN,
+      "payment_method_fallback_hash::price": 0.002287,
+      "payment_method_fallback_hash::product_id": 0.006245,
+      "payment_method_fallback_hash::product_name_fallback_hash": -0.005708,
+      "payment_method_fallback_hash::quantity": -0.005207,
+      "payment_method_fallback_hash::review_score": 0.024264,
+      "price::product_id": -0.005692,
+      "price::product_name_fallback_hash": -0.040188,
+      "price::quantity": -0.024811,
+      "price::review_score": 0.063931,
+      "product_id::product_name_fallback_hash": 0.00565,
+      "product_id::quantity": -0.020815,
+      "product_id::review_score": 0.044792,
+      "product_name_fallback_hash::quantity": -0.001162,
+      "product_name_fallback_hash::review_score": -0.052558,
+      "quantity::review_score": 0.017227
+    },
+    "spearman": {
+      "age::anomaly_flag": 0.048923,
+      "age::anomaly_score": 0.058604,
+      "age::category_id": -0.011068,
+      "age::category_name_fallback_hash": 0.006787,
+      "age::city_fallback_hash": -0.006465,
+      "age::customer_id": 0.038142,
+      "age::gender_fallback_hash": -0.056103,
+      "age::order_date": NaN,
+      "age::payment_method_fallback_hash": -0.01447,
+      "age::price": 0.029826,
+      "age::product_id": -0.015699,
+      "age::product_name_fallback_hash": 0.02753,
+      "age::quantity": -0.030954,
+      "age::review_score": -0.001375,
+      "anomaly_flag::anomaly_score": 0.377492,
+      "anomaly_flag::category_id": 0.061244,
+      "anomaly_flag::category_name_fallback_hash": -0.043106,
+      "anomaly_flag::city_fallback_hash": -0.008823,
+      "anomaly_flag::customer_id": -0.005277,
+      "anomaly_flag::gender_fallback_hash": -0.194184,
+      "anomaly_flag::order_date": NaN,
+      "anomaly_flag::payment_method_fallback_hash": -0.128538,
+      "anomaly_flag::price": 0.061027,
+      "anomaly_flag::product_id": -0.022618,
+      "anomaly_flag::product_name_fallback_hash": -0.012511,
+      "anomaly_flag::quantity": 0.039635,
+      "anomaly_flag::review_score": 0.121848,
+      "anomaly_score::category_id": 0.100191,
+      "anomaly_score::category_name_fallback_hash": -0.090546,
+      "anomaly_score::city_fallback_hash": -0.020068,
+      "anomaly_score::customer_id": -0.003609,
+      "anomaly_score::gender_fallback_hash": -0.19727,
+      "anomaly_score::order_date": NaN,
+      "anomaly_score::payment_method_fallback_hash": -0.252319,
+      "anomaly_score::price": 0.033236,
+      "anomaly_score::product_id": 0.009414,
+      "anomaly_score::product_name_fallback_hash": 0.075079,
+      "anomaly_score::quantity": 0.02841,
+      "anomaly_score::review_score": 0.178898,
+      "category_id::category_name_fallback_hash": -0.908037,
+      "category_id::city_fallback_hash": 0.020619,
+      "category_id::customer_id": 0.035835,
+      "category_id::gender_fallback_hash": 0.072818,
+      "category_id::order_date": NaN,
+      "category_id::payment_method_fallback_hash": -0.038544,
+      "category_id::price": 0.00156,
+      "category_id::product_id": -0.026582,
+      "category_id::product_name_fallback_hash": -0.45723,
+      "category_id::quantity": -0.035565,
+      "category_id::review_score": 0.027511,
+      "category_name_fallback_hash::city_fallback_hash": -0.033171,
+      "category_name_fallback_hash::customer_id": -0.035654,
+      "category_name_fallback_hash::gender_fallback_hash": -0.053967,
+      "category_name_fallback_hash::order_date": NaN,
+      "category_name_fallback_hash::payment_method_fallback_hash": 0.004612,
+      "category_name_fallback_hash::price": -0.002738,
+      "category_name_fallback_hash::product_id": 0.068194,
+      "category_name_fallback_hash::product_name_fallback_hash": 0.482994,
+      "category_name_fallback_hash::quantity": 0.044877,
+      "category_name_fallback_hash::review_score": -0.025854,
+      "city_fallback_hash::customer_id": 0.002269,
+      "city_fallback_hash::gender_fallback_hash": 0.008409,
+      "city_fallback_hash::order_date": NaN,
+      "city_fallback_hash::payment_method_fallback_hash": 0.046008,
+      "city_fallback_hash::price": -0.002063,
+      "city_fallback_hash::product_id": 0.010772,
+      "city_fallback_hash::product_name_fallback_hash": -0.000338,
+      "city_fallback_hash::quantity": -0.062862,
+      "city_fallback_hash::review_score": 0.021296,
+      "customer_id::gender_fallback_hash": -0.020914,
+      "customer_id::order_date": NaN,
+      "customer_id::payment_method_fallback_hash": 0.007493,
+      "customer_id::price": 0.030818,
+      "customer_id::product_id": 0.033373,
+      "customer_id::product_name_fallback_hash": -0.003171,
+      "customer_id::quantity": -0.039268,
+      "customer_id::review_score": -0.005319,
+      "gender_fallback_hash::order_date": NaN,
+      "gender_fallback_hash::payment_method_fallback_hash": -0.038574,
+      "gender_fallback_hash::price": -0.032209,
+      "gender_fallback_hash::product_id": 0.028907,
+      "gender_fallback_hash::product_name_fallback_hash": -0.056143,
+      "gender_fallback_hash::quantity": 0.010545,
+      "gender_fallback_hash::review_score": 0.036693,
+      "order_date::payment_method_fallback_hash": NaN,
+      "order_date::price": NaN,
+      "order_date::product_id": NaN,
+      "order_date::product_name_fallback_hash": NaN,
+      "order_date::quantity": NaN,
+      "order_date::review_score": NaN,
+      "payment_method_fallback_hash::price": 0.004498,
+      "payment_method_fallback_hash::product_id": 0.010273,
+      "payment_method_fallback_hash::product_name_fallback_hash": 0.007089,
+      "payment_method_fallback_hash::quantity": -0.001491,
+      "payment_method_fallback_hash::review_score": 0.007106,
+      "price::product_id": -0.006716,
+      "price::product_name_fallback_hash": -0.032969,
+      "price::quantity": -0.023712,
+      "price::review_score": 0.075275,
+      "product_id::product_name_fallback_hash": -0.000203,
+      "product_id::quantity": -0.020891,
+      "product_id::review_score": 0.045668,
+      "product_name_fallback_hash::quantity": -0.001682,
+      "product_name_fallback_hash::review_score": -0.021669,
+      "quantity::review_score": 0.004559
+    },
+    "cramers_v": {},
+    "highlights": [
+      {
+        "columns": [
+          "category_id",
+          "category_name_fallback_hash"
+        ],
+        "method": "spearman",
+        "value": -0.908037,
+        "flag": "STRONG_CORRELATION",
+        "detail": "Spearman r=-0.9080. Review for feature redundancy or causal relationship."
+      }
+    ]
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 1000,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "age": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_flag": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "category_id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "category_name_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "city_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "customer_id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "gender_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "order_date": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "payment_method_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "price": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "product_id": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "product_name_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "quantity": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "review_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "anomaly_score",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (1000 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "customer_id",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (1000 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "price",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (991 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "columns": [
+        "category_id",
+        "category_name_fallback_hash"
+      ],
+      "method": "spearman",
+      "value": -0.908037,
+      "flag": "STRONG_CORRELATION",
+      "detail": "Spearman r=-0.9080. Review for feature redundancy or causal relationship."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "5.00% of values are outside IQR fence [0.2294, 0.2294]."
+    },
+    {
+      "column": "review_score",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "11.00% of values are outside IQR fence [-1.895, 2.81]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-4.1295. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=15.0526. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "age",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "anomaly_score",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=3.7e-05 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "category_id",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "category_name_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "city_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "customer_id",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "gender_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "price",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "product_id",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "product_name_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "quantity",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "review_score",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 21
+}

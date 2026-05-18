@@ -3,9 +3,9 @@ import { BookOpen, ExternalLink, CheckCircle, ChevronDown, ChevronRight } from '
 import './ApiDocs.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
-// For links that open in a new tab (Swagger, Redoc) we need the real API host,
-// since nginx doesn't proxy /docs or /redoc. Falls back to localhost:8000 in dev.
-const DOCS_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// For links that open in a new tab (Swagger, Redoc) we need the real API host.
+// Use window.location.origin so it works on HF Spaces, localhost, or any host.
+const DOCS_BASE = import.meta.env.VITE_API_URL || window.location.origin;
 
 // ── Endpoints catalog ────────────────────────────────────────────────────────
 const ENDPOINTS = [
@@ -14,7 +14,7 @@ const ENDPOINTS = [
         routes: [
             {
                 method: 'POST', path: '/api/pipeline/run',
-                summary: 'Ingest a file and run the full DIPEX pipeline in one step',
+                summary: 'Ingest a file and run the full ADAP pipeline in one step',
                 body: [
                     { name: 'file', type: 'File (multipart)', required: true, desc: 'The file to run through the pipeline (CSV, Excel, JSON, Parquet)' },
                     { name: 'target_col', type: 'string', required: false, desc: 'Target column for supervised ML — auto-detected if blank' },
@@ -41,7 +41,7 @@ const ENDPOINTS = [
         routes: [
             { method: 'POST', path: '/api/ingest/', summary: 'Upload a file and assign a run_id for deferred pipeline execution' },
             { method: 'POST', path: '/api/ingest/direct', summary: 'Upload and immediately push data through UniversalIntake — returns schema snapshot' },
-            { method: 'POST', path: '/api/ingest/fetch', summary: 'Pull data from an already-connected database into DIPEX and run intake' },
+            { method: 'POST', path: '/api/ingest/fetch', summary: 'Pull data from an already-connected database into ADAP and run intake' },
             { method: 'POST', path: '/api/ingest/v2/source', summary: 'V2 multi-source ingest — file, database, stream, API — returns full ISSF snapshot' },
         ],
     },
@@ -144,7 +144,7 @@ const ApiDocs = () => {
                     <BookOpen className="api-docs-icon" />
                     <div>
                         <h2>API Reference</h2>
-                        <p>Complete endpoint documentation for the DIPEX backend</p>
+                        <p>Complete endpoint documentation for the ADAP backend</p>
                     </div>
                 </div>
                 <div className="api-docs-actions">

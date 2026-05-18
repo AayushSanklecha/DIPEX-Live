@@ -1,0 +1,238 @@
+{
+  "run_id": "34d15313-fca7-4d7e-a472-6f0e4f9c39d2",
+  "generated_at": "2026-03-17T03:35:03.623844+00:00",
+  "dataset_shape": {
+    "rows": 19,
+    "columns": 4
+  },
+  "columns": {
+    "amount": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 19,
+      "cardinality_tier": "unique",
+      "min": -2.2672388953967015,
+      "max": 1.0801707684312514,
+      "mean": 0.0,
+      "median": 0.10973707309440564,
+      "std": 1.0274023338281628,
+      "variance": 1.0555555555555558,
+      "q05": -2.2203149361639816,
+      "q25": -0.2513884848179929,
+      "q75": 0.8286892555190376,
+      "q95": 1.027941915937377,
+      "iqr": 1.080078,
+      "skewness": null,
+      "kurtosis": null,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": null,
+      "normal_dist": null,
+      "profiling_mode": "basic",
+      "outliers": {
+        "iqr": {
+          "count": 2,
+          "pct": 0.105263,
+          "fence_low": -1.871505,
+          "fence_high": 2.448806
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "currency_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "medium",
+      "min": -0.7831869268707489,
+      "max": 1.777913036250557,
+      "mean": 7.011934892369409e-17,
+      "median": -0.7084102856117327,
+      "std": 1.0274023338281628,
+      "variance": 1.0555555555555556,
+      "q05": -0.7831869268707489,
+      "q25": -0.7457986062412407,
+      "q75": 0.26368605075547835,
+      "q95": 1.777913036250557,
+      "iqr": 1.009485,
+      "skewness": 0.948319,
+      "kurtosis": -0.716913,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 8.6e-05,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.260026,
+          "fence_high": 1.777913
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "event_time_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 4,
+      "cardinality_tier": "medium",
+      "min": -2.075050884097578,
+      "max": 1.0653517949006721,
+      "mean": 0.007113503736571655,
+      "median": -0.19080927669862785,
+      "std": 1.0274023338281626,
+      "variance": 1.0555555555555551,
+      "q05": -2.075050884097578,
+      "q25": -0.19080927669862785,
+      "q75": 1.0653517949006721,
+      "q95": 1.0653517949006721,
+      "iqr": 1.256161,
+      "skewness": -0.681758,
+      "kurtosis": -0.318254,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.001369,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -2.075051,
+          "fence_high": 2.949593
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "status_fallback_hash_auto_log1p": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 1,
+      "cardinality_tier": "medium",
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 0.0,
+      "variance": 0.0,
+      "q05": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "q95": 0.0,
+      "iqr": 0.0,
+      "skewness": NaN,
+      "kurtosis": NaN,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 1.0,
+      "normal_dist": "True",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": 0.0,
+          "fence_high": 0.0
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "amount::currency_fallback_hash": -0.336502,
+      "amount::event_time_auto_log1p": 0.264645,
+      "amount::status_fallback_hash_auto_log1p": NaN,
+      "currency_fallback_hash::event_time_auto_log1p": -0.1567,
+      "currency_fallback_hash::status_fallback_hash_auto_log1p": NaN,
+      "event_time_auto_log1p::status_fallback_hash_auto_log1p": NaN
+    },
+    "spearman": {
+      "amount::currency_fallback_hash": -0.301308,
+      "amount::event_time_auto_log1p": 0.319727,
+      "amount::status_fallback_hash_auto_log1p": NaN,
+      "currency_fallback_hash::event_time_auto_log1p": 0.030117,
+      "currency_fallback_hash::status_fallback_hash_auto_log1p": NaN,
+      "event_time_auto_log1p::status_fallback_hash_auto_log1p": NaN
+    },
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 19,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "amount": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "currency_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "event_time_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "status_fallback_hash_auto_log1p": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "amount",
+      "flag": "HIGH_CARDINALITY",
+      "detail": "Column appears to be a unique identifier (19 unique values). Exclude from feature set unless intended."
+    },
+    {
+      "column": "amount",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "10.53% of values are outside IQR fence [-1.872, 2.449]."
+    },
+    {
+      "column": "currency_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=8.6e-05 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "event_time_auto_log1p",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0.001369 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 4
+}

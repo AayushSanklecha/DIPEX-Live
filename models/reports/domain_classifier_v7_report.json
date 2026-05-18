@@ -1,0 +1,41 @@
+{
+  "n_features": 53,
+  "nlp_method": "sentence_transformers",
+  "label_strategy": "gold_standard_plus_nlp_consensus",
+  "gold_labels_used": 129,
+  "nlp_consensus_used": 16,
+  "val_bal_acc": 0.9861,
+  "hold_bal_acc": 0.8194,
+  "cv_mean": 0.1667,
+  "cv_std": 0.0,
+  "quality_gate": {
+    "passed": true,
+    "val": 0.8194,
+    "hold": 0.8194,
+    "gap": 0.0,
+    "cv_std": 0.0,
+    "suspect": "False",
+    "spec": {
+      "min_val": 0.3,
+      "max_gap": 0.25,
+      "max_cv_std": 0.2,
+      "max_holdout": 1.01
+    }
+  },
+  "best_params": {
+    "n_estimators": 2586,
+    "max_depth": 10,
+    "num_leaves": 106,
+    "min_child_samples": 53,
+    "min_split_gain": 0.3159745348090505,
+    "subsample": 0.6882819882729809,
+    "colsample_bytree": 0.5619977490289924,
+    "reg_lambda": 5.0682451296877895,
+    "reg_alpha": 0.534099290872031,
+    "learning_rate": 0.06775151886618536
+  },
+  "model_size_mb": 0.38,
+  "version": "20260413_1258",
+  "time_s": 183.2,
+  "_version": "20260413_1258"
+}

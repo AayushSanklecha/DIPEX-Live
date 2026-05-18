@@ -1,0 +1,369 @@
+{
+  "run_id": "ea95b39e-083f-4b8a-9c92-c6ce7d99e2d3",
+  "generated_at": "2026-04-16T23:11:16.114266+00:00",
+  "dataset_shape": {
+    "rows": 1499,
+    "columns": 6
+  },
+  "columns": {
+    "anomaly_flag": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 2,
+      "cardinality_tier": "low",
+      "min": -4.388252130035005,
+      "max": 0.22788116324392305,
+      "mean": 9.006212127713078e-17,
+      "median": 0.22788116324392305,
+      "std": 1.0003337226857458,
+      "variance": 1.0006675567423227,
+      "q05": 0.22788116324392305,
+      "q25": 0.22788116324392305,
+      "q75": 0.22788116324392305,
+      "q95": 0.22788116324392305,
+      "iqr": 0.0,
+      "skewness": -4.160371,
+      "kurtosis": 15.308687,
+      "high_skew": true,
+      "heavy_tails": true,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 74,
+          "pct": 0.049366,
+          "fence_low": 0.227881,
+          "fence_high": 0.227881
+        },
+        "zscore": {
+          "count": 74,
+          "pct": 0.049366,
+          "threshold": 3.0
+        }
+      }
+    },
+    "anomaly_score": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 566,
+      "cardinality_tier": "medium",
+      "min": -3.2262218013963726,
+      "max": 1.9945431971703749,
+      "mean": 2.0394330357623957e-15,
+      "median": 0.0036383091465922892,
+      "std": 1.000333722685746,
+      "variance": 1.0006675567423229,
+      "q05": -1.7610633331044296,
+      "q25": -0.7082599858318597,
+      "q75": 0.7747008933539774,
+      "q95": 1.5984863790070933,
+      "iqr": 1.482961,
+      "skewness": -0.175396,
+      "kurtosis": -0.588663,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 1,
+          "pct": 0.000667,
+          "fence_low": -2.932701,
+          "fence_high": 2.999142
+        },
+        "zscore": {
+          "count": 1,
+          "pct": 0.000667,
+          "threshold": 3.0
+        }
+      }
+    },
+    "department_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 5,
+      "cardinality_tier": "low",
+      "min": -1.5374993039841758,
+      "max": 1.0139889026760192,
+      "mean": -2.1804513572357978e-16,
+      "median": 0.6153188703853637,
+      "std": 1.000333722685746,
+      "variance": 1.000667556742323,
+      "q05": -1.5374993039841758,
+      "q25": -0.819893245860996,
+      "q75": 0.7747868833016258,
+      "q95": 1.0139889026760192,
+      "iqr": 1.59468,
+      "skewness": -0.514312,
+      "kurtosis": -1.485201,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -3.211913,
+          "fence_high": 3.166807
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "first_name_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 5,
+      "cardinality_tier": "low",
+      "min": -1.6467908130294189,
+      "max": 1.3519208350890197,
+      "mean": -1.4457340520802573e-16,
+      "median": 0.3237911271626979,
+      "std": 1.000333722685746,
+      "variance": 1.000667556742323,
+      "q05": -1.6467908130294189,
+      "q25": -0.3616286781215166,
+      "q75": 0.4951460784837516,
+      "q95": 1.3519208350890197,
+      "iqr": 0.856775,
+      "skewness": -0.447171,
+      "kurtosis": -0.838237,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -1.646791,
+          "fence_high": 1.780308
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "job_title_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 5,
+      "cardinality_tier": "low",
+      "min": -1.8207069109613059,
+      "max": 1.0816728967342195,
+      "mean": 1.4220334938494333e-16,
+      "median": 0.4484263932370139,
+      "std": 1.000333722685746,
+      "variance": 1.000667556742323,
+      "q05": -1.8207069109613059,
+      "q25": -0.39590227809259343,
+      "q75": 0.5539674771532148,
+      "q95": 1.0816728967342195,
+      "iqr": 0.94987,
+      "skewness": -0.846625,
+      "kurtosis": -0.608723,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 284,
+          "pct": 0.18946,
+          "fence_low": -1.820707,
+          "fence_high": 1.978772
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    },
+    "last_name_fallback_hash": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_pct": 0.0,
+      "unique_count": 5,
+      "cardinality_tier": "low",
+      "min": -1.5807398124419285,
+      "max": 1.5459065936416647,
+      "mean": 2.13305024077415e-16,
+      "median": 0.21708187105613758,
+      "std": 1.000333722685746,
+      "variance": 1.0006675567423229,
+      "q05": -1.5807398124419285,
+      "q25": -0.408247410160581,
+      "q75": 0.3734141913603172,
+      "q95": 1.5459065936416647,
+      "iqr": 0.781662,
+      "skewness": -0.109035,
+      "kurtosis": -0.724373,
+      "high_skew": false,
+      "heavy_tails": false,
+      "shapiro_p": 0.0,
+      "normal_dist": "False",
+      "outliers": {
+        "iqr": {
+          "count": 0,
+          "pct": 0.0,
+          "fence_low": -1.58074,
+          "fence_high": 1.545907
+        },
+        "zscore": {
+          "count": 0,
+          "pct": 0.0,
+          "threshold": 3.0
+        }
+      }
+    }
+  },
+  "correlation": {
+    "pearson": {
+      "anomaly_flag::anomaly_score": 0.46896,
+      "anomaly_flag::department_fallback_hash": 0.199606,
+      "anomaly_flag::first_name_fallback_hash": -0.000702,
+      "anomaly_flag::job_title_fallback_hash": 0.254349,
+      "anomaly_flag::last_name_fallback_hash": 0.01793,
+      "anomaly_score::department_fallback_hash": 0.288242,
+      "anomaly_score::first_name_fallback_hash": 0.063034,
+      "anomaly_score::job_title_fallback_hash": 0.380482,
+      "anomaly_score::last_name_fallback_hash": 0.045137,
+      "department_fallback_hash::first_name_fallback_hash": -0.009947,
+      "department_fallback_hash::job_title_fallback_hash": -0.051316,
+      "department_fallback_hash::last_name_fallback_hash": 0.008172,
+      "first_name_fallback_hash::job_title_fallback_hash": -0.024519,
+      "first_name_fallback_hash::last_name_fallback_hash": -0.010007,
+      "job_title_fallback_hash::last_name_fallback_hash": 0.038184
+    },
+    "spearman": {
+      "anomaly_flag::anomaly_score": 0.375218,
+      "anomaly_flag::department_fallback_hash": 0.177446,
+      "anomaly_flag::first_name_fallback_hash": -0.022534,
+      "anomaly_flag::job_title_fallback_hash": 0.177966,
+      "anomaly_flag::last_name_fallback_hash": 0.009125,
+      "anomaly_score::department_fallback_hash": 0.200747,
+      "anomaly_score::first_name_fallback_hash": 0.008432,
+      "anomaly_score::job_title_fallback_hash": 0.244966,
+      "anomaly_score::last_name_fallback_hash": 0.043847,
+      "department_fallback_hash::first_name_fallback_hash": -0.005167,
+      "department_fallback_hash::job_title_fallback_hash": -0.049786,
+      "department_fallback_hash::last_name_fallback_hash": 0.005703,
+      "first_name_fallback_hash::job_title_fallback_hash": -0.021312,
+      "first_name_fallback_hash::last_name_fallback_hash": -0.004336,
+      "job_title_fallback_hash::last_name_fallback_hash": 0.04293
+    },
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {
+      "complete_0pct": 1499,
+      "low_1_25pct": 0,
+      "moderate_25_75pct": 0,
+      "high_75_99pct": 0,
+      "entirely_null_100pct": 0
+    },
+    "column_patterns": {
+      "anomaly_flag": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "anomaly_score": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "department_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "first_name_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "job_title_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      },
+      "last_name_fallback_hash": {
+        "null_pct": 0.0,
+        "pattern": "COMPLETE",
+        "mar_correlated_with": []
+      }
+    },
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "4.94% of values are outside IQR fence [0.2279, 0.2279]."
+    },
+    {
+      "column": "job_title_fallback_hash",
+      "flag": "HIGH_OUTLIER_RATE_IQR",
+      "detail": "18.95% of values are outside IQR fence [-1.821, 1.979]."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HIGH_SKEW",
+      "detail": "skewness=-4.1604. Consider log/Box-Cox transform before modelling."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "HEAVY_TAILS",
+      "detail": "excess kurtosis=15.3087. Distribution has heavier tails than normal."
+    },
+    {
+      "column": "anomaly_flag",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "anomaly_score",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "department_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "first_name_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "job_title_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    },
+    {
+      "column": "last_name_fallback_hash",
+      "flag": "NON_NORMAL_DISTRIBUTION",
+      "detail": "Shapiro-Wilk p=0 (<0.05). Parametric tests assume normality — consider non-parametric alternatives."
+    }
+  ],
+  "flag_count": 10
+}

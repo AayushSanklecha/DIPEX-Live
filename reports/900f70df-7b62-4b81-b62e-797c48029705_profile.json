@@ -1,0 +1,26 @@
+{
+  "run_id": "900f70df-7b62-4b81-b62e-797c48029705",
+  "generated_at": "2026-03-15T18:55:59.814403+00:00",
+  "dataset_shape": {
+    "rows": 0,
+    "columns": 0
+  },
+  "columns": {},
+  "correlation": {
+    "pearson": {},
+    "spearman": {},
+    "cramers_v": {},
+    "highlights": []
+  },
+  "missingness": {
+    "overall_null_pct": 0.0,
+    "complete_rows_pct": 1.0,
+    "row_missingness_buckets": {},
+    "column_patterns": {},
+    "null_corr_pairs": [],
+    "analyst_flags": []
+  },
+  "drift": {},
+  "analyst_flags": [],
+  "flag_count": 0
+}
